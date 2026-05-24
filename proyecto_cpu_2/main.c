@@ -5,26 +5,13 @@
 #include "vista.h"
 #include "controlador.h"
 
-/* =====================================================================
- * main.c  –  Punto de entrada del simulador de planificacion de CPU
- *
- * COMPILAR:
- *   gcc modelo.c vista.c controlador.c main.c -o simulador
- *
- * CONTROLES DURANTE LA SIMULACION:
- *   X  -> Cambiar algoritmo (FCFS <-> Round Robin)
- *   A  -> Apropiatividad: privilegiar un proceso (solo en RR)
- *   M  -> Ver memoria principal (frutas)
- *   S  -> Ver estado del sistema
- * ===================================================================== */
-
 int main(void)
 {
     srand((unsigned)time(NULL));
 
-    /* ----------------------------------------------------------------
-     * 1. INICIALIZACION
-     * ---------------------------------------------------------------- */
+
+    // 1. INICIALIZACION
+
     Cola procesosEnCiclo,  nuevasSolicitudes;
     inicializarCola(&procesosEnCiclo);
     inicializarCola(&nuevasSolicitudes);
@@ -37,9 +24,8 @@ int main(void)
     inicializarES(&es);
     inicializarMemoria();
 
-    /* ----------------------------------------------------------------
-     * 2. CONFIGURACION INICIAL (usuario elige algoritmo y quantum)
-     * ---------------------------------------------------------------- */
+    // 2. CONFIGURACION INICIAL (usuario elige algoritmo y quantum)
+
     vistaMostrarBienvenida();
 
     int algoritmo;
@@ -63,29 +49,28 @@ int main(void)
 
     logEvento("Simulacion iniciada");
 
-    /* ----------------------------------------------------------------
-     * 3. CICLO PRINCIPAL
-     * ---------------------------------------------------------------- */
+    // 3. CICLO PRINCIPAL
+
     int ciclos = 0;
 
     while (!estaVacia(&procesosEnCiclo))
     {
         ciclos++;
 
-        /* a) Ingreso dinamico */
+        // a) Ingreso dinamico 
         ingresarProcesosNuevos(&procesosEnCiclo, ciclos);
 
-        /* b) Procesar E/S */
+        // b) Procesar E/S 
         procesarES(&es, &procesosEnCiclo);
 
-        /* c) Ejecutar CPU */
+        // c) Ejecutar CPU
         if (algoritmo == 1)
             ejecutarFCFS(&procesosEnCiclo, &es, &algoritmo, ciclos);
         else
             ejecutarRR(&procesosEnCiclo, &nuevasSolicitudes,
                        &es, &algoritmo, &quantum, ciclos);
 
-        /* d) Checkpoint global cada 20 ciclos */
+        // d) Checkpoint global cada 20 ciclos
         if (ciclos % 20 == 0) {
             int antes = algoritmo;
             algoritmo = decidirCambio(&procesosEnCiclo, algoritmo);
@@ -100,13 +85,12 @@ int main(void)
             logEvento("Checkpoint GLOBAL");
         }
 
-        /* e) Teclado (sin bloquear) */
+        // e) Teclado (sin bloquear)
         manejarEntrada(&procesosEnCiclo, &algoritmo, quantum, totalTerminados);
     }
 
-    /* ----------------------------------------------------------------
-     * 4. CIERRE
-     * ---------------------------------------------------------------- */
+    // 4. CIERRE
+
     guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
     guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
                               algoritmo, quantum, ciclos, 0);

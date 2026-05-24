@@ -8,22 +8,8 @@
 #include "controlador.h"
 #include "vista.h"
 
-/* =====================================================================
- * controlador.c  –  Logica de negocio completa del simulador
- *
- * Fusion de: planificador.c + control.c + es.c (logica) +
- *            sistema.c (teclado) + log.c
- * ===================================================================== */
-
-/* ================================================================
- * GLOBALES
- * ================================================================ */
 Cola colaTerminados;
 int  totalTerminados = 0;
-
-/* ================================================================
- * SECCION 1 – E/S
- * ================================================================ */
 
 void asignarTiempoES(Proceso *p, int tipo)
 {
@@ -38,7 +24,7 @@ void asignarTiempoES(Proceso *p, int tipo)
            p->id, nombres[tipo], base, p->tiempoES);
 }
 
-/* Procesa UNA cola de E/S */
+// Procesa UNA cola de E/S
 static void procesarColaES(Cola *colaES, Cola *colaListos)
 {
     int size = colaES->tamanio;
@@ -72,9 +58,7 @@ void procesarES(SistemaES *es, Cola *colaListos)
     procesarColaES(&es->impresora, colaListos);
 }
 
-/* ================================================================
- * SECCION 2 – METRICAS DE COLA
- * ================================================================ */
+// SECCION 2 – METRICAS DE COLA
 
 void actualizarEspera(Cola *colaEnCiclo)
 {
@@ -110,9 +94,7 @@ void evaluarColas(int *quantum, Cola *colaEnCiclo, SistemaES *es)
     }
 }
 
-/* ================================================================
- * SECCION 3 – APROPIATIVIDAD
- * ================================================================ */
+// SECCION 3 – APROPIATIVIDAD
 
 void moverAlFrente(Cola *cola, Proceso *p)
 {
@@ -145,11 +127,11 @@ Proceso *seleccionarProcesoCritico(Cola *procesosEnCiclo)
         return NULL;
     }
 
-    /* Limpiar marcas anteriores */
+    // Limpiar marcas anteriores
     for (Nodo *n = procesosEnCiclo->frente; n != NULL; n = n->siguiente)
         n->proceso->esApropiativo = 0;
 
-    /* TOP-5 por ciclosRestantes DESC */
+    // TOP-5 por ciclosRestantes DESC
     Proceso *top5[5] = {NULL};
     int encontrados  = 0;
 
@@ -200,9 +182,7 @@ Proceso *seleccionarProcesoCritico(Cola *procesosEnCiclo)
     return NULL;
 }
 
-/* ================================================================
- * SECCION 4 – CONTROL AUTOMATICO DE ALGORITMO
- * ================================================================ */
+// SECCION 4 – CONTROL AUTOMATICO DE ALGORITMO
 
 int decidirCambio(Cola *colaListos, int algoritmoActual)
 {
@@ -230,7 +210,7 @@ int decidirCambio(Cola *colaListos, int algoritmoActual)
     int pV = vecesT  / total, pB = bloqT    / total;
     int pQ = quantumT / total;
 
-    /* FCFS -> RR: mucha espera, rafagas largas, pocos ingresos al CPU */
+    // FCFS -> RR: mucha espera, rafagas largas, pocos ingresos al CPU
     if (algoritmoActual == 1 &&
         pE > 120 && pD > 25 && pC > 8000 &&
         pR > 50  && pV < 5  && pB > 1    && pQ < 15)
@@ -242,7 +222,7 @@ int decidirCambio(Cola *colaListos, int algoritmoActual)
         return 2;
     }
 
-    /* RR -> FCFS: carga baja, sin bloqueos, procesos cortos */
+    // RR -> FCFS: carga baja, sin bloqueos, procesos cortos
     if (algoritmoActual == 2 &&
         pE < 80  && pD < 20 && pC < 6000 &&
         pR < 40  && pV >= 5 && pB == 0   && pQ > 5)
@@ -257,9 +237,7 @@ int decidirCambio(Cola *colaListos, int algoritmoActual)
     return algoritmoActual;
 }
 
-/* ================================================================
- * SECCION 5 – PLANIFICACION FCFS
- * ================================================================ */
+// SECCION 5 – PLANIFICACION FCFS
 
 void ejecutarFCFS(Cola *colaListos, SistemaES *es,
                   int *algoritmo, int reloj)
@@ -269,7 +247,7 @@ void ejecutarFCFS(Cola *colaListos, SistemaES *es,
 
     actualizarEspera(colaListos);
 
-    /* Proceso privilegiado va al frente */
+    // Proceso privilegiado va al frente
     for (Nodo *n = colaListos->frente; n != NULL; n = n->siguiente)
         if (n->proceso->esApropiativo) {
             moverAlFrente(colaListos, n->proceso);
@@ -324,9 +302,7 @@ void ejecutarFCFS(Cola *colaListos, SistemaES *es,
     }
 }
 
-/* ================================================================
- * SECCION 6 – PLANIFICACION ROUND ROBIN
- * ================================================================ */
+// SECCION 6 – PLANIFICACION ROUND ROBIN
 
 void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
                 SistemaES *es, int *algoritmo,
@@ -338,7 +314,7 @@ void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
     actualizarEspera(colaEnCiclo);
     contador++;
 
-    /* Intentar desbloquear procesos en seccion critica */
+    // Intentar desbloquear procesos en seccion critica
     for (Nodo *n = colaEnCiclo->frente; n != NULL; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (p->estado == 4) {
@@ -352,14 +328,14 @@ void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
         }
     }
 
-    /* Proceso privilegiado al frente */
+    // Proceso privilegiado al frente
     for (Nodo *n = colaEnCiclo->frente; n != NULL; n = n->siguiente)
         if (n->proceso->esApropiativo) {
             moverAlFrente(colaEnCiclo, n->proceso);
             break;
         }
 
-    /* Saltar bloqueados (estado==4) */
+    // Saltar bloqueados (estado==4)
     Nodo *actual = colaEnCiclo->frente, *anterior = NULL;
     while (actual != NULL && actual->proceso->estado == 4) {
         anterior = actual;
@@ -390,7 +366,7 @@ void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
     if (p->vecesEnCPU == 1)
         p->tiempoRespuesta = reloj - p->tiempoLlegada;
 
-    /* Seccion critica: tomar 2 recursos en orden para evitar livelock */
+    // Seccion critica: tomar 2 recursos en orden para evitar livelock
     int ok1 = 0, ok2 = 0, intentos = 0, r1 = -1, r2 = -1;
     while (intentos < 5) {
         int a = rand() % TAM_MEM;
@@ -477,7 +453,7 @@ void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
         vistaMostrarHistorialCPU();
     }
 
-    /* Checkpoint cada 20 iteraciones RR */
+    // Checkpoint cada 20 iteraciones RR 
     if (contador % 20 == 0) {
         evaluarColas(quantum, colaEnCiclo, es);
         vistaMostrarBalanceColas(colaEnCiclo, es);
@@ -490,9 +466,7 @@ void ejecutarRR(Cola *colaEnCiclo, Cola *nuevasSolicitudes,
     }
 }
 
-/* ================================================================
- * SECCION 7 – TECLADO
- * ================================================================ */
+// SECCION 7 – TECLADO
 
 static int hayTecla(void)
 {
@@ -568,9 +542,7 @@ void manejarEntrada(Cola *colaListos, int *algoritmo,
     }
 }
 
-/* ================================================================
- * SECCION 8 – LOGS / PERSISTENCIA
- * ================================================================ */
+// SECCION 8 – LOGS / PERSISTENCIA
 
 static const char *nombreEstado(int e)
 {
