@@ -4,7 +4,7 @@
     {
       "label": "Compilar y ejecutar C",
       "type": "shell",
-      "command": "gcc *.c -o programa && ./programa",
+      "command": "gcc *.c -o simulador && ./simulador",
       "group": {
         "kind": "build",
         "isDefault": true

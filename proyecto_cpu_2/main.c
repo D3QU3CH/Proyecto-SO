@@ -1,107 +1,121 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "modelo.h"
+#include "vista.h"
+#include "controlador.h"
 
-#include "cola.h"
-#include "sistema.h"
-#include "planificador.h"
-#include "es.h"
-#include "memoria.h"
-#include "control.h"
-#include "log.h"
-#include "interfaz.h"
+/* =====================================================================
+ * main.c  –  Punto de entrada del simulador de planificacion de CPU
+ *
+ * COMPILAR:
+ *   gcc modelo.c vista.c controlador.c main.c -o simulador
+ *
+ * CONTROLES DURANTE LA SIMULACION:
+ *   X  -> Cambiar algoritmo (FCFS <-> Round Robin)
+ *   A  -> Apropiatividad: privilegiar un proceso (solo en RR)
+ *   M  -> Ver memoria principal (frutas)
+ *   S  -> Ver estado del sistema
+ * ===================================================================== */
 
-int main()
+int main(void)
 {
-    srand(time(NULL));
+    srand((unsigned)time(NULL));
 
-    //INICIALIZACION
-
-    Cola procesosEnCiclo;
+    /* ----------------------------------------------------------------
+     * 1. INICIALIZACION
+     * ---------------------------------------------------------------- */
+    Cola procesosEnCiclo,  nuevasSolicitudes;
     inicializarCola(&procesosEnCiclo);
-
-    Cola nuevasSolicitudes;
     inicializarCola(&nuevasSolicitudes);
+    inicializarCola(&colaTerminados);
 
     inicializarSistema();
-
     cargarProcesosEnCola(&procesosEnCiclo, &nuevasSolicitudes);
 
     SistemaES es;
     inicializarES(&es);
-
-    extern Cola colaTerminados;
-    inicializarCola(&colaTerminados);
-
     inicializarMemoria();
 
-    int algoritmo;
-    printf("\n1. FCFS\n2. Round Robin\nSeleccione: ");
-    scanf("%d", &algoritmo);
+    /* ----------------------------------------------------------------
+     * 2. CONFIGURACION INICIAL (usuario elige algoritmo y quantum)
+     * ---------------------------------------------------------------- */
+    vistaMostrarBienvenida();
 
-    if (algoritmo != 1 && algoritmo != 2)
+    int algoritmo;
+    printf("  1. FCFS (First Come First Served)\n");
+    printf("  2. Round Robin\n");
+    printf("  Seleccione algoritmo: ");
+    if (scanf("%d", &algoritmo) != 1 || (algoritmo != 1 && algoritmo != 2))
         algoritmo = 1;
 
-    int quantum;
-    printf("Ingrese quantum: ");
-    scanf("%d", &quantum);
+    int quantum = 10;
+    if (algoritmo == 2) {
+        printf("  Ingrese el quantum: ");
+        if (scanf("%d", &quantum) != 1 || quantum <= 0)
+            quantum = 10;
+    }
 
-    if (quantum <= 0)
-        quantum = 10;
+    printf("\n  [OK] Algoritmo: %s",
+           algoritmo == 1 ? "FCFS" : "Round Robin");
+    if (algoritmo == 2) printf(" | Quantum: %d", quantum);
+    printf("\n\n");
 
+    logEvento("Simulacion iniciada");
+
+    /* ----------------------------------------------------------------
+     * 3. CICLO PRINCIPAL
+     * ---------------------------------------------------------------- */
     int ciclos = 0;
-
-    //CICLO DEL SISTEMA 
 
     while (!estaVacia(&procesosEnCiclo))
     {
         ciclos++;
 
-        // 1. Ingreso dinamico
+        /* a) Ingreso dinamico */
         ingresarProcesosNuevos(&procesosEnCiclo, ciclos);
 
-        // 2. ES
+        /* b) Procesar E/S */
         procesarES(&es, &procesosEnCiclo);
 
-        // 3. CPU
+        /* c) Ejecutar CPU */
         if (algoritmo == 1)
-        {
             ejecutarFCFS(&procesosEnCiclo, &es, &algoritmo, ciclos);
-        }
         else
-        {
-    
-            ejecutarRR(&procesosEnCiclo, &nuevasSolicitudes, &es, &algoritmo, &quantum, ciclos);
-        }
+            ejecutarRR(&procesosEnCiclo, &nuevasSolicitudes,
+                       &es, &algoritmo, &quantum, ciclos);
 
-        // 4. Metricas cada 20 ciclos
-        if (ciclos % 20 == 0)
-        {
+        /* d) Checkpoint global cada 20 ciclos */
+        if (ciclos % 20 == 0) {
+            int antes = algoritmo;
             algoritmo = decidirCambio(&procesosEnCiclo, algoritmo);
+            if (algoritmo != antes)
+                vistaMensajeCambioAutomatico(antes, algoritmo);
 
-            mostrarBalanceColas(&procesosEnCiclo, &es);
-
+            vistaMostrarBalanceColas(&procesosEnCiclo, &es);
             guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
-
-            guardarVariablesGlobales(
-                &procesosEnCiclo,
-                &nuevasSolicitudes,
-                algoritmo,
-                quantum,
-                ciclos,
-                TOTAL_PROCESOS - EN_SISTEMA
-            );
-
+            guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
+                                     algoritmo, quantum, ciclos,
+                                     TOTAL_PROCESOS - EN_SISTEMA);
             logEvento("Checkpoint GLOBAL");
         }
+
+        /* e) Teclado (sin bloquear) */
+        manejarEntrada(&procesosEnCiclo, &algoritmo, quantum, totalTerminados);
     }
 
+    /* ----------------------------------------------------------------
+     * 4. CIERRE
+     * ---------------------------------------------------------------- */
+    guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
+    guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
+                              algoritmo, quantum, ciclos, 0);
     logEvento("Simulacion finalizada");
 
-    printf("\nSIMULACION FINALIZADA\n");
-
     liberarCola(&procesosEnCiclo);
+    liberarCola(&nuevasSolicitudes);
     liberarCola(&colaTerminados);
 
+    vistaMostrarCierre(ciclos, totalTerminados);
     return 0;
 }
