@@ -3,7 +3,9 @@
 
 #include "modelo.h"
 
-// Codigos de color ANSI
+// ─────────────────────────────────────────────────────────────────────────────
+// CODIGOS DE COLOR ANSI
+// ─────────────────────────────────────────────────────────────────────────────
 
 #define RESET    "\033[0m"
 #define ROJO     "\033[31m"
@@ -15,43 +17,58 @@
 #define BLANCO   "\033[37m"
 #define NEGRITA  "\033[1m"
 
-
-// Historial CPU
+// ─────────────────────────────────────────────────────────────────────────────
+// HISTORIAL CPU
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaPushHistorial(int uso);
 void vistaMostrarHistorialCPU(void);
 
-
-// Balance de colas
+// ─────────────────────────────────────────────────────────────────────────────
+// BALANCE DE COLAS
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMostrarBalanceColas(Cola *colaEnCiclo, SistemaES *es);
 
-
-// Envejecimiento y desperdicio
+// ─────────────────────────────────────────────────────────────────────────────
+// ENVEJECIMIENTO Y DESPERDICIO
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMostrarEnvejecimiento(Cola *cola);
 void vistaMostrarTopDesperdicio(Cola *cola);
 
-
-// Estado del sistema
+// ─────────────────────────────────────────────────────────────────────────────
+// ESTADO DEL SISTEMA
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMostrarEstadoSistema(Cola *colaListos,
                                int algoritmo,
                                int quantum,
                                int terminados);
 
-
-// Memoria (frutas)
+// ─────────────────────────────────────────────────────────────────────────────
+// MEMORIA (frutas)
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMostrarMemoria(void);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NRU – estado de marcos de pagina
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Inicio y cierre
+// Muestra los marcos NRU de todos los procesos activos en la cola
+void vistaMostrarNRU(Cola *cola);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INICIO Y CIERRE
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMostrarBienvenida(void);
 void vistaMostrarCierre(int ciclos, int terminados);
 
-// Mensajes de eventos
+// ─────────────────────────────────────────────────────────────────────────────
+// MENSAJES DE EVENTOS
+// ─────────────────────────────────────────────────────────────────────────────
 
 void vistaMensajeAlgoritmo(int algoritmo);
 void vistaMensajeProcesoCritico(Proceso *p);
