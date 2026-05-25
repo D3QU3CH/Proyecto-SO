@@ -15,12 +15,11 @@
 
 void vistaBienvenida(void);
 void vistaCierre(int reloj, int terminados);
-void vistaMostrarBCP(Proceso *p);
 void vistaMostrarLista(Lista *l, const char *titulo);
 void vistaMostrarColaListos(Cola *c);
 void vistaMostrarTablaGlobal(void);
 void vistaMostrarBuddy(void);
-void vistaMostrarNRU(Proceso *p);
 void vistaEstadoES(SistemaES *es);
+void vistaMostrarBCP(Proceso *p);
 
 #endif

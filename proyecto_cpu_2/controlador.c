@@ -7,7 +7,7 @@
 #include "vista.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HILOS
+// HILO E/S — procesa un tick de cada cola de dispositivo
 // ─────────────────────────────────────────────────────────────────────────────
 
 void procesarColaES(Cola *colaES, Cola *colaListos)
@@ -16,14 +16,13 @@ void procesarColaES(Cola *colaES, Cola *colaListos)
     while (n--) {
         Proceso *p = desencolar(colaES);
         if (!p) continue;
-
         p->tiempoES--;
         if (p->tiempoES <= 0) {
             p->bloqueado     = 0;
             p->dispositivoES = -1;
             p->estado        = 0;
             encolar(colaListos, p);
-            printf("  [E/S] %s -> Listos\n", p->id);
+            printf("  [ES] %s termino E/S -> colaListos\n", p->id);
         } else {
             encolar(colaES, p);
         }
@@ -43,27 +42,28 @@ void *hiloDispositivoES(void *arg)
     return NULL;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HILO RELOJ — tick cada 50ms, despierta los hilos E/S
+// ─────────────────────────────────────────────────────────────────────────────
+
 void *hiloReloj(void *arg)
 {
     ContextoHilos *ctx = (ContextoHilos *)arg;
     while (!(*ctx->terminado)) {
         usleep(50000);
         pthread_mutex_lock(&ctx->mutexPrincipal);
-
-        // Limpiar bits R de NRU en todos los procesos del ciclo
-        for (Nodo *n = ctx->procesosEnEjecucion->cabeza; n; n = n->siguiente)
-            limpiarBitsR(n->proceso);
-
-        // Despertar hilos E/S para que procesen un tick
         sem_post(&ctx->semDisco);
         sem_post(&ctx->semPantalla);
         sem_post(&ctx->semTeclado);
         sem_post(&ctx->semImpresora);
-
         pthread_mutex_unlock(&ctx->mutexPrincipal);
     }
     return NULL;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HILO ENTRADA — escucha teclado sin bloquear el loop principal
+// ─────────────────────────────────────────────────────────────────────────────
 
 void *hiloEntrada(void *arg)
 {
@@ -71,48 +71,19 @@ void *hiloEntrada(void *arg)
     while (!(*ctx->terminado)) {
         int c = getchar();
         if (c == EOF) { usleep(30000); continue; }
-
         pthread_mutex_lock(&ctx->mutexPrincipal);
         switch (c) {
-            case 's': case 'S': vistaMostrarTablaGlobal();          break;
-            case 'b': case 'B': vistaMostrarBuddy();                break;
-            case 'e': case 'E': vistaEstadoES(ctx->es);             break;
-            case 'n': case 'N':
-                // NRU del primer proceso de la lista como ejemplo
-                if (ctx->procesosEnEjecucion->cabeza)
-                    vistaMostrarNRU(ctx->procesosEnEjecucion->cabeza->proceso);
-                break;
-            case 'q': case 'Q': *ctx->terminado = 1;                break;
+            case 's': case 'S': vistaMostrarTablaGlobal();                    break;
+            case 'b': case 'B': vistaMostrarBuddy();                          break;
+            case 'e': case 'E': vistaEstadoES(ctx->es);                       break;
+            case 'l': case 'L': vistaMostrarLista(ctx->procesosEnEjecucion,
+                                                  "procesosEnEjecucion");     break;
+            case 'q': case 'Q': *ctx->terminado = 1;                          break;
             default: break;
         }
         pthread_mutex_unlock(&ctx->mutexPrincipal);
     }
     return NULL;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INGRESO DINAMICO
-// ─────────────────────────────────────────────────────────────────────────────
-
-void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj)
-{
-    for (Nodo *n = solicitudes->cabeza; n; n = n->siguiente) {
-        Proceso *p = n->proceso;
-        // Solo ingresar si aun no fue encolado (tiempoEspera==0 y estado==0)
-        if (p->estado == 0 && p->tiempoLlegada <= reloj && p->vecesEnCPU == 0
-            && p->tiempoEspera == 0) {
-            encolar(colaListos, p);
-            tablaSistema.procesosIngresadosDinam++;
-            printf("  [NEW] %s ingresa (llegada=%d)\n", p->id, p->tiempoLlegada);
-        }
-    }
-}
-
-void actualizarEspera(Cola *colaListos)
-{
-    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
-        if (n->proceso->estado == 0)
-            n->proceso->tiempoEspera++;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -123,25 +94,22 @@ void guardarBCPs(Lista *enEjecucion, const char *ruta)
 {
     FILE *f = fopen(ruta, "a");
     if (!f) return;
-
     time_t ahora = time(NULL);
     fprintf(f, "\n=== CHECKPOINT %s", ctime(&ahora));
-
     int num = 1;
     for (Nodo *n = enEjecucion->cabeza; n; n = n->siguiente, num++) {
         Proceso *p = n->proceso;
-        fprintf(f, "--- BCP #%d ---\n", num);
-        fprintf(f, " ID           : %s\n",  p->id);
-        fprintf(f, " Nombre       : %s\n",  p->nombre);
-        fprintf(f, " Llegada      : %d\n",  p->tiempoLlegada);
-        fprintf(f, " CiclosTot    : %d\n",  p->ciclosTotales);
-        fprintf(f, " CiclosRest   : %d\n",  p->ciclosRestantes);
-        fprintf(f, " TiempoEspera : %d\n",  p->tiempoEspera);
-        fprintf(f, " Estado       : %d\n",  p->estado);
-        fprintf(f, " FallosPag    : %d\n",  p->fallosPagina);
-        fprintf(f, " Mem (KB)     : %d\n\n",p->bloqueMemoriaKB);
+        fprintf(f, "--- BCP #%d ---\n",      num);
+        fprintf(f, " ID           : %s\n",   p->id);
+        fprintf(f, " Nombre       : %s\n",   p->nombre);
+        fprintf(f, " Llegada      : %d\n",   p->tiempoLlegada);
+        fprintf(f, " CiclosTot    : %d\n",   p->ciclosTotales);
+        fprintf(f, " CiclosRest   : %d\n",   p->ciclosRestantes);
+        fprintf(f, " RafagaActual : %d\n",   p->rafagaActual);
+        fprintf(f, " TiempoEspera : %d\n",   p->tiempoEspera);
+        fprintf(f, " Estado       : %d\n",   p->estado);
+        fprintf(f, " Mem KB       : %d\n\n", p->bloqueMemoriaKB);
     }
-
     fclose(f);
 }
 
@@ -149,7 +117,6 @@ void guardarVariablesGlobales(const char *ruta)
 {
     FILE *f = fopen(ruta, "a");
     if (!f) return;
-
     TablaProcesos *t = &tablaSistema;
     time_t ahora = time(NULL);
     fprintf(f, "\n=== VARIABLES GLOBALES %s", ctime(&ahora));
@@ -158,7 +125,7 @@ void guardarVariablesGlobales(const char *ruta)
     fprintf(f, " 3.  En solicitudes   : %d\n", t->procesosEnSolicitud);
     fprintf(f, " 4.  Cola listos      : %d\n", t->procesosEnColaListos);
     fprintf(f, " 5.  Ejecutando       : %d\n", t->procesosEjecutando);
-    fprintf(f, " 6.  En E/S          : %d\n", t->procesosEnES);
+    fprintf(f, " 6.  En E/S           : %d\n", t->procesosEnES);
     fprintf(f, " 7.  Terminados       : %d\n", t->procesosTerminados);
     fprintf(f, " 8.  Bloqueados       : %d\n", t->procesosBloqueados);
     fprintf(f, " 9.  Algoritmo        : %d\n", t->algoritmoActual);

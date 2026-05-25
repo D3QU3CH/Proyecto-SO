@@ -10,8 +10,7 @@ int main(void)
 {
     srand((unsigned)time(NULL));
 
-    // ── 1. INICIALIZACION ─────────────────────────────────────────────────────
-    cargarLibro("libro1.txt");
+    // 1. Inicializar estructuras
     inicializarBuddy();
     inicializarTablaSistema();
 
@@ -20,73 +19,68 @@ int main(void)
     inicializarLista(&solicitudes);
     poblarListas(&enEjecucion, &solicitudes);
 
+    // Asignar memoria Buddy a los 150 del ciclo
+    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
+        Proceso *p = n->proceso;
+        int idx = asignarMemoriaBuddy(p, p->memoriaUsadaKB);
+        if (idx < 0)
+            printf("  [BUDDY] Sin espacio para %s\n", p->id);
+    }
+
     Cola colaListos;
     inicializarCola(&colaListos);
 
     SistemaES es;
     inicializarSistemaES(&es);
 
-    // ── 2. CONTEXTO DE HILOS ─────────────────────────────────────────────────
-    int terminado = 0;
-    int reloj = 0;
+    // 2. Contexto de hilos
+    int terminado = 0, reloj = 0;
 
     ContextoHilos ctx;
     ctx.procesosEnEjecucion = &enEjecucion;
-    ctx.nuevasSolicitudes = &solicitudes;
-    ctx.colaListos = &colaListos;
-    ctx.es = &es;
-    ctx.reloj = &reloj;
-    ctx.terminado = &terminado;
+    ctx.solicitudes         = &solicitudes;
+    ctx.colaListos          = &colaListos;
+    ctx.es                  = &es;
+    ctx.reloj               = &reloj;
+    ctx.terminado           = &terminado;
 
     pthread_mutex_init(&ctx.mutexPrincipal, NULL);
-    pthread_mutex_init(&ctx.mutexMemoria, NULL);
-    sem_init(&ctx.semDisco, 0, 0);
-    sem_init(&ctx.semPantalla, 0, 0);
-    sem_init(&ctx.semTeclado, 0, 0);
+    sem_init(&ctx.semDisco,     0, 0);
+    sem_init(&ctx.semPantalla,  0, 0);
+    sem_init(&ctx.semTeclado,   0, 0);
     sem_init(&ctx.semImpresora, 0, 0);
 
-    ArgHiloES argDisco = {&es.disco, &colaListos,
-                          &ctx.mutexPrincipal, &ctx.semDisco,
-                          &terminado, "Disco"};
-    ArgHiloES argPantalla = {&es.pantalla, &colaListos,
-                             &ctx.mutexPrincipal, &ctx.semPantalla,
-                             &terminado, "Pantalla"};
-    ArgHiloES argTeclado = {&es.teclado, &colaListos,
-                            &ctx.mutexPrincipal, &ctx.semTeclado,
-                            &terminado, "Teclado"};
-    ArgHiloES argImpresora = {&es.impresora, &colaListos,
-                              &ctx.mutexPrincipal, &ctx.semImpresora,
-                              &terminado, "Impresora"};
+    ArgHiloES argDisco    = {&es.disco,    &colaListos, &ctx.mutexPrincipal, &ctx.semDisco,    &terminado, "Disco"};
+    ArgHiloES argPantalla = {&es.pantalla, &colaListos, &ctx.mutexPrincipal, &ctx.semPantalla, &terminado, "Pantalla"};
+    ArgHiloES argTeclado  = {&es.teclado,  &colaListos, &ctx.mutexPrincipal, &ctx.semTeclado,  &terminado, "Teclado"};
+    ArgHiloES argImpresora= {&es.impresora,&colaListos, &ctx.mutexPrincipal, &ctx.semImpresora,&terminado, "Impresora"};
 
-    // ── 3. LANZAR HILOS ──────────────────────────────────────────────────────
+    // 3. Lanzar hilos
     pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thEntrada;
-    pthread_create(&thDisco, NULL, hiloDispositivoES, &argDisco);
-    pthread_create(&thPantalla, NULL, hiloDispositivoES, &argPantalla);
-    pthread_create(&thTeclado, NULL, hiloDispositivoES, &argTeclado);
+    pthread_create(&thDisco,     NULL, hiloDispositivoES, &argDisco);
+    pthread_create(&thPantalla,  NULL, hiloDispositivoES, &argPantalla);
+    pthread_create(&thTeclado,   NULL, hiloDispositivoES, &argTeclado);
     pthread_create(&thImpresora, NULL, hiloDispositivoES, &argImpresora);
-    pthread_create(&thReloj, NULL, hiloReloj, &ctx);
-    pthread_create(&thEntrada, NULL, hiloEntrada, &ctx);
+    pthread_create(&thReloj,     NULL, hiloReloj,         &ctx);
+    pthread_create(&thEntrada,   NULL, hiloEntrada,       &ctx);
 
-    // ── 4. BIENVENIDA ────────────────────────────────────────────────────────
+    // 4. Mostrar estado inicial
     vistaBienvenida();
     vistaMostrarLista(&enEjecucion, "procesosEnEjecucion");
+    vistaMostrarLista(&solicitudes, "solicitudes");
     vistaMostrarBuddy();
     logEvento("Simulacion iniciada");
 
-    // ── 5. LOOP PRINCIPAL ────────────────────────────────────────────────────
-    // Solo prueba estructuras: avanza reloj, ingresa procesos, actualiza espera
-    while (!terminado)
-    {
+    // 5. Loop principal
+    while (!terminado) {
         pthread_mutex_lock(&ctx.mutexPrincipal);
 
         reloj++;
         ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
         actualizarEspera(&colaListos);
-        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
-                                    &colaListos, &es, reloj);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
 
-        if (reloj % 100 == 0)
-        {
+        if (reloj % 100 == 0) {
             vistaMostrarColaListos(&colaListos);
             vistaMostrarTablaGlobal();
             guardarBCPs(&enEjecucion, "bcps.log");
@@ -98,22 +92,21 @@ int main(void)
         usleep(1000);
     }
 
-    // ── 6. CIERRE ────────────────────────────────────────────────────────────
+    // 6. Cierre
     terminado = 1;
     sem_post(&ctx.semDisco);
     sem_post(&ctx.semPantalla);
     sem_post(&ctx.semTeclado);
     sem_post(&ctx.semImpresora);
 
-    pthread_join(thDisco, NULL);
-    pthread_join(thPantalla, NULL);
-    pthread_join(thTeclado, NULL);
+    pthread_join(thDisco,     NULL);
+    pthread_join(thPantalla,  NULL);
+    pthread_join(thTeclado,   NULL);
     pthread_join(thImpresora, NULL);
-    pthread_join(thReloj, NULL);
-    pthread_join(thEntrada, NULL);
+    pthread_join(thReloj,     NULL);
+    pthread_join(thEntrada,   NULL);
 
     pthread_mutex_destroy(&ctx.mutexPrincipal);
-    pthread_mutex_destroy(&ctx.mutexMemoria);
     sem_destroy(&ctx.semDisco);
     sem_destroy(&ctx.semPantalla);
     sem_destroy(&ctx.semTeclado);
@@ -122,9 +115,6 @@ int main(void)
     guardarBCPs(&enEjecucion, "bcps.log");
     guardarVariablesGlobales("variables.log");
     logEvento("Simulacion finalizada");
-
-    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
-        liberarProceso(n->proceso);
 
     vistaCierre(reloj, tablaSistema.procesosTerminados);
     return 0;
