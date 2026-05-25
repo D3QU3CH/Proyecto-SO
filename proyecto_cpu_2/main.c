@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include "modelo.h"
 #include "vista.h"
 #include "controlador.h"
@@ -11,193 +10,122 @@ int main(void)
 {
     srand((unsigned)time(NULL));
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 1. INICIALIZACION DE ESTRUCTURAS
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── 1. INICIALIZACION ─────────────────────────────────────────────────────
+    cargarLibro("libro1.txt");
+    inicializarBuddy();
+    inicializarTablaSistema();
 
-    Cola procesosEnCiclo, nuevasSolicitudes;
-    inicializarCola(&procesosEnCiclo);
-    inicializarCola(&nuevasSolicitudes);
-    inicializarCola(&colaTerminados);
+    Lista enEjecucion, solicitudes;
+    inicializarLista(&enEjecucion);
+    inicializarLista(&solicitudes);
+    poblarListas(&enEjecucion, &solicitudes);
 
-    inicializarSistema();                    // crea BCPs + asigna socios
-    cargarProcesosEnCola(&procesosEnCiclo, &nuevasSolicitudes);
+    Cola colaListos;
+    inicializarCola(&colaListos);
 
     SistemaES es;
-    inicializarES(&es);
-    inicializarMemoria();
+    inicializarSistemaES(&es);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 2. CONFIGURACION INICIAL (usuario elige algoritmo y quantum)
-    // ─────────────────────────────────────────────────────────────────────────
-
-    vistaMostrarBienvenida();
-
-    int algoritmo;
-    printf("  1. FCFS (First Come First Served)\n");
-    printf("  2. Round Robin\n");
-    printf("  Seleccione algoritmo: ");
-    if (scanf("%d", &algoritmo) != 1 || (algoritmo != 1 && algoritmo != 2))
-        algoritmo = 1;
-
-    int quantum = 10;
-    if (algoritmo == 2) {
-        printf("  Ingrese el quantum: ");
-        if (scanf("%d", &quantum) != 1 || quantum <= 0)
-            quantum = 10;
-    }
-
-    printf("\n  [OK] Algoritmo: %s",
-           algoritmo == 1 ? "FCFS" : "Round Robin");
-    if (algoritmo == 2) printf(" | Quantum: %d", quantum);
-    printf("\n\n");
-
-    logEvento("Simulacion iniciada");
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // 3. SEMAFOROS Y CONTEXTO COMPARTIDO
-    // ─────────────────────────────────────────────────────────────────────────
-
+    // ── 2. CONTEXTO DE HILOS ─────────────────────────────────────────────────
     int terminado = 0;
-    int ciclos    = 0;
-
-    sem_t semDisco, semPantalla, semTeclado, semImpresora;
-    sem_init(&semDisco,     0, 0);
-    sem_init(&semPantalla,  0, 0);
-    sem_init(&semTeclado,   0, 0);
-    sem_init(&semImpresora, 0, 0);
+    int reloj = 0;
 
     ContextoHilos ctx;
-    ctx.procesosEnCiclo   = &procesosEnCiclo;
-    ctx.nuevasSolicitudes = &nuevasSolicitudes;
-    ctx.es                = &es;
-    ctx.algoritmo         = &algoritmo;
-    ctx.quantum           = &quantum;
-    ctx.ciclos            = &ciclos;
-    ctx.terminado         = &terminado;
-    ctx.semDisco          = &semDisco;
-    ctx.semPantalla       = &semPantalla;
-    ctx.semTeclado        = &semTeclado;
-    ctx.semImpresora      = &semImpresora;
+    ctx.procesosEnEjecucion = &enEjecucion;
+    ctx.nuevasSolicitudes = &solicitudes;
+    ctx.colaListos = &colaListos;
+    ctx.es = &es;
+    ctx.reloj = &reloj;
+    ctx.terminado = &terminado;
 
     pthread_mutex_init(&ctx.mutexPrincipal, NULL);
-    pthread_mutex_init(&ctx.mutexSocios,    NULL);
+    pthread_mutex_init(&ctx.mutexMemoria, NULL);
+    sem_init(&ctx.semDisco, 0, 0);
+    sem_init(&ctx.semPantalla, 0, 0);
+    sem_init(&ctx.semTeclado, 0, 0);
+    sem_init(&ctx.semImpresora, 0, 0);
 
-    // Argumentos para cada hilo de E/S
-    ArgHiloES argDisco     = { &es.disco,     &procesosEnCiclo,
-                                &ctx.mutexPrincipal, &semDisco,
-                                &terminado, "Disco" };
-    ArgHiloES argPantalla  = { &es.pantalla,  &procesosEnCiclo,
-                                &ctx.mutexPrincipal, &semPantalla,
-                                &terminado, "Pantalla" };
-    ArgHiloES argTeclado   = { &es.teclado,   &procesosEnCiclo,
-                                &ctx.mutexPrincipal, &semTeclado,
-                                &terminado, "Teclado" };
-    ArgHiloES argImpresora = { &es.impresora, &procesosEnCiclo,
-                                &ctx.mutexPrincipal, &semImpresora,
-                                &terminado, "Impresora" };
+    ArgHiloES argDisco = {&es.disco, &colaListos,
+                          &ctx.mutexPrincipal, &ctx.semDisco,
+                          &terminado, "Disco"};
+    ArgHiloES argPantalla = {&es.pantalla, &colaListos,
+                             &ctx.mutexPrincipal, &ctx.semPantalla,
+                             &terminado, "Pantalla"};
+    ArgHiloES argTeclado = {&es.teclado, &colaListos,
+                            &ctx.mutexPrincipal, &ctx.semTeclado,
+                            &terminado, "Teclado"};
+    ArgHiloES argImpresora = {&es.impresora, &colaListos,
+                              &ctx.mutexPrincipal, &ctx.semImpresora,
+                              &terminado, "Impresora"};
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 4. LANZAMIENTO DE HILOS
-    // ─────────────────────────────────────────────────────────────────────────
-
-    pthread_t thDisco, thPantalla, thTeclado, thImpresora;
-    pthread_t thReloj, thEntrada;
-
-    pthread_create(&thDisco,     NULL, hiloDispositivoES, &argDisco);
-    pthread_create(&thPantalla,  NULL, hiloDispositivoES, &argPantalla);
-    pthread_create(&thTeclado,   NULL, hiloDispositivoES, &argTeclado);
+    // ── 3. LANZAR HILOS ──────────────────────────────────────────────────────
+    pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thEntrada;
+    pthread_create(&thDisco, NULL, hiloDispositivoES, &argDisco);
+    pthread_create(&thPantalla, NULL, hiloDispositivoES, &argPantalla);
+    pthread_create(&thTeclado, NULL, hiloDispositivoES, &argTeclado);
     pthread_create(&thImpresora, NULL, hiloDispositivoES, &argImpresora);
-    pthread_create(&thReloj,     NULL, hiloReloj,          &ctx);
-    pthread_create(&thEntrada,   NULL, hiloTeclado,         &ctx);
+    pthread_create(&thReloj, NULL, hiloReloj, &ctx);
+    pthread_create(&thEntrada, NULL, hiloEntrada, &ctx);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 5. CICLO PRINCIPAL (hilo main = CPU planificador)
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── 4. BIENVENIDA ────────────────────────────────────────────────────────
+    vistaBienvenida();
+    vistaMostrarLista(&enEjecucion, "procesosEnEjecucion");
+    vistaMostrarBuddy();
+    logEvento("Simulacion iniciada");
 
-    while (1) {
-
+    // ── 5. LOOP PRINCIPAL ────────────────────────────────────────────────────
+    // Solo prueba estructuras: avanza reloj, ingresa procesos, actualiza espera
+    while (!terminado)
+    {
         pthread_mutex_lock(&ctx.mutexPrincipal);
 
-        // Condicion de fin: cola vacia y sin procesos en E/S
-        if (estaVacia(&procesosEnCiclo) && contarES(&es) == 0) {
-            pthread_mutex_unlock(&ctx.mutexPrincipal);
-            break;
-        }
+        reloj++;
+        ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
+        actualizarEspera(&colaListos);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
+                                    &colaListos, &es, reloj);
 
-        ciclos++;
-
-        // a) Ingreso dinamico de procesos segun reloj
-        ingresarProcesosNuevos(&procesosEnCiclo, ciclos);
-
-        // b) Ejecutar CPU (hilos de E/S trabajan en paralelo via semaforos)
-        if (algoritmo == 1)
-            ejecutarFCFS(&procesosEnCiclo, &es, &algoritmo, ciclos,
-                         &ctx.mutexSocios);
-        else
-            ejecutarRR(&procesosEnCiclo, &nuevasSolicitudes,
-                       &es, &algoritmo, &quantum, ciclos,
-                       &ctx.mutexSocios);
-
-        // c) Checkpoint global cada 20 ciclos
-        if (ciclos % 20 == 0) {
-            int antes = algoritmo;
-            algoritmo = decidirCambio(&procesosEnCiclo, algoritmo);
-            if (algoritmo != antes)
-                vistaMensajeCambioAutomatico(antes, algoritmo);
-
-            vistaMostrarBalanceColas(&procesosEnCiclo, &es);
-            guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
-            guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
-                                     algoritmo, quantum, ciclos,
-                                     TOTAL_PROCESOS - EN_SISTEMA);
-            logEvento("Checkpoint GLOBAL");
+        if (reloj % 100 == 0)
+        {
+            vistaMostrarColaListos(&colaListos);
+            vistaMostrarTablaGlobal();
+            guardarBCPs(&enEjecucion, "bcps.log");
+            guardarVariablesGlobales("variables.log");
+            logEvento("Checkpoint");
         }
 
         pthread_mutex_unlock(&ctx.mutexPrincipal);
-
-        usleep(1000);   // cede CPU para que los otros hilos avancen
+        usleep(1000);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 6. CIERRE DE HILOS
-    // ─────────────────────────────────────────────────────────────────────────
-
+    // ── 6. CIERRE ────────────────────────────────────────────────────────────
     terminado = 1;
+    sem_post(&ctx.semDisco);
+    sem_post(&ctx.semPantalla);
+    sem_post(&ctx.semTeclado);
+    sem_post(&ctx.semImpresora);
 
-    // Despertar hilos bloqueados en semaforos para que terminen
-    sem_post(&semDisco);
-    sem_post(&semPantalla);
-    sem_post(&semTeclado);
-    sem_post(&semImpresora);
-
-    pthread_join(thDisco,     NULL);
-    pthread_join(thPantalla,  NULL);
-    pthread_join(thTeclado,   NULL);
+    pthread_join(thDisco, NULL);
+    pthread_join(thPantalla, NULL);
+    pthread_join(thTeclado, NULL);
     pthread_join(thImpresora, NULL);
-    pthread_join(thReloj,     NULL);
-    pthread_join(thEntrada,   NULL);
+    pthread_join(thReloj, NULL);
+    pthread_join(thEntrada, NULL);
 
     pthread_mutex_destroy(&ctx.mutexPrincipal);
-    pthread_mutex_destroy(&ctx.mutexSocios);
-    sem_destroy(&semDisco);
-    sem_destroy(&semPantalla);
-    sem_destroy(&semTeclado);
-    sem_destroy(&semImpresora);
+    pthread_mutex_destroy(&ctx.mutexMemoria);
+    sem_destroy(&ctx.semDisco);
+    sem_destroy(&ctx.semPantalla);
+    sem_destroy(&ctx.semTeclado);
+    sem_destroy(&ctx.semImpresora);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 7. GUARDADO FINAL Y LIBERACION
-    // ─────────────────────────────────────────────────────────────────────────
-
-    guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
-    guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
-                              algoritmo, quantum, ciclos, 0);
+    guardarBCPs(&enEjecucion, "bcps.log");
+    guardarVariablesGlobales("variables.log");
     logEvento("Simulacion finalizada");
 
-    liberarCola(&procesosEnCiclo);
-    liberarCola(&nuevasSolicitudes);
-    liberarCola(&colaTerminados);
+    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
+        liberarProceso(n->proceso);
 
-    vistaMostrarCierre(ciclos, totalTerminados);
+    vistaCierre(reloj, tablaSistema.procesosTerminados);
     return 0;
 }
