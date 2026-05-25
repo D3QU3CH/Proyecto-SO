@@ -1,0 +1,3784 @@
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:45 2026
+========================================
+ 1. IteracionCPU:         20
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       18
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46944
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      2810
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7041657
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:46 2026
+========================================
+ 1. IteracionCPU:         40
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      151
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       35
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46918
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       151
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      5304
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7084631
+18. CantProcesosActivos:  151
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:47 2026
+========================================
+ 1. IteracionCPU:         60
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      153
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       48
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47045
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       153
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      7468
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7197985
+18. CantProcesosActivos:  153
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:50 2026
+========================================
+ 1. IteracionCPU:         80
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      155
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       61
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47049
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       155
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      9506
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7292599
+18. CantProcesosActivos:  155
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:51 2026
+========================================
+ 1. IteracionCPU:         20
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      161
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       70
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47465
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       161
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      11388
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7641934
+18. CantProcesosActivos:  161
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:51 2026
+========================================
+ 1. IteracionCPU:         100
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      162
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       73
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47603
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       162
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      11883
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7711807
+18. CantProcesosActivos:  162
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:52 2026
+========================================
+ 1. IteracionCPU:         40
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      165
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       84
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47603
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       165
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      13920
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7854641
+18. CantProcesosActivos:  165
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:52 2026
+========================================
+ 1. IteracionCPU:         120
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      166
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       87
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47823
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       166
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      14489
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7938681
+18. CantProcesosActivos:  166
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:53 2026
+========================================
+ 1. IteracionCPU:         60
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      168
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       100
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48120
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       168
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      16890
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8084198
+18. CantProcesosActivos:  168
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:53 2026
+========================================
+ 1. IteracionCPU:         140
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      170
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       103
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48100
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       170
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      17566
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8177097
+18. CantProcesosActivos:  170
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:53 2026
+========================================
+ 1. IteracionCPU:         80
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      172
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       117
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48340
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       172
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      20230
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8314495
+18. CantProcesosActivos:  172
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:54 2026
+========================================
+ 1. IteracionCPU:         160
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      172
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       121
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48339
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       172
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      20899
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8314435
+18. CantProcesosActivos:  172
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:54 2026
+========================================
+ 1. IteracionCPU:         100
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      175
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       136
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48172
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       175
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      23936
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8430109
+18. CantProcesosActivos:  175
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:54 2026
+========================================
+ 1. IteracionCPU:         180
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      177
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       140
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47882
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       177
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      24836
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8475170
+18. CantProcesosActivos:  177
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:55 2026
+========================================
+ 1. IteracionCPU:         120
+ 2. Algoritmo:            RR
+ 3. Quantum:              15
+ 4. ProcesosEnCiclo:      180
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       157
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48028
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       180
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      28327
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8645154
+18. CantProcesosActivos:  180
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:55 2026
+========================================
+ 1. IteracionCPU:         200
+ 2. Algoritmo:            RR
+ 3. Quantum:              15
+ 4. ProcesosEnCiclo:      181
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       161
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48173
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       181
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      29266
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8719482
+18. CantProcesosActivos:  181
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:56 2026
+========================================
+ 1. IteracionCPU:         140
+ 2. Algoritmo:            RR
+ 3. Quantum:              20
+ 4. ProcesosEnCiclo:      183
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       181
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48335
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       183
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      33273
+16. SumaDesperdicioTotal: 11
+17. SumaCiclosRestantes:  8845384
+18. CantProcesosActivos:  183
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:56 2026
+========================================
+ 1. IteracionCPU:         220
+ 2. Algoritmo:            RR
+ 3. Quantum:              20
+ 4. ProcesosEnCiclo:      183
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       187
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48334
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       183
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      34221
+16. SumaDesperdicioTotal: 36
+17. SumaCiclosRestantes:  8845269
+18. CantProcesosActivos:  183
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:57 2026
+========================================
+ 1. IteracionCPU:         160
+ 2. Algoritmo:            RR
+ 3. Quantum:              25
+ 4. ProcesosEnCiclo:      183
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       207
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48332
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       183
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      38052
+16. SumaDesperdicioTotal: 37
+17. SumaCiclosRestantes:  8844870
+18. CantProcesosActivos:  183
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:57 2026
+========================================
+ 1. IteracionCPU:         240
+ 2. Algoritmo:            RR
+ 3. Quantum:              25
+ 4. ProcesosEnCiclo:      184
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       212
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48109
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       184
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      39110
+16. SumaDesperdicioTotal: 51
+17. SumaCiclosRestantes:  8852203
+18. CantProcesosActivos:  184
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:57 2026
+========================================
+ 1. IteracionCPU:         180
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      187
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       231
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48580
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       187
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      43314
+16. SumaDesperdicioTotal: 110
+17. SumaCiclosRestantes:  9084527
+18. CantProcesosActivos:  187
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:58 2026
+========================================
+ 1. IteracionCPU:         260
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      187
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       236
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48579
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       187
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      44289
+16. SumaDesperdicioTotal: 142
+17. SumaCiclosRestantes:  9084409
+18. CantProcesosActivos:  187
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:58 2026
+========================================
+ 1. IteracionCPU:         200
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      190
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       254
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  48775
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       190
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      48397
+16. SumaDesperdicioTotal: 247
+17. SumaCiclosRestantes:  9267303
+18. CantProcesosActivos:  190
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:58 2026
+========================================
+ 1. IteracionCPU:         280
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      190
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       259
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  48774
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       190
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      49357
+16. SumaDesperdicioTotal: 247
+17. SumaCiclosRestantes:  9267123
+18. CantProcesosActivos:  190
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:59 2026
+========================================
+ 1. IteracionCPU:         220
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      195
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       277
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  48934
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       195
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      54076
+16. SumaDesperdicioTotal: 326
+17. SumaCiclosRestantes:  9542220
+18. CantProcesosActivos:  195
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:50:59 2026
+========================================
+ 1. IteracionCPU:         300
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      196
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       281
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  48815
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       196
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      55265
+16. SumaDesperdicioTotal: 352
+17. SumaCiclosRestantes:  9567874
+18. CantProcesosActivos:  196
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:00 2026
+========================================
+ 1. IteracionCPU:         240
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      199
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       300
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  48419
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       199
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      59801
+16. SumaDesperdicioTotal: 467
+17. SumaCiclosRestantes:  9635577
+18. CantProcesosActivos:  199
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:00 2026
+========================================
+ 1. IteracionCPU:         320
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      199
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       305
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  48419
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       199
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      60849
+16. SumaDesperdicioTotal: 467
+17. SumaCiclosRestantes:  9635427
+18. CantProcesosActivos:  199
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:01 2026
+========================================
+ 1. IteracionCPU:         260
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      202
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       325
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  48617
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       202
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      65679
+16. SumaDesperdicioTotal: 586
+17. SumaCiclosRestantes:  9820773
+18. CantProcesosActivos:  202
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:01 2026
+========================================
+ 1. IteracionCPU:         340
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      202
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       330
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  48616
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       202
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      66739
+16. SumaDesperdicioTotal: 600
+17. SumaCiclosRestantes:  9820547
+18. CantProcesosActivos:  202
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:01 2026
+========================================
+ 1. IteracionCPU:         280
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      202
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       351
+ 9. PromedioDesperdicio:  3
+10. PromedioCiclosRest.:  48613
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       202
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      70915
+16. SumaDesperdicioTotal: 692
+17. SumaCiclosRestantes:  9819859
+18. CantProcesosActivos:  202
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sat May 23 21:51:02 2026
+========================================
+ 1. IteracionCPU:         360
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      203
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       355
+ 9. PromedioDesperdicio:  3
+10. PromedioCiclosRest.:  48584
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       203
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      72183
+16. SumaDesperdicioTotal: 739
+17. SumaCiclosRestantes:  9862748
+18. CantProcesosActivos:  203
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:53 2026
+========================================
+ 1. IteracionCPU:         20
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       18
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46754
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      2810
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7013205
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     20
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:54 2026
+========================================
+ 1. IteracionCPU:         40
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       34
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46749
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      5220
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7012416
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     40
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:55 2026
+========================================
+ 1. IteracionCPU:         60
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       48
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46743
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      7230
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7011502
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     60
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:56 2026
+========================================
+ 1. IteracionCPU:         80
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      152
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       59
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46378
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       152
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      8983
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7049522
+18. CantProcesosActivos:  152
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     82
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:57 2026
+========================================
+ 1. IteracionCPU:         100
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      154
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       68
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46255
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       154
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      10557
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7123348
+18. CantProcesosActivos:  154
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     104
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:58 2026
+========================================
+ 1. IteracionCPU:         120
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      162
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       75
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45915
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       162
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      12184
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7438318
+18. CantProcesosActivos:  162
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     132
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:58 2026
+========================================
+ 1. IteracionCPU:         140
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      166
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       84
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45497
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       166
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      14052
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7552595
+18. CantProcesosActivos:  166
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     156
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:58:59 2026
+========================================
+ 1. IteracionCPU:         160
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      169
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       93
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45620
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       169
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      15813
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7709900
+18. CantProcesosActivos:  169
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     180
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:00 2026
+========================================
+ 1. IteracionCPU:         180
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      175
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       101
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46363
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       175
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      17826
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8113686
+18. CantProcesosActivos:  175
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     207
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:01 2026
+========================================
+ 1. IteracionCPU:         200
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      184
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       107
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46629
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       184
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      19775
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8579821
+18. CantProcesosActivos:  184
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     246
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:02 2026
+========================================
+ 1. IteracionCPU:         220
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      193
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       114
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46275
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       193
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      22064
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8931197
+18. CantProcesosActivos:  193
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     287
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:02 2026
+========================================
+ 1. IteracionCPU:         240
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      201
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       123
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45396
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       201
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      24865
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  9124768
+18. CantProcesosActivos:  201
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     326
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:03 2026
+========================================
+ 1. IteracionCPU:         260
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      220
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       132
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46173
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       220
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      29169
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  10158080
+18. CantProcesosActivos:  220
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     385
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:04 2026
+========================================
+ 1. IteracionCPU:         280
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      237
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       148
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46742
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       237
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      35284
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11077879
+18. CantProcesosActivos:  237
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     445
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:05 2026
+========================================
+ 1. IteracionCPU:         300
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      246
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       172
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  47053
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       246
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      42331
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11575038
+18. CantProcesosActivos:  246
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     484
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:06 2026
+========================================
+ 1. IteracionCPU:         320
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      251
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       193
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46955
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       251
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      48634
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11785747
+18. CantProcesosActivos:  251
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     521
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:19 2026
+========================================
+ 1. IteracionCPU:         340
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      269
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       208
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45810
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       269
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      56027
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  12322914
+18. CantProcesosActivos:  269
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     603
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:20 2026
+========================================
+ 1. IteracionCPU:         20
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      278
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       227
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46183
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       278
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      63153
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  12839066
+18. CantProcesosActivos:  278
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     647
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:20 2026
+========================================
+ 1. IteracionCPU:         360
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      280
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       233
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45888
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       280
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      65514
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  12848780
+18. CantProcesosActivos:  280
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     662
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:21 2026
+========================================
+ 1. IteracionCPU:         40
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      290
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       256
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46029
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       290
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      74424
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  13348532
+18. CantProcesosActivos:  290
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     723
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:21 2026
+========================================
+ 1. IteracionCPU:         380
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      294
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       262
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45958
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       294
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      77198
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  13511827
+18. CantProcesosActivos:  294
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     747
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:22 2026
+========================================
+ 1. IteracionCPU:         60
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      308
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       284
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45739
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       308
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      87589
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  14087635
+18. CantProcesosActivos:  308
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     809
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:22 2026
+========================================
+ 1. IteracionCPU:         400
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      308
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       294
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45738
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       308
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      90603
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  14087535
+18. CantProcesosActivos:  308
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     819
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:22 2026
+========================================
+ 1. IteracionCPU:         80
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      318
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       319
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45690
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       318
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      101607
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  14529645
+18. CantProcesosActivos:  318
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     882
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:23 2026
+========================================
+ 1. IteracionCPU:         420
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      321
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       329
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45714
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       321
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      105670
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  14674465
+18. CantProcesosActivos:  321
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     900
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:23 2026
+========================================
+ 1. IteracionCPU:         100
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      330
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       357
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45461
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       330
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      117923
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  15002407
+18. CantProcesosActivos:  330
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     951
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:23 2026
+========================================
+ 1. IteracionCPU:         440
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      332
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       367
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45259
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       332
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      121905
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  15026145
+18. CantProcesosActivos:  332
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     965
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:24 2026
+========================================
+ 1. IteracionCPU:         120
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      340
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       395
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45755
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       340
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      134399
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  15556776
+18. CantProcesosActivos:  340
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1020
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:24 2026
+========================================
+ 1. IteracionCPU:         460
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      342
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       405
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45705
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       342
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      138690
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  15631258
+18. CantProcesosActivos:  342
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1032
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:25 2026
+========================================
+ 1. IteracionCPU:         140
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      364
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       421
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45572
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       364
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      153586
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  16588296
+18. CantProcesosActivos:  364
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1104
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:25 2026
+========================================
+ 1. IteracionCPU:         480
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      370
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       428
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45692
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       370
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      158570
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  16906292
+18. CantProcesosActivos:  370
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1126
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:26 2026
+========================================
+ 1. IteracionCPU:         160
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      383
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       457
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45467
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       383
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      175100
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  17414173
+18. CantProcesosActivos:  383
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1191
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:26 2026
+========================================
+ 1. IteracionCPU:         500
+ 2. Algoritmo:            RR
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      386
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       469
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45544
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       386
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      181044
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  17580072
+18. CantProcesosActivos:  386
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1203
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:27 2026
+========================================
+ 1. IteracionCPU:         180
+ 2. Algoritmo:            RR
+ 3. Quantum:              15
+ 4. ProcesosEnCiclo:      405
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       497
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45849
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       405
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      201330
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  18569072
+18. CantProcesosActivos:  405
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1287
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:27 2026
+========================================
+ 1. IteracionCPU:         520
+ 2. Algoritmo:            RR
+ 3. Quantum:              15
+ 4. ProcesosEnCiclo:      406
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       510
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45845
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       406
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      207086
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  18613314
+18. CantProcesosActivos:  406
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1303
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:27 2026
+========================================
+ 1. IteracionCPU:         200
+ 2. Algoritmo:            RR
+ 3. Quantum:              20
+ 4. ProcesosEnCiclo:      415
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       542
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45649
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       415
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      225128
+16. SumaDesperdicioTotal: 7
+17. SumaCiclosRestantes:  18944522
+18. CantProcesosActivos:  415
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1344
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:28 2026
+========================================
+ 1. IteracionCPU:         540
+ 2. Algoritmo:            RR
+ 3. Quantum:              20
+ 4. ProcesosEnCiclo:      418
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       552
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45783
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       418
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      230772
+16. SumaDesperdicioTotal: 35
+17. SumaCiclosRestantes:  19137688
+18. CantProcesosActivos:  418
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1359
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:28 2026
+========================================
+ 1. IteracionCPU:         220
+ 2. Algoritmo:            RR
+ 3. Quantum:              25
+ 4. ProcesosEnCiclo:      433
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       583
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46135
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       433
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      252578
+16. SumaDesperdicioTotal: 37
+17. SumaCiclosRestantes:  19976713
+18. CantProcesosActivos:  433
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1430
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:28 2026
+========================================
+ 1. IteracionCPU:         560
+ 2. Algoritmo:            RR
+ 3. Quantum:              25
+ 4. ProcesosEnCiclo:      434
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       596
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46098
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       434
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      258814
+16. SumaDesperdicioTotal: 37
+17. SumaCiclosRestantes:  20006543
+18. CantProcesosActivos:  434
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1438
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:29 2026
+========================================
+ 1. IteracionCPU:         240
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      436
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       634
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46098
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       436
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      276758
+16. SumaDesperdicioTotal: 62
+17. SumaCiclosRestantes:  20098802
+18. CantProcesosActivos:  436
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1470
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:29 2026
+========================================
+ 1. IteracionCPU:         580
+ 2. Algoritmo:            RR
+ 3. Quantum:              30
+ 4. ProcesosEnCiclo:      438
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       645
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  45997
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       438
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      282691
+16. SumaDesperdicioTotal: 100
+17. SumaCiclosRestantes:  20146906
+18. CantProcesosActivos:  438
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1485
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:30 2026
+========================================
+ 1. IteracionCPU:         260
+ 2. Algoritmo:            RR
+ 3. Quantum:              35
+ 4. ProcesosEnCiclo:      445
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       676
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46285
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       445
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      301127
+16. SumaDesperdicioTotal: 237
+17. SumaCiclosRestantes:  20597068
+18. CantProcesosActivos:  445
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1526
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:30 2026
+========================================
+ 1. IteracionCPU:         600
+ 2. Algoritmo:            RR
+ 3. Quantum:              35
+ 4. ProcesosEnCiclo:      449
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       685
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  46144
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       449
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      307903
+16. SumaDesperdicioTotal: 284
+17. SumaCiclosRestantes:  20718872
+18. CantProcesosActivos:  449
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1550
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:31 2026
+========================================
+ 1. IteracionCPU:         280
+ 2. Algoritmo:            RR
+ 3. Quantum:              40
+ 4. ProcesosEnCiclo:      461
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       710
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  46208
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       461
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      327321
+16. SumaDesperdicioTotal: 513
+17. SumaCiclosRestantes:  21302199
+18. CantProcesosActivos:  461
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1615
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:31 2026
+========================================
+ 1. IteracionCPU:         620
+ 2. Algoritmo:            RR
+ 3. Quantum:              40
+ 4. ProcesosEnCiclo:      464
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       718
+ 9. PromedioDesperdicio:  1
+10. PromedioCiclosRest.:  46109
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       464
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      333490
+16. SumaDesperdicioTotal: 666
+17. SumaCiclosRestantes:  21394987
+18. CantProcesosActivos:  464
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1631
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:32 2026
+========================================
+ 1. IteracionCPU:         300
+ 2. Algoritmo:            RR
+ 3. Quantum:              45
+ 4. ProcesosEnCiclo:      471
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       746
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  46216
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       471
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      351520
+16. SumaDesperdicioTotal: 1063
+17. SumaCiclosRestantes:  21768154
+18. CantProcesosActivos:  471
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1685
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:32 2026
+========================================
+ 1. IteracionCPU:         640
+ 2. Algoritmo:            RR
+ 3. Quantum:              45
+ 4. ProcesosEnCiclo:      473
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       755
+ 9. PromedioDesperdicio:  2
+10. PromedioCiclosRest.:  46313
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       473
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      357130
+16. SumaDesperdicioTotal: 1285
+17. SumaCiclosRestantes:  21906471
+18. CantProcesosActivos:  473
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1690
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:32 2026
+========================================
+ 1. IteracionCPU:         320
+ 2. Algoritmo:            RR
+ 3. Quantum:              50
+ 4. ProcesosEnCiclo:      484
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       779
+ 9. PromedioDesperdicio:  4
+10. PromedioCiclosRest.:  46229
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       484
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      377158
+16. SumaDesperdicioTotal: 1949
+17. SumaCiclosRestantes:  22375012
+18. CantProcesosActivos:  484
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1754
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:33 2026
+========================================
+ 1. IteracionCPU:         660
+ 2. Algoritmo:            RR
+ 3. Quantum:              50
+ 4. ProcesosEnCiclo:      485
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       789
+ 9. PromedioDesperdicio:  4
+10. PromedioCiclosRest.:  46243
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       485
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      382805
+16. SumaDesperdicioTotal: 2124
+17. SumaCiclosRestantes:  22428080
+18. CantProcesosActivos:  485
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1760
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:33 2026
+========================================
+ 1. IteracionCPU:         340
+ 2. Algoritmo:            RR
+ 3. Quantum:              55
+ 4. ProcesosEnCiclo:      498
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       812
+ 9. PromedioDesperdicio:  6
+10. PromedioCiclosRest.:  46364
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       498
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      404420
+16. SumaDesperdicioTotal: 2999
+17. SumaCiclosRestantes:  23089555
+18. CantProcesosActivos:  498
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1819
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:34 2026
+========================================
+ 1. IteracionCPU:         680
+ 2. Algoritmo:            RR
+ 3. Quantum:              55
+ 4. ProcesosEnCiclo:      500
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       825
+ 9. PromedioDesperdicio:  6
+10. PromedioCiclosRest.:  46333
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       500
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      412592
+16. SumaDesperdicioTotal: 3295
+17. SumaCiclosRestantes:  23166984
+18. CantProcesosActivos:  500
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1841
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:34 2026
+========================================
+ 1. IteracionCPU:         360
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      512
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       851
+ 9. PromedioDesperdicio:  8
+10. PromedioCiclosRest.:  46374
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       512
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      436035
+16. SumaDesperdicioTotal: 4563
+17. SumaCiclosRestantes:  23743856
+18. CantProcesosActivos:  512
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1909
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:34 2026
+========================================
+ 1. IteracionCPU:         700
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      513
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       862
+ 9. PromedioDesperdicio:  9
+10. PromedioCiclosRest.:  46447
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       513
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      442691
+16. SumaDesperdicioTotal: 5011
+17. SumaCiclosRestantes:  23827763
+18. CantProcesosActivos:  513
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1925
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:35 2026
+========================================
+ 1. IteracionCPU:         380
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      524
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       890
+ 9. PromedioDesperdicio:  11
+10. PromedioCiclosRest.:  46309
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       524
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      466424
+16. SumaDesperdicioTotal: 6108
+17. SumaCiclosRestantes:  24266419
+18. CantProcesosActivos:  524
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     1986
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:35 2026
+========================================
+ 1. IteracionCPU:         720
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      529
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       898
+ 9. PromedioDesperdicio:  12
+10. PromedioCiclosRest.:  46304
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       529
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      475095
+16. SumaDesperdicioTotal: 6668
+17. SumaCiclosRestantes:  24495312
+18. CantProcesosActivos:  529
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2017
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:36 2026
+========================================
+ 1. IteracionCPU:         400
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      541
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       921
+ 9. PromedioDesperdicio:  14
+10. PromedioCiclosRest.:  46123
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       541
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      498311
+16. SumaDesperdicioTotal: 7610
+17. SumaCiclosRestantes:  24952781
+18. CantProcesosActivos:  541
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2090
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:36 2026
+========================================
+ 1. IteracionCPU:         740
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      543
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       929
+ 9. PromedioDesperdicio:  14
+10. PromedioCiclosRest.:  46088
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       543
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      504635
+16. SumaDesperdicioTotal: 7851
+17. SumaCiclosRestantes:  25025894
+18. CantProcesosActivos:  543
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2100
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:37 2026
+========================================
+ 1. IteracionCPU:         420
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      555
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       944
+ 9. PromedioDesperdicio:  16
+10. PromedioCiclosRest.:  46234
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       555
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      524271
+16. SumaDesperdicioTotal: 9320
+17. SumaCiclosRestantes:  25659982
+18. CantProcesosActivos:  555
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2147
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:37 2026
+========================================
+ 1. IteracionCPU:         760
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      557
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       954
+ 9. PromedioDesperdicio:  17
+10. PromedioCiclosRest.:  46305
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       557
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      531600
+16. SumaDesperdicioTotal: 9590
+17. SumaCiclosRestantes:  25792240
+18. CantProcesosActivos:  557
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2161
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:37 2026
+========================================
+ 1. IteracionCPU:         440
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      568
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       981
+ 9. PromedioDesperdicio:  19
+10. PromedioCiclosRest.:  46329
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       568
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      557510
+16. SumaDesperdicioTotal: 11048
+17. SumaCiclosRestantes:  26315327
+18. CantProcesosActivos:  568
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2225
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:38 2026
+========================================
+ 1. IteracionCPU:         780
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      571
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       994
+ 9. PromedioDesperdicio:  20
+10. PromedioCiclosRest.:  46328
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       571
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      567631
+16. SumaDesperdicioTotal: 11605
+17. SumaCiclosRestantes:  26453367
+18. CantProcesosActivos:  571
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2254
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:38 2026
+========================================
+ 1. IteracionCPU:         460
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      588
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1013
+ 9. PromedioDesperdicio:  21
+10. PromedioCiclosRest.:  46247
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       588
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      596050
+16. SumaDesperdicioTotal: 12583
+17. SumaCiclosRestantes:  27193684
+18. CantProcesosActivos:  588
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2334
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:38 2026
+========================================
+ 1. IteracionCPU:         800
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      593
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1023
+ 9. PromedioDesperdicio:  21
+10. PromedioCiclosRest.:  46191
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       593
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      606909
+16. SumaDesperdicioTotal: 12859
+17. SumaCiclosRestantes:  27391487
+18. CantProcesosActivos:  593
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2365
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:39 2026
+========================================
+ 1. IteracionCPU:         480
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      600
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1052
+ 9. PromedioDesperdicio:  23
+10. PromedioCiclosRest.:  46207
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       600
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      631467
+16. SumaDesperdicioTotal: 14090
+17. SumaCiclosRestantes:  27724633
+18. CantProcesosActivos:  600
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2432
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:39 2026
+========================================
+ 1. IteracionCPU:         820
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      600
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1063
+ 9. PromedioDesperdicio:  24
+10. PromedioCiclosRest.:  46206
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       600
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      638350
+16. SumaDesperdicioTotal: 14604
+17. SumaCiclosRestantes:  27723947
+18. CantProcesosActivos:  600
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2436
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:40 2026
+========================================
+ 1. IteracionCPU:         500
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      611
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1097
+ 9. PromedioDesperdicio:  25
+10. PromedioCiclosRest.:  46124
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       611
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      670664
+16. SumaDesperdicioTotal: 15756
+17. SumaCiclosRestantes:  28181849
+18. CantProcesosActivos:  611
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2515
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:40 2026
+========================================
+ 1. IteracionCPU:         840
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      614
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1106
+ 9. PromedioDesperdicio:  26
+10. PromedioCiclosRest.:  45983
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       614
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      679480
+16. SumaDesperdicioTotal: 16182
+17. SumaCiclosRestantes:  28233917
+18. CantProcesosActivos:  614
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2540
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:41 2026
+========================================
+ 1. IteracionCPU:         520
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      614
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1142
+ 9. PromedioDesperdicio:  28
+10. PromedioCiclosRest.:  45980
+11. PromedioVecesEnCPU:   4
+12. TamColaEnCiclo:       614
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      701760
+16. SumaDesperdicioTotal: 17192
+17. SumaCiclosRestantes:  28232287
+18. CantProcesosActivos:  614
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2566
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:41 2026
+========================================
+ 1. IteracionCPU:         860
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      617
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1150
+ 9. PromedioDesperdicio:  28
+10. PromedioCiclosRest.:  45995
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       617
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      710154
+16. SumaDesperdicioTotal: 17524
+17. SumaCiclosRestantes:  28379481
+18. CantProcesosActivos:  617
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2595
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:42 2026
+========================================
+ 1. IteracionCPU:         540
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      631
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1188
+ 9. PromedioDesperdicio:  30
+10. PromedioCiclosRest.:  46011
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       631
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      749632
+16. SumaDesperdicioTotal: 19512
+17. SumaCiclosRestantes:  29033408
+18. CantProcesosActivos:  631
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2727
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:42 2026
+========================================
+ 1. IteracionCPU:         880
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      631
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1199
+ 9. PromedioDesperdicio:  31
+10. PromedioCiclosRest.:  46010
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       631
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      757086
+16. SumaDesperdicioTotal: 19787
+17. SumaCiclosRestantes:  29032603
+18. CantProcesosActivos:  631
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2736
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:42 2026
+========================================
+ 1. IteracionCPU:         560
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      645
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1234
+ 9. PromedioDesperdicio:  33
+10. PromedioCiclosRest.:  46061
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       645
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      796284
+16. SumaDesperdicioTotal: 21574
+17. SumaCiclosRestantes:  29709666
+18. CantProcesosActivos:  645
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2837
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:43 2026
+========================================
+ 1. IteracionCPU:         900
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      646
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1245
+ 9. PromedioDesperdicio:  34
+10. PromedioCiclosRest.:  46050
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       646
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      804846
+16. SumaDesperdicioTotal: 22190
+17. SumaCiclosRestantes:  29748502
+18. CantProcesosActivos:  646
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2850
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:43 2026
+========================================
+ 1. IteracionCPU:         580
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      662
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1280
+ 9. PromedioDesperdicio:  36
+10. PromedioCiclosRest.:  45845
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       662
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      847786
+16. SumaDesperdicioTotal: 24182
+17. SumaCiclosRestantes:  30349518
+18. CantProcesosActivos:  662
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2962
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:43 2026
+========================================
+ 1. IteracionCPU:         920
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      663
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1293
+ 9. PromedioDesperdicio:  37
+10. PromedioCiclosRest.:  45864
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       663
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      857842
+16. SumaDesperdicioTotal: 24681
+17. SumaCiclosRestantes:  30408039
+18. CantProcesosActivos:  663
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     2976
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:44 2026
+========================================
+ 1. IteracionCPU:         600
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      677
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1331
+ 9. PromedioDesperdicio:  39
+10. PromedioCiclosRest.:  46013
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       677
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      901421
+16. SumaDesperdicioTotal: 26687
+17. SumaCiclosRestantes:  31151026
+18. CantProcesosActivos:  677
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3066
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:44 2026
+========================================
+ 1. IteracionCPU:         940
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      684
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1350
+ 9. PromedioDesperdicio:  39
+10. PromedioCiclosRest.:  46087
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       684
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      923542
+16. SumaDesperdicioTotal: 27264
+17. SumaCiclosRestantes:  31523814
+18. CantProcesosActivos:  684
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3120
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:45 2026
+========================================
+ 1. IteracionCPU:         620
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      687
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1389
+ 9. PromedioDesperdicio:  40
+10. PromedioCiclosRest.:  46133
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       687
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      954863
+16. SumaDesperdicioTotal: 28003
+17. SumaCiclosRestantes:  31693974
+18. CantProcesosActivos:  687
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3172
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:45 2026
+========================================
+ 1. IteracionCPU:         960
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      694
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1399
+ 9. PromedioDesperdicio:  41
+10. PromedioCiclosRest.:  46084
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       694
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      971251
+16. SumaDesperdicioTotal: 28796
+17. SumaCiclosRestantes:  31982825
+18. CantProcesosActivos:  694
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3227
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:46 2026
+========================================
+ 1. IteracionCPU:         640
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      698
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1438
+ 9. PromedioDesperdicio:  42
+10. PromedioCiclosRest.:  46176
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       698
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1004267
+16. SumaDesperdicioTotal: 29949
+17. SumaCiclosRestantes:  32231329
+18. CantProcesosActivos:  698
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3268
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:46 2026
+========================================
+ 1. IteracionCPU:         980
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      699
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1450
+ 9. PromedioDesperdicio:  43
+10. PromedioCiclosRest.:  46185
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       699
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1014148
+16. SumaDesperdicioTotal: 30287
+17. SumaCiclosRestantes:  32283325
+18. CantProcesosActivos:  699
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3275
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:47 2026
+========================================
+ 1. IteracionCPU:         660
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      709
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1495
+ 9. PromedioDesperdicio:  44
+10. PromedioCiclosRest.:  46173
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       709
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1060432
+16. SumaDesperdicioTotal: 31380
+17. SumaCiclosRestantes:  32737253
+18. CantProcesosActivos:  709
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3385
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:47 2026
+========================================
+ 1. IteracionCPU:         1000
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      712
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1509
+ 9. PromedioDesperdicio:  44
+10. PromedioCiclosRest.:  46168
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       712
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1074941
+16. SumaDesperdicioTotal: 31660
+17. SumaCiclosRestantes:  32871853
+18. CantProcesosActivos:  712
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3403
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:47 2026
+========================================
+ 1. IteracionCPU:         680
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      714
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1550
+ 9. PromedioDesperdicio:  45
+10. PromedioCiclosRest.:  46118
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       714
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1106708
+16. SumaDesperdicioTotal: 32614
+17. SumaCiclosRestantes:  32928548
+18. CantProcesosActivos:  714
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3456
+EX. SumaReemplazosNRU:    11
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:48 2026
+========================================
+ 1. IteracionCPU:         1020
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      718
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1565
+ 9. PromedioDesperdicio:  46
+10. PromedioCiclosRest.:  46020
+11. PromedioVecesEnCPU:   5
+12. TamColaEnCiclo:       718
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1123907
+16. SumaDesperdicioTotal: 33176
+17. SumaCiclosRestantes:  33042686
+18. CantProcesosActivos:  718
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3492
+EX. SumaReemplazosNRU:    11
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:48 2026
+========================================
+ 1. IteracionCPU:         700
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      728
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1600
+ 9. PromedioDesperdicio:  46
+10. PromedioCiclosRest.:  45983
+11. PromedioVecesEnCPU:   6
+12. TamColaEnCiclo:       728
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1165411
+16. SumaDesperdicioTotal: 34187
+17. SumaCiclosRestantes:  33475712
+18. CantProcesosActivos:  728
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3569
+EX. SumaReemplazosNRU:    16
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:48 2026
+========================================
+ 1. IteracionCPU:         1040
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      729
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1611
+ 9. PromedioDesperdicio:  47
+10. PromedioCiclosRest.:  45959
+11. PromedioVecesEnCPU:   6
+12. TamColaEnCiclo:       729
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1175131
+16. SumaDesperdicioTotal: 34495
+17. SumaCiclosRestantes:  33504536
+18. CantProcesosActivos:  729
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3578
+EX. SumaReemplazosNRU:    16
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:49 2026
+========================================
+ 1. IteracionCPU:         720
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      741
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       0
+ 8. PromedioEspera:       1647
+ 9. PromedioDesperdicio:  49
+10. PromedioCiclosRest.:  45826
+11. PromedioVecesEnCPU:   6
+12. TamColaEnCiclo:       741
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1220818
+16. SumaDesperdicioTotal: 36365
+17. SumaCiclosRestantes:  33957373
+18. CantProcesosActivos:  741
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3689
+EX. SumaReemplazosNRU:    16
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:49 2026
+========================================
+ 1. IteracionCPU:         1060
+ 2. Algoritmo:            RR
+ 3. Quantum:              60
+ 4. ProcesosEnCiclo:      750
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       1655
+ 9. PromedioDesperdicio:  49
+10. PromedioCiclosRest.:  45846
+11. PromedioVecesEnCPU:   6
+12. TamColaEnCiclo:       750
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      1241420
+16. SumaDesperdicioTotal: 37106
+17. SumaCiclosRestantes:  34384871
+18. CantProcesosActivos:  750
+19. AlgoritmoAnterior:    FCFS
+20. AlgoritmoActual:      RR
+EX. SumaFallosPagina:     3754
+EX. SumaReemplazosNRU:    16
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:52 2026
+========================================
+ 1. IteracionCPU:         20
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       18
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49215
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      2810
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7382360
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     20
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:53 2026
+========================================
+ 1. IteracionCPU:         40
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      150
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       34
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49209
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       150
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      5220
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7381495
+18. CantProcesosActivos:  150
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     40
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:54 2026
+========================================
+ 1. IteracionCPU:         60
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      151
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       48
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49346
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       151
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      7280
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7451393
+18. CantProcesosActivos:  151
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     61
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:55 2026
+========================================
+ 1. IteracionCPU:         80
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      151
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       59
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49341
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       151
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      8970
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7450614
+18. CantProcesosActivos:  151
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     81
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:56 2026
+========================================
+ 1. IteracionCPU:         100
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      152
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       67
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49535
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       152
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      10316
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7529362
+18. CantProcesosActivos:  152
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     102
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:57 2026
+========================================
+ 1. IteracionCPU:         120
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      154
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       74
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49652
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       154
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      11430
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7646475
+18. CantProcesosActivos:  154
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     124
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:57 2026
+========================================
+ 1. IteracionCPU:         140
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      155
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       79
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49690
+11. PromedioVecesEnCPU:   0
+12. TamColaEnCiclo:       155
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      12306
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  7702029
+18. CantProcesosActivos:  155
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     145
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:58 2026
+========================================
+ 1. IteracionCPU:         160
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      163
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       82
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49736
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       163
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      13439
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8107067
+18. CantProcesosActivos:  163
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     175
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 12:59:59 2026
+========================================
+ 1. IteracionCPU:         180
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      166
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       87
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49581
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       166
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      14594
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8230484
+18. CantProcesosActivos:  166
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     200
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:00 2026
+========================================
+ 1. IteracionCPU:         200
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      173
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       90
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  50429
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       173
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      15714
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8724335
+18. CantProcesosActivos:  173
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     235
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:01 2026
+========================================
+ 1. IteracionCPU:         220
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      176
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       95
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  50211
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       176
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      16784
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  8837275
+18. CantProcesosActivos:  176
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     259
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:02 2026
+========================================
+ 1. IteracionCPU:         240
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      192
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       100
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  51084
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       192
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      19374
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  9808134
+18. CantProcesosActivos:  192
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     310
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:02 2026
+========================================
+ 1. IteracionCPU:         260
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      204
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       111
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  51870
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       204
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      22784
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  10581661
+18. CantProcesosActivos:  204
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     357
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:03 2026
+========================================
+ 1. IteracionCPU:         280
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      218
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       125
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  50726
+11. PromedioVecesEnCPU:   1
+12. TamColaEnCiclo:       218
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      27399
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11058321
+18. CantProcesosActivos:  218
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     407
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:04 2026
+========================================
+ 1. IteracionCPU:         300
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      233
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       145
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49206
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       233
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      33797
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11465056
+18. CantProcesosActivos:  233
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     457
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:05 2026
+========================================
+ 1. IteracionCPU:         320
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      239
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       165
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49106
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       239
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      39594
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  11736543
+18. CantProcesosActivos:  239
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     500
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:06 2026
+========================================
+ 1. IteracionCPU:         340
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      260
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       179
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  49139
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       260
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      46585
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  12776256
+18. CantProcesosActivos:  260
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     574
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:07 2026
+========================================
+ 1. IteracionCPU:         360
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      275
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       197
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48465
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       275
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      54403
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  13328132
+18. CantProcesosActivos:  275
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     649
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:07 2026
+========================================
+ 1. IteracionCPU:         380
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      299
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       214
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48375
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       299
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      63990
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  14464166
+18. CantProcesosActivos:  299
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     738
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:08 2026
+========================================
+ 1. IteracionCPU:         400
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      313
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       237
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48546
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       313
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      74437
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  15195023
+18. CantProcesosActivos:  313
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     802
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:09 2026
+========================================
+ 1. IteracionCPU:         420
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      340
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       257
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48500
+11. PromedioVecesEnCPU:   2
+12. TamColaEnCiclo:       340
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      87517
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  16490026
+18. CantProcesosActivos:  340
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     926
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:10 2026
+========================================
+ 1. IteracionCPU:         440
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      352
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       281
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48372
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       352
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      99121
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  17027001
+18. CantProcesosActivos:  352
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     996
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:11 2026
+========================================
+ 1. IteracionCPU:         460
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      373
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       304
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48247
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       373
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      113696
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  17996150
+18. CantProcesosActivos:  373
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     1109
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:12 2026
+========================================
+ 1. IteracionCPU:         480
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      390
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       329
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48058
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       390
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      128359
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  18742785
+18. CantProcesosActivos:  390
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     1206
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:12 2026
+========================================
+ 1. IteracionCPU:         500
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      406
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       359
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48304
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       406
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      145983
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  19611638
+18. CantProcesosActivos:  406
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     1290
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:13 2026
+========================================
+ 1. IteracionCPU:         520
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      432
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       385
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48686
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       432
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      166593
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  21032383
+18. CantProcesosActivos:  432
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     1394
+EX. SumaReemplazosNRU:    0
+
+========================================
+ VARIABLES GLOBALES – Sun May 24 13:00:14 2026
+========================================
+ 1. IteracionCPU:         540
+ 2. Algoritmo:            FCFS
+ 3. Quantum:              10
+ 4. ProcesosEnCiclo:      460
+ 5. NuevasSolicitudes:    100
+ 6. ProcesosTerminados:   0
+ 7. ProcesosNuevos:       100
+ 8. PromedioEspera:       412
+ 9. PromedioDesperdicio:  0
+10. PromedioCiclosRest.:  48922
+11. PromedioVecesEnCPU:   3
+12. TamColaEnCiclo:       460
+13. TamNuevasSolicitudes: 100
+14. TamColaTerminados:    0
+15. SumaEsperaTotal:      189759
+16. SumaDesperdicioTotal: 0
+17. SumaCiclosRestantes:  22504274
+18. CantProcesosActivos:  460
+19. AlgoritmoAnterior:    RR
+20. AlgoritmoActual:      FCFS
+EX. SumaFallosPagina:     1512
+EX. SumaReemplazosNRU:    0
