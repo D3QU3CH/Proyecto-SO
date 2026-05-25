@@ -1,103 +1,94 @@
+#include <time.h>
 #include "modelo.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATOS GLOBALES
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Globales ──────────────────────────────────────────────────────────────────
+TablaProcesos tablaSistema;
+LibroPalabras libroPalabras;
+MemoriaBuddy  memoriaBuddy;
 
-// Frutas: recursos compartidos usados en la seccion critica (RR)
-char memoria[TAM_MEM][20] = {
-    "Manzana",   "Pera",      "Mango",     "Sandia",    "Pina",
-    "Uva",       "Fresa",     "Banano",    "Naranja",   "Limon",
-    "Papaya",    "Melon",     "Guanabana", "Mammon",    "Cas",
-    "Nance",     "Maranon",   "Jobo",      "Guayaba",   "Carambola"
-};
-
-int recursoOcupado[TAM_MEM];
-
-// Tabla global: fuente de verdad de todos los BCPs.
-// NINGUN proceso sale de aqui durante la simulacion.
-Proceso tablaProcesos[TOTAL_PROCESOS];
+static int tiemposUsados[TIEMPO_LLEGADA_MAX + 1];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LISTAS FIJAS
-//
-// listaProcesosEnEjecucion : 150 punteros a BCPs que arrancan en el ciclo.
-//                            El proceso NUNCA se elimina de aqui.
-//                            Su campo `estado` cambia segun el ciclo.
-//
-// listaNuevasSolicitudes   : 100 punteros a BCPs que esperan su tiempoLlegada.
-//                            Cuando el reloj >= tiempoLlegada se encolan en
-//                            colaListos y se marcan como ingresados.
-//                            Tampoco se eliminan de esta lista.
+// UTILIDADES INTERNAS
 // ─────────────────────────────────────────────────────────────────────────────
 
-Proceso *listaProcesosEnEjecucion[EN_SISTEMA];
-Proceso *listaNuevasSolicitudes[EN_ESPERA];
+static int tiempoLlegadaUnico(void)
+{
+    int t;
+    do { t = rand() % (TIEMPO_LLEGADA_MAX + 1); } while (tiemposUsados[t]);
+    tiemposUsados[t] = 1;
+    return t;
+}
 
-// Marca si el proceso de nuevasSolicitudes ya fue ingresado a colaListos
-static int yaIngresado[EN_ESPERA];
-
-// Registro de tiempos de llegada unicos (0-799)
-static int tiemposUsados[800];
+static int potencia2Suficiente(int kb)
+{
+    int p = BUDDY_BASE_KB;
+    while (p < kb) p <<= 1;
+    return p;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BCP – inicializarProceso
+// BCP
 // ─────────────────────────────────────────────────────────────────────────────
 
 void inicializarProceso(Proceso *p, int index)
 {
     memset(p, 0, sizeof(Proceso));
 
-    // ID en orden alfabetico: A-0, B-1, ... Z-25, A-26, B-27 ...
-    snprintf(p->id,     sizeof(p->id),     "%c-%d", 'A' + (index % 26), index);
+    char letra = 'A' + (index % 26);
+    snprintf(p->id,     sizeof(p->id),     "%c-%d", letra, index);
     snprintf(p->nombre, sizeof(p->nombre), "Proceso_%d", index);
 
-    p->tiempoLlegada   = 0;           // se asigna despues con generarTiempoUnico
-    p->ciclosTotales   = rand() % 85001; // 0 a 85000 segun enunciado
+    p->tiempoLlegada   = tiempoLlegadaUnico();
+    p->ciclosTotales   = rand() % (CICLOS_MAX - CICLOS_MIN + 1) + CICLOS_MIN;
     p->ciclosRestantes = p->ciclosTotales;
-
-    p->rafagaActual    = 0;
-    p->tiempoEjecucion = 0;
-    p->tiempoEspera    = 0;
-    p->tiempoRespuesta = 0;
-    p->tiempoRetorno   = 0;
-
-    p->estado          = 0;           // empieza LISTO
-
-    p->vecesEnCPU      = 0;
-    p->iteraciones     = 0;
-    p->restanteQuantum = 0;
-    p->cambiosContexto = 0;
-    p->esApropiativo   = 0;
-    p->tipoProceso     = 0;
-
-    p->aprovechamiento = 0;
-    p->desperdicio     = 0;
-
+    p->estado          = 0;
     p->dispositivoES   = -1;
-    p->tiempoES        = 0;
-    p->bloqueado       = 0;
-
     p->variable1       = -1;
     p->variable2       = -1;
-    p->enSeccionCritica= 0;
+    p->tipoProceso     = rand() % 2;
+    p->memoriaUsadaKB  = rand() % 5 + 2;   // 2-6 KB -> buddy asigna 4 u 8 KB
 
-    p->usoMemoria      = rand() % 100;
-    p->listaOrigen     = -1;          // se asigna en cargarListas()
+    int m = MARCOS_MIN + (rand() % ((MARCOS_MAX - MARCOS_MIN) / 2 + 1)) * 2;
+    inicializarNRU(p, m);
+    generarCrecimientoMem(p);
+}
 
-    p->socioIndex             = -1;
-    p->socioTerminado         = 0;
-    p->reporteSocioGenerado   = 0;
-
-    inicializarNRU(p);
-    p->fallosPagina  = 0;
-    p->reemplazosNRU = 0;
+void liberarProceso(Proceso *p)
+{
+    free(p->marcos);      p->marcos     = NULL;
+    free(p->paginasSwap); p->paginasSwap = NULL;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COLA ENLAZADA
-// Recuerda: los nodos son temporales. Los BCPs viven en tablaProcesos[].
-// Desencolar borra el nodo pero el BCP sigue intacto en su lista.
+// LISTA DOBLE
+// ─────────────────────────────────────────────────────────────────────────────
+
+void inicializarLista(Lista *l)
+{
+    l->cabeza  = NULL;
+    l->cola    = NULL;
+    l->tamanio = 0;
+}
+
+void insertarEnLista(Lista *l, Proceso *p)
+{
+    Nodo *n    = malloc(sizeof(Nodo));
+    n->proceso  = p;
+    n->siguiente = NULL;
+    n->anterior  = l->cola;
+
+    if (l->cola) l->cola->siguiente = n;
+    else         l->cabeza = n;
+
+    l->cola = n;
+    l->tamanio++;
+}
+
+int estaVaciaLista(Lista *l) { return l->cabeza == NULL; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COLA FIFO
 // ─────────────────────────────────────────────────────────────────────────────
 
 void inicializarCola(Cola *c)
@@ -109,86 +100,44 @@ void inicializarCola(Cola *c)
 
 void encolar(Cola *c, Proceso *p)
 {
-    Nodo *nuevo    = (Nodo *)malloc(sizeof(Nodo));
-    nuevo->proceso  = p;
-    nuevo->siguiente = NULL;
+    NodoCola *n = malloc(sizeof(NodoCola));
+    n->proceso   = p;
+    n->siguiente = NULL;
 
-    if (c->final == NULL)
-        c->frente = c->final = nuevo;
-    else
-    {
-        c->final->siguiente = nuevo;
-        c->final = nuevo;
-    }
+    if (!c->final) c->frente = c->final = n;
+    else { c->final->siguiente = n; c->final = n; }
+    c->tamanio++;
+}
+
+void encolarAlFrente(Cola *c, Proceso *p)
+{
+    NodoCola *n = malloc(sizeof(NodoCola));
+    n->proceso   = p;
+    n->siguiente = c->frente;
+    c->frente    = n;
+    if (!c->final) c->final = n;
     c->tamanio++;
 }
 
 Proceso *desencolar(Cola *c)
 {
-    // Solo elimina el NODO de la cola.
-    // El Proceso* que contenia sigue vivo en tablaProcesos[].
-    if (estaVacia(c))
-        return NULL;
-
-    Nodo    *temp = c->frente;
-    Proceso *p    = temp->proceso;
-
-    c->frente = c->frente->siguiente;
-    if (c->frente == NULL)
-        c->final = NULL;
-
-    free(temp);
+    if (!c->frente) return NULL;
+    NodoCola *tmp = c->frente;
+    Proceso  *p   = tmp->proceso;
+    c->frente = tmp->siguiente;
+    if (!c->frente) c->final = NULL;
+    free(tmp);
     c->tamanio--;
     return p;
 }
 
-int estaVacia(Cola *c)
-{
-    return c->frente == NULL;
-}
-
-// Insercion ordenada por tiempoLlegada ascendente (para FCFS)
-void insertarOrdenado(Cola *c, Proceso *p)
-{
-    Nodo *nuevo      = (Nodo *)malloc(sizeof(Nodo));
-    nuevo->proceso   = p;
-    nuevo->siguiente = NULL;
-
-    if (c->frente == NULL ||
-        p->tiempoLlegada < c->frente->proceso->tiempoLlegada)
-    {
-        nuevo->siguiente = c->frente;
-        c->frente = nuevo;
-        if (c->final == NULL)
-            c->final = nuevo;
-        c->tamanio++;
-        return;
-    }
-
-    Nodo *actual = c->frente;
-    while (actual->siguiente != NULL &&
-           actual->siguiente->proceso->tiempoLlegada <= p->tiempoLlegada)
-        actual = actual->siguiente;
-
-    nuevo->siguiente   = actual->siguiente;
-    actual->siguiente  = nuevo;
-    if (nuevo->siguiente == NULL)
-        c->final = nuevo;
-    c->tamanio++;
-}
-
-void liberarCola(Cola *c)
-{
-    // Solo libera los nodos, NO los BCPs (esos viven en tablaProcesos[])
-    while (!estaVacia(c))
-        desencolar(c);
-}
+int estaVaciaCola(Cola *c) { return c->frente == NULL; }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SISTEMA E/S
 // ─────────────────────────────────────────────────────────────────────────────
 
-void inicializarES(SistemaES *es)
+void inicializarSistemaES(SistemaES *es)
 {
     inicializarCola(&es->disco);
     inicializarCola(&es->pantalla);
@@ -198,345 +147,395 @@ void inicializarES(SistemaES *es)
 
 int contarES(SistemaES *es)
 {
-    return es->disco.tamanio    +
-           es->pantalla.tamanio +
-           es->teclado.tamanio  +
-           es->impresora.tamanio;
+    return es->disco.tamanio + es->pantalla.tamanio +
+           es->teclado.tamanio + es->impresora.tamanio;
+}
+
+void asignarES(Proceso *p, SistemaES *es)
+{
+    int tipo      = rand() % 4;
+    int base      = rand() % 100 + 1;
+    int mults[4]  = { MULT_DISCO, MULT_PANTALLA, MULT_TECLADO, MULT_IMPRESORA };
+
+    p->tiempoES    = base * mults[tipo];
+    p->dispositivoES = tipo;
+    p->bloqueado   = 1;
+    p->estado      = 2;
+
+    switch (tipo) {
+        case 0: encolar(&es->disco,     p); break;
+        case 1: encolar(&es->pantalla,  p); break;
+        case 2: encolar(&es->teclado,   p); break;
+        case 3: encolar(&es->impresora, p); break;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MEMORIA (frutas / recursos compartidos)
+// TABLA DE PROCESOS
 // ─────────────────────────────────────────────────────────────────────────────
 
-void inicializarMemoria(void)
+void inicializarTablaSistema(void)
 {
-    for (int i = 0; i < TAM_MEM; i++)
-        recursoOcupado[i] = 0;
+    memset(&tablaSistema, 0, sizeof(TablaProcesos));
+    memset(tiemposUsados, 0, sizeof(tiemposUsados));
+
+    tablaSistema.totalProcesos      = TOTAL_PROCESOS;
+    tablaSistema.procesosEnCiclo    = EN_EJECUCION;
+    tablaSistema.procesosEnSolicitud = EN_SOLICITUDES;
+
+    for (int i = 0; i < TOTAL_PROCESOS; i++)
+        inicializarProceso(&tablaSistema.tablaBCPs[i], i);
 }
 
-int usarRecurso(int index)
-{
-    if (index < 0 || index >= TAM_MEM) return 0;
-    if (recursoOcupado[index] == 1)    return 0;
-    recursoOcupado[index] = 1;
-    return 1;
-}
-
-void liberarRecurso(int index)
-{
-    if (index >= 0 && index < TAM_MEM)
-        recursoOcupado[index] = 0;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INICIALIZACION DEL SISTEMA
-// ─────────────────────────────────────────────────────────────────────────────
-
-static int generarTiempoUnico(void)
-{
-    int t;
-    do { t = rand() % 800; } while (tiemposUsados[t] == 1);
-    tiemposUsados[t] = 1;
-    return t;
-}
-
-// Ordena tablaProcesos[] por tiempoLlegada ascendente (burbuja simple)
 static void ordenarPorLlegada(void)
 {
     for (int i = 0; i < TOTAL_PROCESOS - 1; i++)
         for (int j = i + 1; j < TOTAL_PROCESOS; j++)
-            if (tablaProcesos[i].tiempoLlegada > tablaProcesos[j].tiempoLlegada)
-            {
-                Proceso tmp       = tablaProcesos[i];
-                tablaProcesos[i]  = tablaProcesos[j];
-                tablaProcesos[j]  = tmp;
+            if (tablaSistema.tablaBCPs[i].tiempoLlegada >
+                tablaSistema.tablaBCPs[j].tiempoLlegada) {
+                Proceso tmp = tablaSistema.tablaBCPs[i];
+                tablaSistema.tablaBCPs[i] = tablaSistema.tablaBCPs[j];
+                tablaSistema.tablaBCPs[j] = tmp;
             }
 }
 
-void inicializarSistema(void)
+void poblarListas(Lista *enEjecucion, Lista *solicitudes)
 {
-    memset(tiemposUsados, 0, sizeof(tiemposUsados));
-    memset(yaIngresado,   0, sizeof(yaIngresado));
-
-    // Crear los 250 BCPs con ID, ciclosTotales y tiempoLlegada unico
-    for (int i = 0; i < TOTAL_PROCESOS; i++)
-    {
-        inicializarProceso(&tablaProcesos[i], i);
-        tablaProcesos[i].tiempoLlegada = generarTiempoUnico();
-    }
-
-    // Ordenar por tiempoLlegada para que los primeros 150 sean los que
-    // llegan antes (arrancan en el ciclo) y los 100 restantes esperen
     ordenarPorLlegada();
 
-    // Asignar socios despues de tener todos los BCPs listos
-    asignarSocios();
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CARGA DE LISTAS Y COLA INICIAL
-//
-// Llena las dos listas fijas con punteros a tablaProcesos[].
-// Los primeros EN_SISTEMA procesos (los que llegan antes) van a
-// listaProcesosEnEjecucion y se encolan en colaListos con estado=0.
-// Los EN_ESPERA restantes van a listaNuevasSolicitudes con estado=0
-// pero NO se encolan todavia; esperan a que el reloj los llame.
-// ─────────────────────────────────────────────────────────────────────────────
-
-void cargarListas(Cola *colaListos)
-{
-    // Lista 1: procesos que arrancan en el ciclo
-    for (int i = 0; i < EN_SISTEMA; i++)
-    {
-        tablaProcesos[i].listaOrigen = 0;   // listaProcesosEnEjecucion
-        tablaProcesos[i].estado      = 0;   // LISTO
-        listaProcesosEnEjecucion[i]  = &tablaProcesos[i];
-
-        // Se encolan en colaListos para que el planificador los atienda
-        encolar(colaListos, &tablaProcesos[i]);
-
-        printf("  [LISTA-EJE] %s | Llegada: %d | Ciclos: %d\n",
-               tablaProcesos[i].id,
-               tablaProcesos[i].tiempoLlegada,
-               tablaProcesos[i].ciclosTotales);
+    for (int i = 0; i < EN_EJECUCION; i++) {
+        Proceso *p = &tablaSistema.tablaBCPs[i];
+        p->estado = 0;
+        insertarEnLista(enEjecucion, p);
+        int idx = asignarMemoriaBuddy(p, p->memoriaUsadaKB);
+        if (idx < 0)
+            printf("  [BUDDY] Sin espacio para %s (%d KB)\n", p->id, p->memoriaUsadaKB);
     }
 
-    // Lista 2: procesos que esperan su tiempoLlegada
-    for (int i = 0; i < EN_ESPERA; i++)
-    {
-        int idx = EN_SISTEMA + i;
-        tablaProcesos[idx].listaOrigen = 1; // listaNuevasSolicitudes
-        tablaProcesos[idx].estado      = 0; // LISTO (esperando reloj)
-        listaNuevasSolicitudes[i]      = &tablaProcesos[idx];
-        yaIngresado[i]                 = 0; // todavia no entro a colaListos
-
-        printf("  [LISTA-NUE] %s | Llegada: %d | Ciclos: %d\n",
-               tablaProcesos[idx].id,
-               tablaProcesos[idx].tiempoLlegada,
-               tablaProcesos[idx].ciclosTotales);
-    }
-
-    printf("\n  [OK] Lista procesosEnEjecucion: %d procesos cargados\n",
-           EN_SISTEMA);
-    printf("  [OK] Lista nuevasSolicitudes:   %d procesos cargados\n\n",
-           EN_ESPERA);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INGRESO DINAMICO DE NUEVAS SOLICITUDES
-//
-// Se llama en cada ciclo del planificador.
-// Recorre listaNuevasSolicitudes[] y encola en colaListos a los procesos
-// cuyo tiempoLlegada ya fue alcanzado por el reloj.
-// El proceso NO sale de listaNuevasSolicitudes; solo se encola en colaListos
-// y se marca como yaIngresado para no encolarlo dos veces.
-// ─────────────────────────────────────────────────────────────────────────────
-
-void ingresarNuevosSegunReloj(Cola *colaListos, int reloj)
-{
-    for (int i = 0; i < EN_ESPERA; i++)
-    {
-        if (yaIngresado[i])
-            continue;
-
-        Proceso *p = listaNuevasSolicitudes[i];
-
-        if (p->tiempoLlegada <= reloj)
-        {
-            p->estado    = 0;   // LISTO
-            p->bloqueado = 0;
-
-            // Insertar ordenado por tiempoLlegada para respetar FCFS
-            insertarOrdenado(colaListos, p);
-            yaIngresado[i] = 1;
-
-            printf("  [INGRESO] %s llega al ciclo (reloj=%d, llegada=%d)\n",
-                   p->id, reloj, p->tiempoLlegada);
-        }
+    for (int i = EN_EJECUCION; i < TOTAL_PROCESOS; i++) {
+        tablaSistema.tablaBCPs[i].estado = 0;
+        insertarEnLista(solicitudes, &tablaSistema.tablaBCPs[i]);
     }
 }
 
+void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
+                                  Cola *colaListos, SistemaES *es, int reloj)
+{
+    int sumEspera = 0, sumCiclos = 0, cant = 0;
+    int terminados = 0, ejecutando = 0, bloq = 0, enES = 0;
+
+    for (Nodo *n = enEjecucion->cabeza; n; n = n->siguiente) {
+        Proceso *p = n->proceso;
+        sumEspera += p->tiempoEspera;
+        sumCiclos += p->ciclosRestantes;
+        cant++;
+        if (p->estado == 3) terminados++;
+        if (p->estado == 1) ejecutando++;
+        if (p->estado == 4) bloq++;
+        if (p->estado == 2) enES++;
+    }
+
+    tablaSistema.procesosTerminados    = terminados;
+    tablaSistema.procesosEjecutando    = ejecutando;
+    tablaSistema.procesosBloqueados    = bloq;
+    tablaSistema.procesosEnES          = enES;
+    tablaSistema.procesosEnColaListos  = colaListos->tamanio;
+    tablaSistema.procesosEnSolicitud   = solicitudes->tamanio;
+    tablaSistema.cicloActual           = reloj;
+    tablaSistema.sumaEspera            = sumEspera;
+    tablaSistema.sumaCiclosRestantes   = sumCiclos;
+    tablaSistema.promedioEspera        = cant ? sumEspera / cant : 0;
+    tablaSistema.promedioCiclos        = cant ? sumCiclos / cant : 0;
+    tablaSistema.memoriaLibreKB        = memoriaBuddy.memoriaLibreKB;
+    tablaSistema.desperdicioTotal      = memoriaBuddy.desperdicioInternoTotal;
+    (void)es;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// UTILIDADES DE CONTEO SOBRE LAS LISTAS
+// LIBRO DE PALABRAS
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Cuantos procesos en listaProcesosEnEjecucion aun no terminaron
-int contarActivosEnEjecucion(void)
+int cargarLibro(const char *ruta)
 {
-    int cnt = 0;
-    for (int i = 0; i < EN_SISTEMA; i++)
-        if (listaProcesosEnEjecucion[i]->estado != 3)
-            cnt++;
+    memset(&libroPalabras, 0, sizeof(LibroPalabras));
+
+    FILE *f = fopen(ruta, "r");
+    if (!f) {
+        fprintf(stderr, "  [WARN] No se encontro '%s'. Usando palabras generadas.\n", ruta);
+        for (int i = 0; i < MAX_PALABRAS; i++)
+            snprintf(libroPalabras.palabras[i], MAX_LEN_PALABRA, "pal%d", i);
+        libroPalabras.totalPalabras = MAX_PALABRAS;
+        return 0;
+    }
+
+    char buf[MAX_LEN_PALABRA];
+    int  cnt = 0;
+    while (cnt < MAX_PALABRAS && fscanf(f, "%63s", buf) == 1)
+        strncpy(libroPalabras.palabras[cnt++], buf, MAX_LEN_PALABRA - 1);
+
+    libroPalabras.totalPalabras = cnt;
+    fclose(f);
+    printf("  [LIBRO] %d palabras cargadas\n", cnt);
     return cnt;
 }
 
-// Cuantos procesos en listaNuevasSolicitudes aun no ingresaron al ciclo
-int contarPendientesNuevas(void)
+void obtenerPalabras(int inicio, int cantidad,
+                     char destino[][MAX_LEN_PALABRA], int *obtenidas)
 {
-    int cnt = 0;
-    for (int i = 0; i < EN_ESPERA; i++)
-        if (!yaIngresado[i])
-            cnt++;
-    return cnt;
+    *obtenidas = 0;
+    for (int i = 0; i < cantidad && (inicio + i) < libroPalabras.totalPalabras; i++) {
+        strncpy(destino[i], libroPalabras.palabras[inicio + i], MAX_LEN_PALABRA - 1);
+        (*obtenidas)++;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SOCIOS
+// BUDDY SYSTEM
 // ─────────────────────────────────────────────────────────────────────────────
 
-void asignarSocios(void)
+void inicializarBuddy(void)
 {
-    int indices[TOTAL_PROCESOS];
-    for (int i = 0; i < TOTAL_PROCESOS; i++)
-        indices[i] = i;
+    memset(&memoriaBuddy, 0, sizeof(MemoriaBuddy));
+    pthread_mutex_init(&memoriaBuddy.mutex, NULL);
 
-    // Fisher-Yates shuffle
-    for (int i = TOTAL_PROCESOS - 1; i > 0; i--)
-    {
-        int j   = rand() % (i + 1);
-        int tmp = indices[i];
-        indices[i] = indices[j];
-        indices[j] = tmp;
-    }
+    memoriaBuddy.bloques[0].tamanioKB    = MEMORIA_TOTAL_KB;
+    memoriaBuddy.bloques[0].baseDir      = 0;
+    memoriaBuddy.bloques[0].libre        = 1;
+    memoriaBuddy.bloques[0].indexProceso = -1;
+    memoriaBuddy.bloques[0].socio        = NULL;
+    memoriaBuddy.numBloques              = 1;
+    memoriaBuddy.memoriaLibreKB          = MEMORIA_TOTAL_KB;
 
-    // Emparejar de 2 en 2
-    for (int i = 0; i + 1 < TOTAL_PROCESOS; i += 2)
-    {
-        int a = indices[i];
-        int b = indices[i + 1];
-        tablaProcesos[a].socioIndex = b;
-        tablaProcesos[b].socioIndex = a;
-    }
-
-    printf("  [SOCIOS] %d pares asignados\n", TOTAL_PROCESOS / 2);
+    printf("  [BUDDY] %d KB totales\n", MEMORIA_TOTAL_KB);
 }
 
-void notificarTerminacion(Proceso *p, pthread_mutex_t *mtx)
+static int dividirHasta(int idx, int targetKB)
 {
-    if (p->socioIndex < 0 || p->socioIndex >= TOTAL_PROCESOS)
-        return;
+    while (memoriaBuddy.bloques[idx].tamanioKB > targetKB) {
+        int mitad = memoriaBuddy.bloques[idx].tamanioKB / 2;
+        int nuevo = memoriaBuddy.numBloques;
 
-    Proceso *socio = &tablaProcesos[p->socioIndex];
+        memoriaBuddy.bloques[idx].tamanioKB = mitad;
 
-    pthread_mutex_lock(mtx);
+        memoriaBuddy.bloques[nuevo].tamanioKB    = mitad;
+        memoriaBuddy.bloques[nuevo].baseDir      = memoriaBuddy.bloques[idx].baseDir + mitad;
+        memoriaBuddy.bloques[nuevo].libre        = 1;
+        memoriaBuddy.bloques[nuevo].indexProceso = -1;
 
-    if (socio->estado == 3 && !p->reporteSocioGenerado)
-    {
-        p->reporteSocioGenerado    = 1;
-        socio->reporteSocioGenerado = 1;
+        memoriaBuddy.bloques[idx].socio  = &memoriaBuddy.bloques[nuevo];
+        memoriaBuddy.bloques[nuevo].socio = &memoriaBuddy.bloques[idx];
 
-        FILE *f = fopen("socios.log", "a");
-        if (f)
-        {
-            fprintf(f, "\n=== PAR DE SOCIOS COMPLETADO ===\n");
-            fprintf(f, "  Proceso A : %-8s | Lista: %s | Retorno: %d | VecesEnCPU: %d\n",
-                    p->id,
-                    p->listaOrigen == 0 ? "EnEjecucion" : "NuevasSolicitudes",
-                    p->tiempoRetorno, p->vecesEnCPU);
-            fprintf(f, "  Proceso B : %-8s | Lista: %s | Retorno: %d | VecesEnCPU: %d\n",
-                    socio->id,
-                    socio->listaOrigen == 0 ? "EnEjecucion" : "NuevasSolicitudes",
-                    socio->tiempoRetorno, socio->vecesEnCPU);
-            fprintf(f, "  Retorno combinado: %d\n",
-                    p->tiempoRetorno + socio->tiempoRetorno);
-            fclose(f);
-        }
-
-        printf("  [SOCIOS] Par %s <-> %s completado. Retorno combinado: %d\n",
-               p->id, socio->id,
-               p->tiempoRetorno + socio->tiempoRetorno);
+        memoriaBuddy.numBloques++;
     }
-    else
-    {
-        socio->socioTerminado = 1;
-        printf("  [SOCIOS] %s termino. Esperando socio %s...\n",
-               p->id, socio->id);
-    }
-
-    pthread_mutex_unlock(mtx);
+    return idx;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// NRU (Not Recently Used)
-// ─────────────────────────────────────────────────────────────────────────────
-
-void inicializarNRU(Proceso *p)
+int asignarMemoriaBuddy(Proceso *p, int memoriaKB)
 {
-    for (int i = 0; i < NRU_NUM_MARCOS; i++)
-    {
-        p->marcosNRU[i].numeroPagina = -1;
-        p->marcosNRU[i].bitR         = 0;
-        p->marcosNRU[i].bitM         = 0;
-        p->marcosNRU[i].valido       = 0;
+    pthread_mutex_lock(&memoriaBuddy.mutex);
+
+    int target = potencia2Suficiente(memoriaKB);
+    if (target > MEMORIA_TOTAL_KB) {
+        pthread_mutex_unlock(&memoriaBuddy.mutex);
+        return -1;
     }
-}
 
-static int claseNRU(MarcoNRU *m)
-{
-    // Clase 0: R=0,M=0  Clase 1: R=0,M=1
-    // Clase 2: R=1,M=0  Clase 3: R=1,M=1
-    return (m->bitR << 1) | m->bitM;
-}
-
-static int elegirVictimaNRU(Proceso *p)
-{
-    int mejor    = -1;
-    int mejorCl  = 4;
-
-    for (int i = 0; i < NRU_NUM_MARCOS; i++)
-    {
-        if (!p->marcosNRU[i].valido)
-            return i;   // marco libre, usarlo directamente
-
-        int cl = claseNRU(&p->marcosNRU[i]);
-        if (cl < mejorCl)
-        {
-            mejorCl = cl;
-            mejor   = i;
+    int mejor = -1;
+    for (int i = 0; i < memoriaBuddy.numBloques; i++) {
+        if (memoriaBuddy.bloques[i].libre &&
+            memoriaBuddy.bloques[i].tamanioKB >= target) {
+            if (mejor == -1 ||
+                memoriaBuddy.bloques[i].tamanioKB < memoriaBuddy.bloques[mejor].tamanioKB)
+                mejor = i;
         }
     }
-    return mejor;
+
+    if (mejor == -1) {
+        pthread_mutex_unlock(&memoriaBuddy.mutex);
+        return -1;
+    }
+
+    int idx = dividirHasta(mejor, target);
+
+    memoriaBuddy.bloques[idx].libre        = 0;
+    memoriaBuddy.bloques[idx].indexProceso = (int)(p - tablaSistema.tablaBCPs);
+    memoriaBuddy.memoriaLibreKB           -= target;
+    memoriaBuddy.memoriaUsadaKB           += target;
+    memoriaBuddy.desperdicioInternoTotal  += target - memoriaKB;
+
+    p->bloqueMemoriaKB    = target;        // bloque buddy asignado (potencia 2)
+    p->memoriaUsadaKB     = memoriaKB;     // uso real del proceso
+    p->desperdicioInterno = target - memoriaKB;
+
+    pthread_mutex_unlock(&memoriaBuddy.mutex);
+    return idx;
 }
 
-void accederPaginaNRU(Proceso *p)
+void liberarMemoriaBuddy(Proceso *p)
 {
-    int pagVirtual = rand() % NRU_NUM_PAGINAS;
+    pthread_mutex_lock(&memoriaBuddy.mutex);
 
-    // Buscar si la pagina ya esta en algun marco (hit)
-    for (int i = 0; i < NRU_NUM_MARCOS; i++)
-    {
-        if (p->marcosNRU[i].valido &&
-            p->marcosNRU[i].numeroPagina == pagVirtual)
-        {
-            p->marcosNRU[i].bitR = 1;
-            if (rand() % 3 == 0)        // 33% probabilidad de escritura
-                p->marcosNRU[i].bitM = 1;
+    int idx = -1;
+    for (int i = 0; i < memoriaBuddy.numBloques; i++) {
+        if (!memoriaBuddy.bloques[i].libre &&
+            memoriaBuddy.bloques[i].indexProceso == (int)(p - tablaSistema.tablaBCPs)) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) { pthread_mutex_unlock(&memoriaBuddy.mutex); return; }
+
+    memoriaBuddy.bloques[idx].libre        = 1;
+    memoriaBuddy.bloques[idx].indexProceso = -1;
+    memoriaBuddy.memoriaLibreKB           += memoriaBuddy.bloques[idx].tamanioKB;
+    memoriaBuddy.memoriaUsadaKB           -= memoriaBuddy.bloques[idx].tamanioKB;
+    memoriaBuddy.desperdicioInternoTotal  -= p->desperdicioInterno;
+
+    // Fusion con socio
+    BloqueBS *actual = &memoriaBuddy.bloques[idx];
+    while (actual->socio && actual->socio->libre &&
+           actual->socio->tamanioKB == actual->tamanioKB) {
+        BloqueBS *socio = actual->socio;
+        if (actual->baseDir > socio->baseDir) {
+            socio->tamanioKB *= 2;
+            socio->socio      = actual->socio->socio;
+            actual->tamanioKB = 0;
+            actual = socio;
+        } else {
+            actual->tamanioKB *= 2;
+            socio->tamanioKB   = 0;
+            actual->socio      = socio->socio;
+        }
+    }
+
+    p->bloqueMemoriaKB    = 0;
+    p->desperdicioInterno = 0;
+    pthread_mutex_unlock(&memoriaBuddy.mutex);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NRU
+// ─────────────────────────────────────────────────────────────────────────────
+
+void inicializarNRU(Proceso *p, int numMarcos)
+{
+    p->numMarcos  = numMarcos;
+    p->numPaginas = numMarcos * 4;
+
+    p->marcos = calloc(numMarcos, sizeof(MarcoNRU));
+    for (int i = 0; i < numMarcos; i++) {
+        p->marcos[i].numeroPagina = -1;
+        p->marcos[i].valido       = 0;
+    }
+
+    p->paginasSwap = calloc(p->numPaginas, sizeof(int));
+    p->numSwap     = 0;
+}
+
+void redimensionarNRU(Proceso *p, int nuevosMarcos)
+{
+    if (nuevosMarcos < MARCOS_MIN) nuevosMarcos = MARCOS_MIN;
+    if (nuevosMarcos > MARCOS_MAX) nuevosMarcos = MARCOS_MAX;
+    if (nuevosMarcos % 2 != 0)     nuevosMarcos++;
+
+    MarcoNRU *nuevos = calloc(nuevosMarcos, sizeof(MarcoNRU));
+
+    int copiar = (nuevosMarcos < p->numMarcos) ? nuevosMarcos : p->numMarcos;
+    for (int i = 0; i < copiar; i++) nuevos[i] = p->marcos[i];
+    for (int i = copiar; i < nuevosMarcos; i++) {
+        nuevos[i].numeroPagina = -1;
+        nuevos[i].valido       = 0;
+    }
+
+    free(p->marcos);
+    p->marcos    = nuevos;
+    p->numMarcos = nuevosMarcos;
+}
+
+static int elegirVictima(Proceso *p)
+{
+    int mejorIdx = -1, mejorClase = 4;
+    for (int i = 0; i < p->numMarcos; i++) {
+        if (!p->marcos[i].valido) return i;
+        int cl = (p->marcos[i].bitR << 1) | p->marcos[i].bitM;
+        if (cl < mejorClase) { mejorClase = cl; mejorIdx = i; }
+    }
+    return mejorIdx;
+}
+
+void accederPaginaNRU(Proceso *p, int pagVirtual)
+{
+    for (int i = 0; i < p->numMarcos; i++) {
+        if (p->marcos[i].valido && p->marcos[i].numeroPagina == pagVirtual) {
+            p->marcos[i].bitR = 1;
+            if (rand() % 3 == 0) p->marcos[i].bitM = 1;
             return;
         }
     }
 
-    // Fallo de pagina: elegir victima y reemplazar
     p->fallosPagina++;
-    int victima = elegirVictimaNRU(p);
+    int v = elegirVictima(p);
 
-    if (p->marcosNRU[victima].valido)
-    {
+    if (p->marcos[v].valido) {
         p->reemplazosNRU++;
-        printf("  [NRU ] %s | Reemplaza pag %d (clase %d) -> pag %d\n",
-               p->id,
-               p->marcosNRU[victima].numeroPagina,
-               claseNRU(&p->marcosNRU[victima]),
-               pagVirtual);
+        if (p->numSwap < p->numPaginas)
+            p->paginasSwap[p->numSwap++] = p->marcos[v].numeroPagina;
     }
 
-    p->marcosNRU[victima].numeroPagina = pagVirtual;
-    p->marcosNRU[victima].bitR         = 1;
-    p->marcosNRU[victima].bitM         = (rand() % 3 == 0) ? 1 : 0;
-    p->marcosNRU[victima].valido       = 1;
+    int ini = pagVirtual * PALABRAS_POR_PAG, ob = 0;
+    obtenerPalabras(ini, PALABRAS_POR_PAG, p->marcos[v].palabras, &ob);
+
+    p->marcos[v].numeroPagina = pagVirtual;
+    p->marcos[v].bitR         = 1;
+    p->marcos[v].bitM         = (rand() % 3 == 0) ? 1 : 0;
+    p->marcos[v].valido       = 1;
 }
 
 void limpiarBitsR(Proceso *p)
 {
-    for (int i = 0; i < NRU_NUM_MARCOS; i++)
-        p->marcosNRU[i].bitR = 0;
+    for (int i = 0; i < p->numMarcos; i++)
+        p->marcos[i].bitR = 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CRECIMIENTO DE MEMORIA
+// ─────────────────────────────────────────────────────────────────────────────
+
+void generarCrecimientoMem(Proceso *p)
+{
+    memset(p->crecimientoMem, 0, sizeof(p->crecimientoMem));
+    int usadas[20] = {0}, colocados = 0;
+    while (colocados < 5) {
+        int pos = rand() % 20;
+        if (!usadas[pos]) {
+            p->crecimientoMem[pos] = rand() % 50 + 1;
+            usadas[pos] = 1;
+            colocados++;
+        }
+    }
+    p->indiceCrecimiento = 0;
+}
+
+int siguienteCrecimiento(Proceso *p)
+{
+    int v = p->crecimientoMem[p->indiceCrecimiento];
+    p->indiceCrecimiento = (p->indiceCrecimiento + 1) % 20;
+    return v;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REDIMENSION MASIVA
+// ─────────────────────────────────────────────────────────────────────────────
+
+void redimensionarMitadProcesos(Lista *enEjecucion)
+{
+    int i = 0;
+    for (Nodo *n = enEjecucion->cabeza; n; n = n->siguiente, i++) {
+        Proceso *p = n->proceso;
+        if (p->estado == 3) continue;
+        int nuevos = (i % 2 == 0) ? p->numMarcos / 2 : p->numMarcos * 2;
+        redimensionarNRU(p, nuevos);
+    }
+    printf("  [MEM] Redimension aplicada\n");
 }
