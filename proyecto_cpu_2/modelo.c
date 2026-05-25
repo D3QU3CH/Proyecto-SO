@@ -7,11 +7,12 @@
 TablaProcesos tablaSistema;
 MemoriaBuddy  memoriaBuddy;
 
+BancoPalabras   bancoPalabras;
+MemoriaPrincipal memoriaPrincipal;
+
 static int tiemposUsados[801];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// UTILIDADES INTERNAS
-// ─────────────────────────────────────────────────────────────────────────────
+// UTILIDADES INTERNAS────────────────────────────────────────────────
 
 static int tiempoLlegadaUnico(void)
 {
@@ -89,29 +90,57 @@ void inicializarTablaSistema(void)
     printf("  [INIT] 250 procesos creados\n");
 }
 
-static void ordenarPorLlegada(void)
+/* Mezcla un arreglo de indices — usado solo en poblarListas */
+static void mezclarIndices(int *indices, int n)
 {
-    for (int i = 0; i < 249; i++)
-        for (int j = i + 1; j < 250; j++)
-            if (tablaSistema.tablaBCPs[i].tiempoLlegada >
-                tablaSistema.tablaBCPs[j].tiempoLlegada) {
-                Proceso tmp               = tablaSistema.tablaBCPs[i];
-                tablaSistema.tablaBCPs[i] = tablaSistema.tablaBCPs[j];
-                tablaSistema.tablaBCPs[j] = tmp;
+    for (int i = n - 1; i > 0; i--) {
+        int j        = rand() % (i + 1);
+        int tmp      = indices[i];
+        indices[i]   = indices[j];
+        indices[j]   = tmp;
+    }
+}
+
+/* Ordena SOLO los procesos de solicitudes por tiempoLlegada */
+static void ordenarSolicitudesPorLlegada(Lista *solicitudes)
+{
+    if (!solicitudes->cabeza) return;
+
+    // Burbuja sobre los nodos de la lista
+    int cambiado = 1;
+    while (cambiado) {
+        cambiado = 0;
+        for (Nodo *n = solicitudes->cabeza; n && n->siguiente; n = n->siguiente) {
+            Proceso *a = n->proceso;
+            Proceso *b = n->siguiente->proceso;
+            if (a->tiempoLlegada > b->tiempoLlegada) {
+                n->proceso          = b;
+                n->siguiente->proceso = a;
+                cambiado = 1;
             }
+        }
+    }
 }
 
 void poblarListas(Lista *enEjecucion, Lista *solicitudes)
 {
-    ordenarPorLlegada();
+    // 1. Crear arreglo con los 250 indices y mezclarlo aleatoriamente
+    int indices[250];
+    for (int i = 0; i < 250; i++) indices[i] = i;
+    mezclarIndices(indices, 250);
 
+    // 2. Primeros 150 indices al azar -> enEjecucion
     for (int i = 0; i < 150; i++)
-        insertarEnLista(enEjecucion, &tablaSistema.tablaBCPs[i]);
+        insertarEnLista(enEjecucion, &tablaSistema.tablaBCPs[indices[i]]);
 
+    // 3. Ultimos 100 indices al azar -> solicitudes (sin orden aun)
     for (int i = 150; i < 250; i++)
-        insertarEnLista(solicitudes, &tablaSistema.tablaBCPs[i]);
+        insertarEnLista(solicitudes, &tablaSistema.tablaBCPs[indices[i]]);
 
-    printf("  [LISTAS] enEjecucion=%d  solicitudes=%d\n",
+    // 4. Ordenar solicitudes por tiempoLlegada para el ingreso dinamico
+    ordenarSolicitudesPorLlegada(solicitudes);
+
+    printf("  [LISTAS] enEjecucion=%d (aleatorio)  solicitudes=%d (ord. llegada)\n",
            enEjecucion->tamanio, solicitudes->tamanio);
 }
 
@@ -255,6 +284,35 @@ void asignarES(Proceso *p, SistemaES *es)
     }
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INGRESO DINAMICO DESDE SOLICITUDES
+// ─────────────────────────────────────────────────────────────────────────────
+
+void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj)
+{
+    for (Nodo *n = solicitudes->cabeza; n; n = n->siguiente) {
+        Proceso *p = n->proceso;
+        if (!p->yaIngresado && p->tiempoLlegada <= reloj) {
+            encolar(colaListos, p);
+            p->yaIngresado = 1;
+            tablaSistema.procesosIngresadosDinam++;
+            printf("  [NEW] %s ingresa (llegada=%d)\n", p->id, p->tiempoLlegada);
+        }
+    }
+}
+
+void actualizarEspera(Cola *colaListos)
+{
+    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
+        if (n->proceso->estado == 0)
+            n->proceso->tiempoEspera++;
+}
+
+
+
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BUDDY SYSTEM
 // ─────────────────────────────────────────────────────────────────────────────
@@ -373,26 +431,212 @@ void liberarMemoriaBuddy(Proceso *p)
     pthread_mutex_unlock(&memoriaBuddy.mutex);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ─────────────────────────────────────────────────────────────────────────────
-// INGRESO DINAMICO DESDE SOLICITUDES
+// BANCO DE PALABRAS
 // ─────────────────────────────────────────────────────────────────────────────
 
-void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj)
+void cargarPalabras(const char *rutaArchivo)
 {
-    for (Nodo *n = solicitudes->cabeza; n; n = n->siguiente) {
-        Proceso *p = n->proceso;
-        if (!p->yaIngresado && p->tiempoLlegada <= reloj) {
-            encolar(colaListos, p);
-            p->yaIngresado = 1;
-            tablaSistema.procesosIngresadosDinam++;
-            printf("  [NEW] %s ingresa (llegada=%d)\n", p->id, p->tiempoLlegada);
+    memset(&bancoPalabras, 0, sizeof(BancoPalabras));
+
+    FILE *f = fopen(rutaArchivo, "r");
+    if (!f) {
+        // Si no existe el archivo genera palabras de relleno para no crashear
+        printf("  [MEM] AVISO: no se encontro %s, usando palabras generadas\n",
+               rutaArchivo);
+        for (int i = 0; i < MAX_PALABRAS; i++)
+            snprintf(bancoPalabras.palabras[i], MAX_LEN_PALABRA, "palabra%d", i);
+        bancoPalabras.totalPalabras = MAX_PALABRAS;
+        bancoPalabras.cursor        = 0;
+        return;
+    }
+
+    char buf[MAX_LEN_PALABRA];
+    while (bancoPalabras.totalPalabras < MAX_PALABRAS &&
+           fscanf(f, "%63s", buf) == 1) {
+        strncpy(bancoPalabras.palabras[bancoPalabras.totalPalabras],
+                buf, MAX_LEN_PALABRA - 1);
+        bancoPalabras.totalPalabras++;
+    }
+    fclose(f);
+    bancoPalabras.cursor = 0;
+
+    printf("  [MEM] %d palabras cargadas desde %s\n",
+           bancoPalabras.totalPalabras, rutaArchivo);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MEMORIA PRINCIPAL
+// ─────────────────────────────────────────────────────────────────────────────
+
+void inicializarMemoriaPrincipal(void)
+{
+    memset(&memoriaPrincipal, 0, sizeof(MemoriaPrincipal));
+    for (int i = 0; i < 150; i++) {
+        memoriaPrincipal.slots[i].ocupado        = 0;
+        memoriaPrincipal.slots[i].indiceProceso  = -1;
+        memoriaPrincipal.slots[i].numPalabras    = 0;
+        memoriaPrincipal.slots[i].capacidadPalabras = 0;
+    }
+    printf("  [MEM] MemoriaPrincipal inicializada (150 slots)\n");
+}
+
+// Busca un slot libre y lo asigna al proceso.
+// Trae palabras iniciales proporcionales a su memoriaUsadaKB.
+// Retorna el indice del slot o -1 si no hay espacio.
+int asignarSlotMemoria(Proceso *p)
+{
+    // Buscar slot libre
+    int slot = -1;
+    for (int i = 0; i < 150; i++) {
+        if (!memoriaPrincipal.slots[i].ocupado) { slot = i; break; }
+    }
+    if (slot == -1) {
+        printf("  [MEM] Sin slots libres para %s\n", p->id);
+        return -1;
+    }
+
+    SlotMemoria *s       = &memoriaPrincipal.slots[slot];
+    s->ocupado           = 1;
+    s->indiceProceso     = (int)(p - tablaSistema.tablaBCPs);
+    s->numPalabras       = 0;
+    // capacidad: cada KB alcanza para ~10 palabras (estimado)
+    s->capacidadPalabras = p->bloqueMemoriaKB * 10;
+    if (s->capacidadPalabras > MAX_PALABRAS_POR_SLOT)
+        s->capacidadPalabras = MAX_PALABRAS_POR_SLOT;
+
+    // Traer palabras iniciales segun memoriaUsadaKB
+    int palabrasIniciales = p->memoriaUsadaKB * 10;
+    agregarPalabrasAlSlot(p, palabrasIniciales);
+
+    memoriaPrincipal.numSlotsOcupados++;
+    memoriaPrincipal.procesosEnEjecucion++;
+
+    printf("  [MEM] Slot %d asignado a %s (%d palabras iniciales)\n",
+           slot, p->id, palabrasIniciales);
+    return slot;
+}
+
+// Agrega 'cantidad' palabras del banco al slot del proceso.
+// Si el banco se acaba vuelve al inicio (circular).
+void agregarPalabrasAlSlot(Proceso *p, int cantidad)
+{
+    // Encontrar el slot del proceso
+    SlotMemoria *s = NULL;
+    for (int i = 0; i < 150; i++) {
+        if (memoriaPrincipal.slots[i].ocupado &&
+            memoriaPrincipal.slots[i].indiceProceso ==
+                (int)(p - tablaSistema.tablaBCPs)) {
+            s = &memoriaPrincipal.slots[i];
+            break;
+        }
+    }
+    if (!s) return;
+
+    for (int i = 0; i < cantidad; i++) {
+        if (s->numPalabras >= s->capacidadPalabras) break; // slot lleno
+        if (bancoPalabras.totalPalabras == 0)       break; // banco vacio
+
+        // Copia la palabra del banco al slot
+        strncpy(s->palabras[s->numPalabras],
+                bancoPalabras.palabras[bancoPalabras.cursor],
+                MAX_LEN_PALABRA - 1);
+        s->numPalabras++;
+
+        // Cursor circular sobre el banco
+        bancoPalabras.cursor =
+            (bancoPalabras.cursor + 1) % bancoPalabras.totalPalabras;
+    }
+}
+
+// Llamar cada vez que el proceso entra a CPU.
+// Consulta crecimientoMem[indiceCrecimiento], si es > 0 pide mas Buddy
+// y trae las palabras correspondientes.
+void crecerMemoriaProceso(Proceso *p)
+{
+    int extra = p->crecimientoMem[p->indiceCrecimiento % 20];
+    p->indiceCrecimiento++;
+
+    if (extra <= 0) return; // este turno no crece
+
+    // Pedir mas memoria al Buddy
+    int idx = asignarMemoriaBuddy(p, extra);
+    if (idx < 0) {
+        printf("  [MEM] %s quiso crecer %d KB pero Buddy sin espacio\n",
+               p->id, extra);
+        return;
+    }
+
+    // Traer palabras proporcionales al crecimiento
+    int palabrasExtra = extra * 10;
+    agregarPalabrasAlSlot(p, palabrasExtra);
+
+    printf("  [MEM] %s crece +%d KB → +%d palabras (slot ahora: %d palabras)\n",
+           p->id, extra, palabrasExtra,
+           memoriaPrincipal.slots[0].numPalabras); // solo referencial
+}
+
+// Libera el slot del proceso cuando termina.
+void liberarSlotMemoria(Proceso *p)
+{
+    for (int i = 0; i < 150; i++) {
+        SlotMemoria *s = &memoriaPrincipal.slots[i];
+        if (s->ocupado &&
+            s->indiceProceso == (int)(p - tablaSistema.tablaBCPs)) {
+
+            // Actualizar estadisticas antes de limpiar
+            memoriaPrincipal.tiempoTotalEjecucion += p->tiempoEjecucion;
+            memoriaPrincipal.procesosTerminados++;
+            memoriaPrincipal.procesosEnEjecucion--;
+            memoriaPrincipal.numSlotsOcupados--;
+
+            // Limpiar el slot
+            memset(s, 0, sizeof(SlotMemoria));
+            s->ocupado       = 0;
+            s->indiceProceso = -1;
+
+            printf("  [MEM] Slot liberado de %s\n", p->id);
+            return;
         }
     }
 }
 
-void actualizarEspera(Cola *colaListos)
+// Muestra estadisticas de rendimiento de la MemoriaPrincipal + Buddy
+void mostrarEstadisticasMemoria(void)
 {
-    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
-        if (n->proceso->estado == 0)
-            n->proceso->tiempoEspera++;
+    int term = memoriaPrincipal.procesosTerminados;
+
+    printf("\n  === ESTADISTICAS MEMORIA ===\n");
+    printf("  Desperdicio interno (Buddy)  : %d KB\n",
+           memoriaBuddy.desperdicioInternoTotal);
+    printf("  Memoria libre (Buddy)        : %d KB\n",
+           memoriaBuddy.memoriaLibreKB);
+    printf("  Memoria usada (Buddy)        : %d KB\n",
+           memoriaBuddy.memoriaUsadaKB);
+    printf("  Slots ocupados               : %d / 150\n",
+           memoriaPrincipal.numSlotsOcupados);
+    printf("  Procesos en ejecucion        : %d\n",
+           memoriaPrincipal.procesosEnEjecucion);
+    printf("  Procesos terminados          : %d\n", term);
+    printf("  Prom. tiempo ejec. proceso   : %d ciclos\n",
+           term ? memoriaPrincipal.tiempoTotalEjecucion / term : 0);
+    printf("  Palabras en banco            : %d\n",
+           bancoPalabras.totalPalabras);
 }

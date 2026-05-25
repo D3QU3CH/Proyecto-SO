@@ -51,6 +51,37 @@ typedef struct {
     int  indiceCrecimiento;
 } Proceso;
 
+typedef struct {
+    Proceso tablaBCPs[250];
+
+    int totalProcesos;           //  1
+    int procesosEnCiclo;         //  2
+    int procesosEnSolicitud;     //  3
+    int procesosEnColaListos;    //  4
+    int procesosEjecutando;      //  5
+    int procesosEnES;            //  6
+    int procesosTerminados;      //  7
+    int procesosBloqueados;      //  8
+    int algoritmoActual;         //  9
+    int quantumActual;           // 10
+    int cicloActual;             // 11
+    int totalCambiosContexto;    // 12
+    int totalFallosPagina;       // 13
+    int sumaEspera;              // 14
+    int sumaCiclosRestantes;     // 15
+    int promedioEspera;          // 16
+    int promedioCiclos;          // 17
+    int procesosIngresadosDinam; // 18
+    int memoriaLibreKB;          // 19
+    int desperdicioTotal;        // 20
+} TablaProcesos;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GLOBALES
+// ─────────────────────────────────────────────────────────────────────────────
+
+extern TablaProcesos tablaSistema;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LISTA DOBLEMENTE ENLAZADA
 // ─────────────────────────────────────────────────────────────────────────────
@@ -114,6 +145,8 @@ typedef struct {
     pthread_mutex_t mutex;
 } MemoriaBuddy;
 
+extern MemoriaBuddy  memoriaBuddy;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CONTEXTO DE HILOS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,42 +177,6 @@ typedef struct {
 } ArgHiloES;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TABLA DE PROCESOS — 20 variables globales del sistema
-// ─────────────────────────────────────────────────────────────────────────────
-
-typedef struct {
-    Proceso tablaBCPs[250];
-
-    int totalProcesos;           //  1
-    int procesosEnCiclo;         //  2
-    int procesosEnSolicitud;     //  3
-    int procesosEnColaListos;    //  4
-    int procesosEjecutando;      //  5
-    int procesosEnES;            //  6
-    int procesosTerminados;      //  7
-    int procesosBloqueados;      //  8
-    int algoritmoActual;         //  9
-    int quantumActual;           // 10
-    int cicloActual;             // 11
-    int totalCambiosContexto;    // 12
-    int totalFallosPagina;       // 13
-    int sumaEspera;              // 14
-    int sumaCiclosRestantes;     // 15
-    int promedioEspera;          // 16
-    int promedioCiclos;          // 17
-    int procesosIngresadosDinam; // 18
-    int memoriaLibreKB;          // 19
-    int desperdicioTotal;        // 20
-} TablaProcesos;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GLOBALES
-// ─────────────────────────────────────────────────────────────────────────────
-
-extern TablaProcesos tablaSistema;
-extern MemoriaBuddy  memoriaBuddy;
-
-// ─────────────────────────────────────────────────────────────────────────────
 // PROTOTIPOS — modelo.c
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -204,13 +201,73 @@ int      estaVaciaCola(Cola *c);
 void inicializarSistemaES(SistemaES *es);
 void asignarES(Proceso *p, SistemaES *es);
 
+// Ingreso dinamico y espera
+void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj);
+void actualizarEspera(Cola *colaListos);
+
 // Buddy
 void inicializarBuddy(void);
 int  asignarMemoriaBuddy(Proceso *p, int memoriaKB);
 void liberarMemoriaBuddy(Proceso *p);
 
-// Ingreso dinamico y espera
-void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj);
-void actualizarEspera(Cola *colaListos);
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BANCO DE PALABRAS — palabras cargadas desde libro1.txt
+// ─────────────────────────────────────────────────────────────────────────────
+
+#define MAX_PALABRAS      8000
+#define MAX_LEN_PALABRA     64
+
+typedef struct {
+    char  palabras[MAX_PALABRAS][MAX_LEN_PALABRA];
+    int   totalPalabras;   // cuantas se leyeron del archivo
+    int   cursor;          // siguiente palabra disponible para repartir
+} BancoPalabras;
+
+extern BancoPalabras bancoPalabras;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLOT DE MEMORIA PRINCIPAL — espacio de un proceso en RAM
+// ─────────────────────────────────────────────────────────────────────────────
+
+#define MAX_PALABRAS_POR_SLOT  512
+
+typedef struct {
+    int   ocupado;                              // 1=tiene proceso, 0=libre
+    int   indiceProceso;                        // indice en tablaBCPs
+    char  palabras[MAX_PALABRAS_POR_SLOT][MAX_LEN_PALABRA]; // palabras en RAM
+    int   numPalabras;                          // cuantas tiene ahora
+    int   capacidadPalabras;                    // cuantas caben segun Buddy
+} SlotMemoria;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MEMORIA PRINCIPAL — 150 slots, uno por proceso del ciclo
+// ─────────────────────────────────────────────────────────────────────────────
+
+typedef struct {
+    SlotMemoria slots[150];
+    int         numSlotsOcupados;
+
+    // Estadisticas
+    int         desperdicioInternoTotal;  // sum(bloqueKB - realKB) de todos
+    int         desperdicioExterno;       // memoria libre no contigua inutilizable
+    int         procesosEnEjecucion;      // slots ocupados activos
+    int         procesosTerminados;       // que ya liberaron su slot
+    int         tiempoTotalEjecucion;     // suma tiempoEjecucion de terminados
+} MemoriaPrincipal;
+
+extern MemoriaPrincipal memoriaPrincipal;
+
+// Banco de palabras
+void cargarPalabras(const char *rutaArchivo);
+
+// Memoria Principal
+void inicializarMemoriaPrincipal(void);
+int  asignarSlotMemoria(Proceso *p);
+void agregarPalabrasAlSlot(Proceso *p, int cantidad);
+void liberarSlotMemoria(Proceso *p);
+void crecerMemoriaProceso(Proceso *p);
+void mostrarEstadisticasMemoria(void);
 
 #endif
