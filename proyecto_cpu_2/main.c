@@ -12,23 +12,35 @@ int main(void)
     srand((unsigned)time(NULL));
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 1. INICIALIZACION DE ESTRUCTURAS
+    // 1. INICIALIZACION
+    //
+    // Estructura de datos segun el enunciado:
+    //
+    //   tablaProcesos[250]              <- arreglo fijo, nunca pierde procesos
+    //   listaProcesosEnEjecucion[150]  <- punteros a los primeros 150 BCPs
+    //   listaNuevasSolicitudes[100]    <- punteros a los 100 BCPs restantes
+    //   colaListos                     <- la UNICA cola dinamica del planificador
+    //
+    // Los procesos entran y salen de colaListos pero NUNCA de las listas fijas.
+    // Solo cambia su campo `estado` en el BCP.
     // ─────────────────────────────────────────────────────────────────────────
 
-    Cola procesosEnCiclo, nuevasSolicitudes;
-    inicializarCola(&procesosEnCiclo);
-    inicializarCola(&nuevasSolicitudes);
+    Cola colaListos;
+    inicializarCola(&colaListos);
     inicializarCola(&colaTerminados);
 
-    inicializarSistema();                    // crea BCPs + asigna socios
-    cargarProcesosEnCola(&procesosEnCiclo, &nuevasSolicitudes);
+    // Crear los 250 BCPs con IDs, tiempoLlegada y ciclosTotales
+    inicializarSistema();
+
+    // Llenar las dos listas fijas y encolar los 150 iniciales en colaListos
+    cargarListas(&colaListos);
 
     SistemaES es;
     inicializarES(&es);
     inicializarMemoria();
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 2. CONFIGURACION INICIAL (usuario elige algoritmo y quantum)
+    // 2. CONFIGURACION INICIAL
     // ─────────────────────────────────────────────────────────────────────────
 
     vistaMostrarBienvenida();
@@ -41,21 +53,21 @@ int main(void)
         algoritmo = 1;
 
     int quantum = 10;
-    if (algoritmo == 2) {
-        printf("  Ingrese el quantum: ");
+    if (algoritmo == 2)
+    {
+        printf("  Ingrese el quantum inicial: ");
         if (scanf("%d", &quantum) != 1 || quantum <= 0)
             quantum = 10;
     }
 
-    printf("\n  [OK] Algoritmo: %s",
-           algoritmo == 1 ? "FCFS" : "Round Robin");
+    printf("\n  [OK] Algoritmo: %s", algoritmo == 1 ? "FCFS" : "Round Robin");
     if (algoritmo == 2) printf(" | Quantum: %d", quantum);
     printf("\n\n");
 
     logEvento("Simulacion iniciada");
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 3. SEMAFOROS Y CONTEXTO COMPARTIDO
+    // 3. SEMAFOROS Y CONTEXTO COMPARTIDO ENTRE HILOS
     // ─────────────────────────────────────────────────────────────────────────
 
     int terminado = 0;
@@ -68,37 +80,41 @@ int main(void)
     sem_init(&semImpresora, 0, 0);
 
     ContextoHilos ctx;
-    ctx.procesosEnCiclo   = &procesosEnCiclo;
-    ctx.nuevasSolicitudes = &nuevasSolicitudes;
-    ctx.es                = &es;
-    ctx.algoritmo         = &algoritmo;
-    ctx.quantum           = &quantum;
-    ctx.ciclos            = &ciclos;
-    ctx.terminado         = &terminado;
-    ctx.semDisco          = &semDisco;
-    ctx.semPantalla       = &semPantalla;
-    ctx.semTeclado        = &semTeclado;
-    ctx.semImpresora      = &semImpresora;
+    ctx.colaListos   = &colaListos;
+    ctx.es           = &es;
+    ctx.algoritmo    = &algoritmo;
+    ctx.quantum      = &quantum;
+    ctx.ciclos       = &ciclos;
+    ctx.terminado    = &terminado;
+    ctx.semDisco     = &semDisco;
+    ctx.semPantalla  = &semPantalla;
+    ctx.semTeclado   = &semTeclado;
+    ctx.semImpresora = &semImpresora;
 
     pthread_mutex_init(&ctx.mutexPrincipal, NULL);
     pthread_mutex_init(&ctx.mutexSocios,    NULL);
 
-    // Argumentos para cada hilo de E/S
-    ArgHiloES argDisco     = { &es.disco,     &procesosEnCiclo,
+    // Argumentos para cada hilo de dispositivo E/S
+    // Cada hilo recibe su cola de dispositivo y la colaListos a la que devuelve
+    ArgHiloES argDisco     = { &es.disco,     &colaListos,
                                 &ctx.mutexPrincipal, &semDisco,
                                 &terminado, "Disco" };
-    ArgHiloES argPantalla  = { &es.pantalla,  &procesosEnCiclo,
+    ArgHiloES argPantalla  = { &es.pantalla,  &colaListos,
                                 &ctx.mutexPrincipal, &semPantalla,
                                 &terminado, "Pantalla" };
-    ArgHiloES argTeclado   = { &es.teclado,   &procesosEnCiclo,
+    ArgHiloES argTeclado   = { &es.teclado,   &colaListos,
                                 &ctx.mutexPrincipal, &semTeclado,
                                 &terminado, "Teclado" };
-    ArgHiloES argImpresora = { &es.impresora, &procesosEnCiclo,
+    ArgHiloES argImpresora = { &es.impresora, &colaListos,
                                 &ctx.mutexPrincipal, &semImpresora,
                                 &terminado, "Impresora" };
 
     // ─────────────────────────────────────────────────────────────────────────
     // 4. LANZAMIENTO DE HILOS
+    //
+    // Hilos de E/S: uno por dispositivo, atienden su cola en paralelo
+    // Hilo reloj:   limpia bits R cada 50ms y despierta los hilos E/S
+    // Hilo teclado: escucha entrada del usuario sin bloquear el ciclo
     // ─────────────────────────────────────────────────────────────────────────
 
     pthread_t thDisco, thPantalla, thTeclado, thImpresora;
@@ -112,51 +128,59 @@ int main(void)
     pthread_create(&thEntrada,   NULL, hiloTeclado,         &ctx);
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 5. CICLO PRINCIPAL (hilo main = CPU planificador)
+    // 5. CICLO PRINCIPAL (hilo main actua como el planificador de CPU)
+    //
+    // Condicion de fin: colaListos vacia Y sin procesos en ningun dispositivo E/S
+    // Y sin procesos pendientes en listaNuevasSolicitudes.
+    // Los procesos terminados (estado=3) siguen en sus listas pero no se encolan.
     // ─────────────────────────────────────────────────────────────────────────
 
-    while (1) {
-
+    while (1)
+    {
         pthread_mutex_lock(&ctx.mutexPrincipal);
 
-        // Condicion de fin: cola vacia y sin procesos en E/S
-        if (estaVacia(&procesosEnCiclo) && contarES(&es) == 0) {
+        // Verificar condicion de fin
+        int sinPendientes = (contarPendientesNuevas() == 0);
+        int sinListos     = estaVacia(&colaListos);
+        int sinES         = (contarES(&es) == 0);
+
+        if (sinListos && sinES && sinPendientes)
+        {
             pthread_mutex_unlock(&ctx.mutexPrincipal);
             break;
         }
 
         ciclos++;
 
-        // a) Ingreso dinamico de procesos segun reloj
-        ingresarProcesosNuevos(&procesosEnCiclo, ciclos);
+        // a) Ingresar procesos de listaNuevasSolicitudes cuyo tiempoLlegada llego
+        //    El proceso se encola en colaListos pero no sale de su lista
+        ingresarNuevosSegunReloj(&colaListos, ciclos);
 
-        // b) Ejecutar CPU (hilos de E/S trabajan en paralelo via semaforos)
+        // b) Ejecutar un ciclo del planificador
         if (algoritmo == 1)
-            ejecutarFCFS(&procesosEnCiclo, &es, &algoritmo, ciclos,
+            ejecutarFCFS(&colaListos, &es, &algoritmo, ciclos,
                          &ctx.mutexSocios);
         else
-            ejecutarRR(&procesosEnCiclo, &nuevasSolicitudes,
-                       &es, &algoritmo, &quantum, ciclos,
+            ejecutarRR(&colaListos, &es,
+                       &algoritmo, &quantum, ciclos,
                        &ctx.mutexSocios);
 
         // c) Checkpoint global cada 20 ciclos
-        if (ciclos % 20 == 0) {
+        if (ciclos % 20 == 0)
+        {
             int antes = algoritmo;
-            algoritmo = decidirCambio(&procesosEnCiclo, algoritmo);
+            algoritmo = decidirCambio(&colaListos, algoritmo);
             if (algoritmo != antes)
                 vistaMensajeCambioAutomatico(antes, algoritmo);
 
-            vistaMostrarBalanceColas(&procesosEnCiclo, &es);
-            guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
-            guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
-                                     algoritmo, quantum, ciclos,
-                                     TOTAL_PROCESOS - EN_SISTEMA);
+            vistaMostrarBalanceColas(&colaListos, &es);
+            guardarTablaProcesos();     // recorre las listas fijas completas
+            guardarVariablesGlobales(&colaListos, algoritmo, quantum, ciclos);
             logEvento("Checkpoint GLOBAL");
         }
 
         pthread_mutex_unlock(&ctx.mutexPrincipal);
-
-        usleep(1000);   // cede CPU para que los otros hilos avancen
+        usleep(1000);   // cede CPU al resto de hilos
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -164,8 +188,6 @@ int main(void)
     // ─────────────────────────────────────────────────────────────────────────
 
     terminado = 1;
-
-    // Despertar hilos bloqueados en semaforos para que terminen
     sem_post(&semDisco);
     sem_post(&semPantalla);
     sem_post(&semTeclado);
@@ -186,16 +208,17 @@ int main(void)
     sem_destroy(&semImpresora);
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 7. GUARDADO FINAL Y LIBERACION
+    // 7. GUARDADO FINAL
+    // Las listas fijas siguen intactas con todos los BCPs, incluso los terminados
     // ─────────────────────────────────────────────────────────────────────────
 
-    guardarTablaProcesos(&procesosEnCiclo, &nuevasSolicitudes);
-    guardarVariablesGlobales(&procesosEnCiclo, &nuevasSolicitudes,
-                              algoritmo, quantum, ciclos, 0);
+    guardarTablaProcesos();
+    guardarVariablesGlobales(&colaListos, algoritmo, quantum, ciclos);
     logEvento("Simulacion finalizada");
 
-    liberarCola(&procesosEnCiclo);
-    liberarCola(&nuevasSolicitudes);
+    // Solo liberar los nodos de las colas dinamicas.
+    // Los BCPs viven en tablaProcesos[] (stack), no hay malloc de BCPs.
+    liberarCola(&colaListos);
     liberarCola(&colaTerminados);
 
     vistaMostrarCierre(ciclos, totalTerminados);

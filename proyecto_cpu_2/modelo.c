@@ -4,23 +4,41 @@
 // DATOS GLOBALES
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Frutas (recursos compartidos de la seccion critica)
+// Frutas: recursos compartidos usados en la seccion critica (RR)
 char memoria[TAM_MEM][20] = {
-    "Manzana", "Pera", "Mango", "Sandia", "Pina",
-    "Uva", "Fresa", "Banano", "Naranja", "Limon",
-    "Papaya", "Melon", "Guanabana", "Mammon", "Cas",
-    "Nance", "Maranon", "Jobo", "Guayaba", "Carambola"};
+    "Manzana",   "Pera",      "Mango",     "Sandia",    "Pina",
+    "Uva",       "Fresa",     "Banano",    "Naranja",   "Limon",
+    "Papaya",    "Melon",     "Guanabana", "Mammon",    "Cas",
+    "Nance",     "Maranon",   "Jobo",      "Guayaba",   "Carambola"
+};
 
 int recursoOcupado[TAM_MEM];
 
-// Tabla global de BCPs
+// Tabla global: fuente de verdad de todos los BCPs.
+// NINGUN proceso sale de aqui durante la simulacion.
 Proceso tablaProcesos[TOTAL_PROCESOS];
 
-// Registro de tiempos unicos de llegada
-static int tiemposUsados[801];
+// ─────────────────────────────────────────────────────────────────────────────
+// LISTAS FIJAS
+//
+// listaProcesosEnEjecucion : 150 punteros a BCPs que arrancan en el ciclo.
+//                            El proceso NUNCA se elimina de aqui.
+//                            Su campo `estado` cambia segun el ciclo.
+//
+// listaNuevasSolicitudes   : 100 punteros a BCPs que esperan su tiempoLlegada.
+//                            Cuando el reloj >= tiempoLlegada se encolan en
+//                            colaListos y se marcan como ingresados.
+//                            Tampoco se eliminan de esta lista.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Siguiente proceso pendiente de ingresar al ciclo dinamicamente
-static int indiceSiguiente = EN_SISTEMA;
+Proceso *listaProcesosEnEjecucion[EN_SISTEMA];
+Proceso *listaNuevasSolicitudes[EN_ESPERA];
+
+// Marca si el proceso de nuevasSolicitudes ya fue ingresado a colaListos
+static int yaIngresado[EN_ESPERA];
+
+// Registro de tiempos de llegada unicos (0-799)
+static int tiemposUsados[800];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BCP – inicializarProceso
@@ -30,91 +48,92 @@ void inicializarProceso(Proceso *p, int index)
 {
     memset(p, 0, sizeof(Proceso));
 
-    snprintf(p->id, sizeof(p->id), "%c-%d", 'A' + (index % 26), index);
+    // ID en orden alfabetico: A-0, B-1, ... Z-25, A-26, B-27 ...
+    snprintf(p->id,     sizeof(p->id),     "%c-%d", 'A' + (index % 26), index);
     snprintf(p->nombre, sizeof(p->nombre), "Proceso_%d", index);
 
-    p->tiempoLlegada = 0;
-    p->ciclosTotales = rand() % 85001 + 5000;
+    p->tiempoLlegada   = 0;           // se asigna despues con generarTiempoUnico
+    p->ciclosTotales   = rand() % 85001; // 0 a 85000 segun enunciado
     p->ciclosRestantes = p->ciclosTotales;
-    p->rafagaActual = 0;
+
+    p->rafagaActual    = 0;
     p->tiempoEjecucion = 0;
-    p->tiempoEspera = 0;
+    p->tiempoEspera    = 0;
     p->tiempoRespuesta = 0;
-    p->tiempoRetorno = 0;
+    p->tiempoRetorno   = 0;
 
-    p->estado = 0;
+    p->estado          = 0;           // empieza LISTO
 
-    p->vecesEnCPU = 0;
-    p->iteraciones = 0;
+    p->vecesEnCPU      = 0;
+    p->iteraciones     = 0;
     p->restanteQuantum = 0;
     p->cambiosContexto = 0;
-    p->esApropiativo = 0;
-    p->tipoProceso = 0;
+    p->esApropiativo   = 0;
+    p->tipoProceso     = 0;
 
     p->aprovechamiento = 0;
-    p->desperdicio = 0;
+    p->desperdicio     = 0;
 
-    p->dispositivoES = -1;
-    p->tiempoES = 0;
-    p->bloqueado = 0;
+    p->dispositivoES   = -1;
+    p->tiempoES        = 0;
+    p->bloqueado       = 0;
 
-    p->variable1 = -1;
-    p->variable2 = -1;
-    p->enSeccionCritica = 0;
+    p->variable1       = -1;
+    p->variable2       = -1;
+    p->enSeccionCritica= 0;
 
-    p->usoMemoria = rand() % 100;
+    p->usoMemoria      = rand() % 100;
+    p->listaOrigen     = -1;          // se asigna en cargarListas()
 
-    // Socios
-    p->socioIndex = -1;
-    p->socioTerminado = 0;
-    p->reporteSocioGenerado = 0;
+    p->socioIndex             = -1;
+    p->socioTerminado         = 0;
+    p->reporteSocioGenerado   = 0;
 
-    // NRU
     inicializarNRU(p);
-    p->fallosPagina = 0;
+    p->fallosPagina  = 0;
     p->reemplazosNRU = 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COLA
+// COLA ENLAZADA
+// Recuerda: los nodos son temporales. Los BCPs viven en tablaProcesos[].
+// Desencolar borra el nodo pero el BCP sigue intacto en su lista.
 // ─────────────────────────────────────────────────────────────────────────────
 
 void inicializarCola(Cola *c)
 {
-    c->frente = NULL;
-    c->final = NULL;
+    c->frente  = NULL;
+    c->final   = NULL;
     c->tamanio = 0;
 }
 
 void encolar(Cola *c, Proceso *p)
 {
-    Nodo *nuevo = (Nodo *)malloc(sizeof(Nodo));
-    nuevo->proceso = p;
+    Nodo *nuevo    = (Nodo *)malloc(sizeof(Nodo));
+    nuevo->proceso  = p;
     nuevo->siguiente = NULL;
 
     if (c->final == NULL)
-    {
         c->frente = c->final = nuevo;
-    }
     else
     {
         c->final->siguiente = nuevo;
         c->final = nuevo;
     }
-
     c->tamanio++;
 }
 
 Proceso *desencolar(Cola *c)
 {
+    // Solo elimina el NODO de la cola.
+    // El Proceso* que contenia sigue vivo en tablaProcesos[].
     if (estaVacia(c))
         return NULL;
 
-    Nodo *temp = c->frente;
-    Proceso *p = temp->proceso;
+    Nodo    *temp = c->frente;
+    Proceso *p    = temp->proceso;
 
     c->frente = c->frente->siguiente;
-
     if (c->frente == NULL)
         c->final = NULL;
 
@@ -129,11 +148,10 @@ int estaVacia(Cola *c)
 }
 
 // Insercion ordenada por tiempoLlegada ascendente (para FCFS)
-
 void insertarOrdenado(Cola *c, Proceso *p)
 {
-    Nodo *nuevo = (Nodo *)malloc(sizeof(Nodo));
-    nuevo->proceso = p;
+    Nodo *nuevo      = (Nodo *)malloc(sizeof(Nodo));
+    nuevo->proceso   = p;
     nuevo->siguiente = NULL;
 
     if (c->frente == NULL ||
@@ -141,33 +159,27 @@ void insertarOrdenado(Cola *c, Proceso *p)
     {
         nuevo->siguiente = c->frente;
         c->frente = nuevo;
-
         if (c->final == NULL)
             c->final = nuevo;
-
         c->tamanio++;
         return;
     }
 
     Nodo *actual = c->frente;
-
     while (actual->siguiente != NULL &&
            actual->siguiente->proceso->tiempoLlegada <= p->tiempoLlegada)
-    {
         actual = actual->siguiente;
-    }
 
-    nuevo->siguiente = actual->siguiente;
-    actual->siguiente = nuevo;
-
+    nuevo->siguiente   = actual->siguiente;
+    actual->siguiente  = nuevo;
     if (nuevo->siguiente == NULL)
         c->final = nuevo;
-
     c->tamanio++;
 }
 
 void liberarCola(Cola *c)
 {
+    // Solo libera los nodos, NO los BCPs (esos viven en tablaProcesos[])
     while (!estaVacia(c))
         desencolar(c);
 }
@@ -186,9 +198,9 @@ void inicializarES(SistemaES *es)
 
 int contarES(SistemaES *es)
 {
-    return es->disco.tamanio +
+    return es->disco.tamanio    +
            es->pantalla.tamanio +
-           es->teclado.tamanio +
+           es->teclado.tamanio  +
            es->impresora.tamanio;
 }
 
@@ -204,11 +216,8 @@ void inicializarMemoria(void)
 
 int usarRecurso(int index)
 {
-    if (index < 0 || index >= TAM_MEM)
-        return 0;
-    if (recursoOcupado[index] == 1)
-        return 0;
-
+    if (index < 0 || index >= TAM_MEM) return 0;
+    if (recursoOcupado[index] == 1)    return 0;
     recursoOcupado[index] = 1;
     return 1;
 }
@@ -220,94 +229,171 @@ void liberarRecurso(int index)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TABLA GLOBAL DE PROCESOS
+// INICIALIZACION DEL SISTEMA
 // ─────────────────────────────────────────────────────────────────────────────
 
 static int generarTiempoUnico(void)
 {
     int t;
-    do
-    {
-        t = rand() % 800;
-    } while (tiemposUsados[t] == 1);
+    do { t = rand() % 800; } while (tiemposUsados[t] == 1);
     tiemposUsados[t] = 1;
     return t;
 }
 
-void inicializarSistema(void)
-{
-    memset(tiemposUsados, 0, sizeof(tiemposUsados));
-
-    for (int i = 0; i < TOTAL_PROCESOS; i++)
-    {
-        inicializarProceso(&tablaProcesos[i], i);
-        tablaProcesos[i].tiempoLlegada = generarTiempoUnico();
-    }
-
-    // Asignar socios despues de crear todos los BCPs
-    asignarSocios();
-}
-
-// Ordena la tabla por tiempoLlegada ascendente (burbuja)
-
+// Ordena tablaProcesos[] por tiempoLlegada ascendente (burbuja simple)
 static void ordenarPorLlegada(void)
 {
     for (int i = 0; i < TOTAL_PROCESOS - 1; i++)
         for (int j = i + 1; j < TOTAL_PROCESOS; j++)
             if (tablaProcesos[i].tiempoLlegada > tablaProcesos[j].tiempoLlegada)
             {
-                Proceso tmp = tablaProcesos[i];
-                tablaProcesos[i] = tablaProcesos[j];
-                tablaProcesos[j] = tmp;
+                Proceso tmp       = tablaProcesos[i];
+                tablaProcesos[i]  = tablaProcesos[j];
+                tablaProcesos[j]  = tmp;
             }
 }
 
-void cargarProcesosEnCola(Cola *procesosEnCiclo, Cola *nuevasSolicitudes)
+void inicializarSistema(void)
 {
+    memset(tiemposUsados, 0, sizeof(tiemposUsados));
+    memset(yaIngresado,   0, sizeof(yaIngresado));
+
+    // Crear los 250 BCPs con ID, ciclosTotales y tiempoLlegada unico
+    for (int i = 0; i < TOTAL_PROCESOS; i++)
+    {
+        inicializarProceso(&tablaProcesos[i], i);
+        tablaProcesos[i].tiempoLlegada = generarTiempoUnico();
+    }
+
+    // Ordenar por tiempoLlegada para que los primeros 150 sean los que
+    // llegan antes (arrancan en el ciclo) y los 100 restantes esperen
     ordenarPorLlegada();
 
-    for (int i = 0; i < EN_SISTEMA; i++)
-        encolar(procesosEnCiclo, &tablaProcesos[i]);
-
-    for (int i = EN_SISTEMA; i < TOTAL_PROCESOS; i++)
-        encolar(nuevasSolicitudes, &tablaProcesos[i]);
+    // Asignar socios despues de tener todos los BCPs listos
+    asignarSocios();
 }
 
-// Agrega procesos cuyo tiempoLlegada <= reloj actual
+// ─────────────────────────────────────────────────────────────────────────────
+// CARGA DE LISTAS Y COLA INICIAL
+//
+// Llena las dos listas fijas con punteros a tablaProcesos[].
+// Los primeros EN_SISTEMA procesos (los que llegan antes) van a
+// listaProcesosEnEjecucion y se encolan en colaListos con estado=0.
+// Los EN_ESPERA restantes van a listaNuevasSolicitudes con estado=0
+// pero NO se encolan todavia; esperan a que el reloj los llame.
+// ─────────────────────────────────────────────────────────────────────────────
 
-void ingresarProcesosNuevos(Cola *procesosEnCiclo, int reloj)
+void cargarListas(Cola *colaListos)
 {
-    while (indiceSiguiente < TOTAL_PROCESOS)
+    // Lista 1: procesos que arrancan en el ciclo
+    for (int i = 0; i < EN_SISTEMA; i++)
     {
-        Proceso *p = &tablaProcesos[indiceSiguiente];
+        tablaProcesos[i].listaOrigen = 0;   // listaProcesosEnEjecucion
+        tablaProcesos[i].estado      = 0;   // LISTO
+        listaProcesosEnEjecucion[i]  = &tablaProcesos[i];
+
+        // Se encolan en colaListos para que el planificador los atienda
+        encolar(colaListos, &tablaProcesos[i]);
+
+        printf("  [LISTA-EJE] %s | Llegada: %d | Ciclos: %d\n",
+               tablaProcesos[i].id,
+               tablaProcesos[i].tiempoLlegada,
+               tablaProcesos[i].ciclosTotales);
+    }
+
+    // Lista 2: procesos que esperan su tiempoLlegada
+    for (int i = 0; i < EN_ESPERA; i++)
+    {
+        int idx = EN_SISTEMA + i;
+        tablaProcesos[idx].listaOrigen = 1; // listaNuevasSolicitudes
+        tablaProcesos[idx].estado      = 0; // LISTO (esperando reloj)
+        listaNuevasSolicitudes[i]      = &tablaProcesos[idx];
+        yaIngresado[i]                 = 0; // todavia no entro a colaListos
+
+        printf("  [LISTA-NUE] %s | Llegada: %d | Ciclos: %d\n",
+               tablaProcesos[idx].id,
+               tablaProcesos[idx].tiempoLlegada,
+               tablaProcesos[idx].ciclosTotales);
+    }
+
+    printf("\n  [OK] Lista procesosEnEjecucion: %d procesos cargados\n",
+           EN_SISTEMA);
+    printf("  [OK] Lista nuevasSolicitudes:   %d procesos cargados\n\n",
+           EN_ESPERA);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INGRESO DINAMICO DE NUEVAS SOLICITUDES
+//
+// Se llama en cada ciclo del planificador.
+// Recorre listaNuevasSolicitudes[] y encola en colaListos a los procesos
+// cuyo tiempoLlegada ya fue alcanzado por el reloj.
+// El proceso NO sale de listaNuevasSolicitudes; solo se encola en colaListos
+// y se marca como yaIngresado para no encolarlo dos veces.
+// ─────────────────────────────────────────────────────────────────────────────
+
+void ingresarNuevosSegunReloj(Cola *colaListos, int reloj)
+{
+    for (int i = 0; i < EN_ESPERA; i++)
+    {
+        if (yaIngresado[i])
+            continue;
+
+        Proceso *p = listaNuevasSolicitudes[i];
+
         if (p->tiempoLlegada <= reloj)
         {
-            insertarOrdenado(procesosEnCiclo, p);
-            indiceSiguiente++;
-        }
-        else
-        {
-            break;
+            p->estado    = 0;   // LISTO
+            p->bloqueado = 0;
+
+            // Insertar ordenado por tiempoLlegada para respetar FCFS
+            insertarOrdenado(colaListos, p);
+            yaIngresado[i] = 1;
+
+            printf("  [INGRESO] %s llega al ciclo (reloj=%d, llegada=%d)\n",
+                   p->id, reloj, p->tiempoLlegada);
         }
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILIDADES DE CONTEO SOBRE LAS LISTAS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Cuantos procesos en listaProcesosEnEjecucion aun no terminaron
+int contarActivosEnEjecucion(void)
+{
+    int cnt = 0;
+    for (int i = 0; i < EN_SISTEMA; i++)
+        if (listaProcesosEnEjecucion[i]->estado != 3)
+            cnt++;
+    return cnt;
+}
+
+// Cuantos procesos en listaNuevasSolicitudes aun no ingresaron al ciclo
+int contarPendientesNuevas(void)
+{
+    int cnt = 0;
+    for (int i = 0; i < EN_ESPERA; i++)
+        if (!yaIngresado[i])
+            cnt++;
+    return cnt;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SOCIOS
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Asigna socios al azar en pares; un proceso sin pareja queda con socioIndex=-1
-
 void asignarSocios(void)
 {
-    // Shuffle de indices
     int indices[TOTAL_PROCESOS];
     for (int i = 0; i < TOTAL_PROCESOS; i++)
         indices[i] = i;
 
+    // Fisher-Yates shuffle
     for (int i = TOTAL_PROCESOS - 1; i > 0; i--)
     {
-        int j = rand() % (i + 1);
+        int j   = rand() % (i + 1);
         int tmp = indices[i];
         indices[i] = indices[j];
         indices[j] = tmp;
@@ -322,10 +408,8 @@ void asignarSocios(void)
         tablaProcesos[b].socioIndex = a;
     }
 
-    printf("  [SOCIOS] Socios asignados (%d pares)\n", TOTAL_PROCESOS / 2);
+    printf("  [SOCIOS] %d pares asignados\n", TOTAL_PROCESOS / 2);
 }
-
-// Notifica que p termino; si su socio tambien termino genera el reporte conjunto
 
 void notificarTerminacion(Proceso *p, pthread_mutex_t *mtx)
 {
@@ -338,18 +422,21 @@ void notificarTerminacion(Proceso *p, pthread_mutex_t *mtx)
 
     if (socio->estado == 3 && !p->reporteSocioGenerado)
     {
-        // Ambos terminaron -> reporte conjunto
-        p->reporteSocioGenerado = 1;
+        p->reporteSocioGenerado    = 1;
         socio->reporteSocioGenerado = 1;
 
         FILE *f = fopen("socios.log", "a");
         if (f)
         {
             fprintf(f, "\n=== PAR DE SOCIOS COMPLETADO ===\n");
-            fprintf(f, "  Proceso A : %-8s | Retorno: %d | VecesEnCPU: %d\n",
-                    p->id, p->tiempoRetorno, p->vecesEnCPU);
-            fprintf(f, "  Proceso B : %-8s | Retorno: %d | VecesEnCPU: %d\n",
-                    socio->id, socio->tiempoRetorno, socio->vecesEnCPU);
+            fprintf(f, "  Proceso A : %-8s | Lista: %s | Retorno: %d | VecesEnCPU: %d\n",
+                    p->id,
+                    p->listaOrigen == 0 ? "EnEjecucion" : "NuevasSolicitudes",
+                    p->tiempoRetorno, p->vecesEnCPU);
+            fprintf(f, "  Proceso B : %-8s | Lista: %s | Retorno: %d | VecesEnCPU: %d\n",
+                    socio->id,
+                    socio->listaOrigen == 0 ? "EnEjecucion" : "NuevasSolicitudes",
+                    socio->tiempoRetorno, socio->vecesEnCPU);
             fprintf(f, "  Retorno combinado: %d\n",
                     p->tiempoRetorno + socio->tiempoRetorno);
             fclose(f);
@@ -361,7 +448,6 @@ void notificarTerminacion(Proceso *p, pthread_mutex_t *mtx)
     }
     else
     {
-        // Solo este termino; marcar al socio para que sepa
         socio->socioTerminado = 1;
         printf("  [SOCIOS] %s termino. Esperando socio %s...\n",
                p->id, socio->id);
@@ -379,72 +465,64 @@ void inicializarNRU(Proceso *p)
     for (int i = 0; i < NRU_NUM_MARCOS; i++)
     {
         p->marcosNRU[i].numeroPagina = -1;
-        p->marcosNRU[i].bitR = 0;
-        p->marcosNRU[i].bitM = 0;
-        p->marcosNRU[i].valido = 0;
+        p->marcosNRU[i].bitR         = 0;
+        p->marcosNRU[i].bitM         = 0;
+        p->marcosNRU[i].valido       = 0;
     }
 }
 
-// Devuelve la clase NRU (0-3) de un marco segun bits R y M
-
 static int claseNRU(MarcoNRU *m)
 {
+    // Clase 0: R=0,M=0  Clase 1: R=0,M=1
+    // Clase 2: R=1,M=0  Clase 3: R=1,M=1
     return (m->bitR << 1) | m->bitM;
-    // clase 0: R=0 M=0  clase 1: R=0 M=1
-    // clase 2: R=1 M=0  clase 3: R=1 M=1
 }
 
-// Elige el marco a reemplazar: menor clase NRU; dentro de la clase, el primero
-
-static int elegirVictimaНРU(Proceso *p)
+static int elegirVictimaNRU(Proceso *p)
 {
-    int mejor = -1;
-    int mejorCl = 4;
+    int mejor    = -1;
+    int mejorCl  = 4;
 
     for (int i = 0; i < NRU_NUM_MARCOS; i++)
     {
         if (!p->marcosNRU[i].valido)
-        {
-            return i; // marco libre: usarlo directamente
-        }
+            return i;   // marco libre, usarlo directamente
+
         int cl = claseNRU(&p->marcosNRU[i]);
         if (cl < mejorCl)
         {
             mejorCl = cl;
-            mejor = i;
+            mejor   = i;
         }
     }
     return mejor;
 }
 
-// Simula acceso a una pagina virtual del proceso
-
 void accederPaginaNRU(Proceso *p)
 {
     int pagVirtual = rand() % NRU_NUM_PAGINAS;
 
-    // Buscar si ya esta en algun marco
+    // Buscar si la pagina ya esta en algun marco (hit)
     for (int i = 0; i < NRU_NUM_MARCOS; i++)
     {
         if (p->marcosNRU[i].valido &&
             p->marcosNRU[i].numeroPagina == pagVirtual)
         {
-            // Hit: marcar R y posiblemente M
             p->marcosNRU[i].bitR = 1;
-            if (rand() % 3 == 0) // 33% de escritura
+            if (rand() % 3 == 0)        // 33% probabilidad de escritura
                 p->marcosNRU[i].bitM = 1;
             return;
         }
     }
 
-    // Fallo de pagina: elegir victima NRU
+    // Fallo de pagina: elegir victima y reemplazar
     p->fallosPagina++;
-    int victima = elegirVictimaНРU(p);
+    int victima = elegirVictimaNRU(p);
 
     if (p->marcosNRU[victima].valido)
     {
         p->reemplazosNRU++;
-        printf("  [NRU ] %s | Reemplaza pag %d (clase %d) por pag %d\n",
+        printf("  [NRU ] %s | Reemplaza pag %d (clase %d) -> pag %d\n",
                p->id,
                p->marcosNRU[victima].numeroPagina,
                claseNRU(&p->marcosNRU[victima]),
@@ -452,12 +530,10 @@ void accederPaginaNRU(Proceso *p)
     }
 
     p->marcosNRU[victima].numeroPagina = pagVirtual;
-    p->marcosNRU[victima].bitR = 1;
-    p->marcosNRU[victima].bitM = (rand() % 3 == 0) ? 1 : 0;
-    p->marcosNRU[victima].valido = 1;
+    p->marcosNRU[victima].bitR         = 1;
+    p->marcosNRU[victima].bitM         = (rand() % 3 == 0) ? 1 : 0;
+    p->marcosNRU[victima].valido       = 1;
 }
-
-// Limpia bits R de todos los marcos (se llama periodicamente por el reloj)
 
 void limpiarBitsR(Proceso *p)
 {
