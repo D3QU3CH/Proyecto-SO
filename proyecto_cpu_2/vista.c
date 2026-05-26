@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include "vista.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AUXILIARES
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── AUXILIARES ──────────────────────────────────────────────────────────────
 
 static const char *nomEstado(int e)
 {
@@ -28,9 +26,7 @@ static const char *nomDispES(int d)
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BCP individual
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── BCP individual ──────────────────────────────────────────────────────────
 
 void vistaMostrarBCP(Proceso *p)
 {
@@ -45,16 +41,16 @@ void vistaMostrarBCP(Proceso *p)
     printf("  11. Estado         : %s\n",        nomEstado(p->estado));
     printf("  12. VecesEnCPU     : %d\n",        p->vecesEnCPU);
     printf("  15. CambioCtx      : %d\n",        p->cambiosContexto);
+    printf("  16. Apropiativo    : %s\n",        p->esApropiativo ? AMARILLO "SI" RESET : "NO");
     printf("  17. TipoProceso    : %s\n",        p->tipoProceso == 0 ? "CPU" : "ES");
     printf("  20. DispositivoES  : %s\n",        nomDispES(p->dispositivoES));
-    printf("  22. Bloqueado      : %s\n",        p->bloqueado ? "SI" : "NO");
-    printf("  EX. Mem.Real/Buddy : %d KB / %d KB  (desp: %d KB)\n",
+    printf("  Mem.Real/Buddy     : %d KB / %d KB  (desp: %d KB)\n",
            p->memoriaUsadaKB, p->bloqueMemoriaKB, p->desperdicioInterno);
+    printf("  Marcos/Paginas     : %d marcos | %d paginas | fallos:%d\n",
+           p->numMarcos, p->numPaginas, p->fallosPagina);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Lista resumida (enEjecucion o solicitudes)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Lista ───────────────────────────────────────────────────────────────────
 
 void vistaMostrarLista(Lista *l, const char *titulo)
 {
@@ -63,18 +59,14 @@ void vistaMostrarLista(Lista *l, const char *titulo)
     for (Nodo *n = l->cabeza; n; n = n->siguiente, i++) {
         Proceso *p = n->proceso;
         printf("  %3d. " MAGENTA "%-8s" RESET
-               " | %-10s | llegada:%3d | ciclos:%6d"
-               " | rafaga:%2d | cc:%2d | mem:%dKB(buddy:%dKB)\n",
+               " | %-10s | llegada:%3d | ciclos:%6d | cc:%2d | mem:%dKB\n",
                i, p->id, nomEstado(p->estado),
                p->tiempoLlegada, p->ciclosRestantes,
-               p->rafagaActual, p->cambiosContexto,
-               p->memoriaUsadaKB, p->bloqueMemoriaKB);
+               p->cambiosContexto, p->memoriaUsadaKB);
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Cola de listos
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Cola de listos ──────────────────────────────────────────────────────────
 
 void vistaMostrarColaListos(Cola *c)
 {
@@ -82,15 +74,14 @@ void vistaMostrarColaListos(Cola *c)
     int i = 1;
     for (NodoCola *n = c->frente; n; n = n->siguiente, i++) {
         Proceso *p = n->proceso;
-        printf("  %2d. " CIAN "%-8s" RESET " | espera:%d | ciclosRest:%d\n",
-               i, p->id, p->tiempoEspera, p->ciclosRestantes);
+        printf("  %2d. " CIAN "%-8s" RESET " | espera:%4d | ciclosRest:%6d%s\n",
+               i, p->id, p->tiempoEspera, p->ciclosRestantes,
+               p->esApropiativo ? AMARILLO " [APROPIA]" RESET : "");
     }
     if (!c->tamanio) printf("  (vacia)\n");
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tabla global del sistema
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Tabla global ────────────────────────────────────────────────────────────
 
 void vistaMostrarTablaGlobal(void)
 {
@@ -104,7 +95,7 @@ void vistaMostrarTablaGlobal(void)
     printf("  6.  En E/S              : %d\n", t->procesosEnES);
     printf("  7.  Terminados          : %d\n", t->procesosTerminados);
     printf("  8.  Bloqueados          : %d\n", t->procesosBloqueados);
-    printf("  9.  Algoritmo actual    : %d\n", t->algoritmoActual);
+    printf("  9.  Algoritmo actual    : %s\n", t->algoritmoActual == ALG_FCFS ? "FCFS" : "RR");
     printf(" 10.  Quantum actual      : %d\n", t->quantumActual);
     printf(" 11.  Ciclo actual        : %d\n", t->cicloActual);
     printf(" 12.  Cambios contexto    : %d\n", t->totalCambiosContexto);
@@ -118,9 +109,7 @@ void vistaMostrarTablaGlobal(void)
     printf(" 20.  Desperdicio total   : %d\n", t->desperdicioTotal);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Buddy System
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Buddy System ────────────────────────────────────────────────────────────
 
 void vistaMostrarBuddy(void)
 {
@@ -130,7 +119,6 @@ void vistaMostrarBuddy(void)
         if (memoriaBuddy.bloques[i].libre) libres++;
         else                               ocupados++;
     }
-
     printf(NEGRITA CIAN "\n  === BUDDY SYSTEM ===\n" RESET);
     printf("  Total:1024KB | Libre:%dKB | Usado:%dKB | Desp.int:%dKB\n",
            memoriaBuddy.memoriaLibreKB,
@@ -153,35 +141,131 @@ void vistaMostrarBuddy(void)
         printf("  ... (%d bloques mas)\n", memoriaBuddy.numBloques - mostrados);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Estado E/S
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Estado E/S ──────────────────────────────────────────────────────────────
 
 void vistaEstadoES(SistemaES *es)
 {
     printf(NEGRITA AMARILLO "\n  === E/S ===\n" RESET);
-    printf("  Disco(x2)    : %d proceso(s)\n", es->disco.tamanio);
-    printf("  Pantalla(x4) : %d proceso(s)\n", es->pantalla.tamanio);
-    printf("  Teclado(x8)  : %d proceso(s)\n", es->teclado.tamanio);
+    printf("  Disco(x2)     : %d proceso(s)\n", es->disco.tamanio);
+    printf("  Pantalla(x4)  : %d proceso(s)\n", es->pantalla.tamanio);
+    printf("  Teclado(x8)   : %d proceso(s)\n", es->teclado.tamanio);
     printf("  Impresora(x12): %d proceso(s)\n", es->impresora.tamanio);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Bienvenida y cierre
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Paginacion NRU ──────────────────────────────────────────────────────────
+
+void vistaMostrarPaginacion(Proceso *p)
+{
+    printf(NEGRITA CIAN "\n  === PAGINACION NRU: %s ===\n" RESET, p->id);
+    printf("  Marcos asignados: %d | Total paginas: %d | Fallos: %d\n",
+           p->numMarcos, p->numPaginas, p->fallosPagina);
+    printf("  Paginas en RAM:\n");
+    int enRAM = 0, enSwap = 0;
+    for (int i = 0; i < p->numPaginas; i++) {
+        int m = p->paginasEnRAM[i];
+        if (m >= 0) {
+            enRAM++;
+            printf("    Pag %2d -> Marco %3d | R=%d M=%d | palabras:%d\n",
+                   i, m,
+                   memoriaPrincipal.marcos[m].bitR,
+                   memoriaPrincipal.marcos[m].bitM,
+                   memoriaPrincipal.marcos[m].numPalabras);
+        } else {
+            enSwap++;
+        }
+    }
+    printf("  En RAM: %d | En SWAP: %d\n", enRAM, enSwap);
+    printf("  Total paginas SWAP (sistema): %d\n", areaSwap.numPaginas);
+}
+
+// ─── 5 procesos mas rezagados (para apropiatividad RR) ───────────────────────
+
+void vistaMostrarMasRezagados(Cola *c)
+{
+    printf(NEGRITA ROJO "\n  === 5 PROCESOS MAS REZAGADOS ===\n" RESET);
+    Proceso *top[5] = {NULL};
+    for (NodoCola *n = c->frente; n; n = n->siguiente) {
+        Proceso *p = n->proceso;
+        for (int i = 0; i < 5; i++) {
+            if (!top[i] || p->ciclosRestantes > top[i]->ciclosRestantes) {
+                for (int j = 4; j > i; j--) top[j] = top[j-1];
+                top[i] = p;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < 5 && top[i]; i++)
+        printf("  %d. %-8s | ciclosRest:%6d | espera:%4d | vecesEnCPU:%3d\n",
+               i+1, top[i]->id, top[i]->ciclosRestantes,
+               top[i]->tiempoEspera, top[i]->vecesEnCPU);
+    if (!top[0]) printf("  (cola vacia)\n");
+}
+
+// ─── Barras de aprovechamiento RR (estado actual + 4 anteriores) ─────────────
+
+void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int histIdx)
+{
+    // Calcular aprovechamiento actual
+    int totalQ = 0, totalRafaga = 0, cnt = 0;
+    for (NodoCola *n = c->frente; n; n = n->siguiente) {
+        Proceso *p = n->proceso;
+        totalQ     += tablaSistema.quantumActual;
+        totalRafaga += (p->rafagaActual < tablaSistema.quantumActual)
+                        ? p->rafagaActual : tablaSistema.quantumActual;
+        cnt++;
+    }
+    int aprovActual = cnt ? (totalRafaga * 100) / (totalQ ? totalQ : 1) : 0;
+    int despActual  = 100 - aprovActual;
+
+    printf(NEGRITA AMARILLO "\n  === APROVECHAMIENTO CPU (RR, Q=%d) ===\n" RESET,
+           tablaSistema.quantumActual);
+
+    // Mostrar estado actual y los 4 anteriores del historico
+    int indices[5];
+    int mostrar = 0;
+    for (int i = 0; i < 4 && mostrar < 4; i++) {
+        int idx = (histIdx - 1 - i + 100) % 100;
+        if (histCiclo[idx] > 0) {
+            indices[mostrar++] = idx;
+        }
+    }
+
+    // Imprimir historico (del mas antiguo al mas reciente)
+    for (int i = mostrar - 1; i >= 0; i--) {
+        int idx  = indices[i];
+        int aprov = 100 - histDesp[idx];
+        printf("  Ciclo %4d | Aprov: %3d%% [", histCiclo[idx], aprov);
+        int barras = aprov / 5;
+        for (int b = 0; b < 20; b++)
+            printf("%s", b < barras ? VERDE "#" RESET : ROJO "." RESET);
+        printf("] Desp: %3d%%\n", histDesp[idx]);
+    }
+    // Estado actual
+    printf("  Ciclo %4d | Aprov: %3d%% [", tablaSistema.cicloActual, aprovActual);
+    int barras = aprovActual / 5;
+    for (int b = 0; b < 20; b++)
+        printf("%s", b < barras ? VERDE "#" RESET : ROJO "." RESET);
+    printf("] Desp: %3d%% " NEGRITA "<-- ACTUAL\n" RESET, despActual);
+
+    (void)histDesp; (void)histCiclo; (void)histIdx;
+}
+
+// ─── Bienvenida y cierre ─────────────────────────────────────────────────────
 
 void vistaBienvenida(void)
 {
     printf(NEGRITA AZUL
-           "\n╔══════════════════════════════════════╗\n"
-           "║   SIMULADOR CPU-MEMORIA  (P-III)     ║\n"
-           "╚══════════════════════════════════════╝\n" RESET);
-    printf("  250 procesos | 150 en ciclo | 100 en solicitudes\n");
-    printf("  Memoria: 1024 KB (Buddy System)\n");
-    printf("  Teclas: [s]=tabla global  [b]=buddy  [e]=ES  [q]=salir\n\n");
+           "\n╔══════════════════════════════════════════════╗\n"
+           "║   SIMULADOR CPU-MEMORIA  (P-III)             ║\n"
+           "║   Buddy System + Paginacion NRU              ║\n"
+           "╚══════════════════════════════════════════════╝\n" RESET);
+    printf("  %d procesos | %d en ciclo | %d en solicitudes\n",
+           TOTAL_PROCESOS, PROCESOS_EN_CICLO, PROCESOS_EN_SOLICITUD);
+    printf("  Algoritmo inicial: FCFS  |  NRU para reemplazo de paginas\n");
+    printf("  Teclas: [s]tabla  [b]buddy  [e]ES  [m]mem  [p]paginas\n");
+    printf("          [x]cambiar alg  [a]apropiativo(RR)  [v]envejecimiento\n");
+    printf("          [r]redimensionar  [q]salir\n\n");
 }
-
-
 
 void vistaCierre(int reloj, int terminados)
 {

@@ -6,11 +6,16 @@
 #include "vista.h"
 #include "controlador.h"
 
+// Historial de aprovechamiento para barras RR (100 entradas circulares)
+static int histDesp[100];
+static int histCiclo[100];
+static int histIdx  = 0;
+
 int main(void)
 {
     srand((unsigned)time(NULL));
 
-    // 1. Inicializar estructuras
+    // 1. Inicializar
     inicializarBuddy();
     inicializarTablaSistema();
 
@@ -19,118 +24,187 @@ int main(void)
     inicializarLista(&solicitudes);
 
     cargarPalabras("libro1.txt");
+    cargarFrases("frases.txt");
     inicializarMemoriaPrincipal();
+    inicializarPaginacion();
 
     poblarListas(&enEjecucion, &solicitudes);
 
-    // Asignar memoria Buddy a los 150 del ciclo
-    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
-    {
+    // Asignar Buddy + slot + paginas a los procesos del ciclo
+    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
-        int idx = asignarMemoriaBuddy(p, p->memoriaUsadaKB);
-        if (idx < 0)
-            printf("  [BUDDY] Sin espacio para %s\n", p->id);
+        if (asignarMemoriaBuddy(p, p->memoriaUsadaKB) < 0)
+            continue;
+        asignarSlotMemoria(p);
+        asignarPaginasProceso(p);
     }
-
-    // Después del loop que asigna Buddy a los 150:
-    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
-        asignarSlotMemoria(n->proceso); // ← agrega esta línea
 
     Cola colaListos;
     inicializarCola(&colaListos);
 
+    // Encolar los procesos del ciclo en colaListos (ya "llegaron")
+    for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
+        encolar(&colaListos, n->proceso);
+
     SistemaES es;
     inicializarSistemaES(&es);
 
-    // 2. Contexto de hilos
-    int terminado = 0, reloj = 0;
+    // 2. Estado de control
+    int terminado      = 0;
+    int reloj          = 0;
+    int algoritmo      = ALG_FCFS;
+    int quantum        = 20;
+    int procesoPrivilId = -1;
+    int iteracionesRR  = 0;
 
+    tablaSistema.algoritmoActual = ALG_FCFS;
+    tablaSistema.quantumActual   = quantum;
+
+    // 3. Contexto de hilos
     ContextoHilos ctx;
     ctx.procesosEnEjecucion = &enEjecucion;
-    ctx.solicitudes = &solicitudes;
-    ctx.colaListos = &colaListos;
-    ctx.es = &es;
-    ctx.reloj = &reloj;
-    ctx.terminado = &terminado;
+    ctx.solicitudes         = &solicitudes;
+    ctx.colaListos          = &colaListos;
+    ctx.es                  = &es;
+    ctx.reloj               = &reloj;
+    ctx.terminado           = &terminado;
+    ctx.algoritmo           = &algoritmo;
+    ctx.quantum             = &quantum;
+    ctx.procesoPrivilId     = &procesoPrivilId;
 
     pthread_mutex_init(&ctx.mutexPrincipal, NULL);
-    sem_init(&ctx.semDisco, 0, 0);
-    sem_init(&ctx.semPantalla, 0, 0);
-    sem_init(&ctx.semTeclado, 0, 0);
+    sem_init(&ctx.semDisco,     0, 0);
+    sem_init(&ctx.semPantalla,  0, 0);
+    sem_init(&ctx.semTeclado,   0, 0);
     sem_init(&ctx.semImpresora, 0, 0);
 
-    ArgHiloES argDisco = {&es.disco, &colaListos, &ctx.mutexPrincipal, &ctx.semDisco, &terminado, "Disco"};
-    ArgHiloES argPantalla = {&es.pantalla, &colaListos, &ctx.mutexPrincipal, &ctx.semPantalla, &terminado, "Pantalla"};
-    ArgHiloES argTeclado = {&es.teclado, &colaListos, &ctx.mutexPrincipal, &ctx.semTeclado, &terminado, "Teclado"};
-    ArgHiloES argImpresora = {&es.impresora, &colaListos, &ctx.mutexPrincipal, &ctx.semImpresora, &terminado, "Impresora"};
+    ArgHiloES argDisco    = {&es.disco,     &colaListos, &ctx.mutexPrincipal, &ctx.semDisco,     &terminado, "Disco"};
+    ArgHiloES argPantalla = {&es.pantalla,  &colaListos, &ctx.mutexPrincipal, &ctx.semPantalla,  &terminado, "Pantalla"};
+    ArgHiloES argTeclado  = {&es.teclado,   &colaListos, &ctx.mutexPrincipal, &ctx.semTeclado,   &terminado, "Teclado"};
+    ArgHiloES argImpresora= {&es.impresora, &colaListos, &ctx.mutexPrincipal, &ctx.semImpresora, &terminado, "Impresora"};
 
-    // 3. Lanzar hilos
     pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thEntrada;
-    pthread_create(&thDisco, NULL, hiloDispositivoES, &argDisco);
-    pthread_create(&thPantalla, NULL, hiloDispositivoES, &argPantalla);
-    pthread_create(&thTeclado, NULL, hiloDispositivoES, &argTeclado);
+    pthread_create(&thDisco,     NULL, hiloDispositivoES, &argDisco);
+    pthread_create(&thPantalla,  NULL, hiloDispositivoES, &argPantalla);
+    pthread_create(&thTeclado,   NULL, hiloDispositivoES, &argTeclado);
     pthread_create(&thImpresora, NULL, hiloDispositivoES, &argImpresora);
-    pthread_create(&thReloj, NULL, hiloReloj, &ctx);
-    pthread_create(&thEntrada, NULL, hiloEntrada, &ctx);
+    pthread_create(&thReloj,     NULL, hiloReloj, &ctx);
+    pthread_create(&thEntrada,   NULL, hiloEntrada, &ctx);
 
-    // 4. Mostrar estado inicial
+    // 4. Estado inicial
     vistaBienvenida();
-    vistaMostrarLista(&enEjecucion, "procesosEnEjecucion");
-    vistaMostrarLista(&solicitudes, "solicitudes");
-    vistaMostrarBuddy();
     logEvento("Simulacion iniciada");
 
     // 5. Loop principal
-    while (!terminado)
-    {
+    while (!terminado) {
         pthread_mutex_lock(&ctx.mutexPrincipal);
 
         reloj++;
+        resetarBitsR(reloj);
         ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
         actualizarEspera(&colaListos);
 
-        // ── SCHEDULER FCFS: tomar el siguiente de la cola y ejecutarlo ──
-        if (!estaVaciaCola(&colaListos))
-        {
-            Proceso *p = desencolar(&colaListos);
-
-            // Requisitos: re-sortear cc, crecer memoria, descontar ciclos
-            procesarEntradaCPU(p);
-
-            if (p->ciclosRestantes <= 0)
-            {
-                // Proceso terminado: liberar Buddy + slot
-                procesarTerminacion(p);
+        // Evaluar cambio automatico de algoritmo cada 50 ciclos
+        if (reloj % 50 == 0) {
+            int nuevoAlg = evaluarCambioAlgoritmo(&colaListos, &es);
+            if (nuevoAlg != algoritmo) {
+                algoritmo = nuevoAlg;
+                tablaSistema.algoritmoActual = nuevoAlg;
+                if (nuevoAlg == ALG_RR && quantum <= 0) {
+                    quantum = 20;
+                    tablaSistema.quantumActual = quantum;
+                }
             }
-            else if (p->tipoProceso == 1 && rand() % 3 == 0)
-            {
-                // Proceso ES-bound: enviar a E/S con probabilidad 1/3
-                asignarES(p, &es);
-            }
-            else
-            {
-                // Vuelve a la cola de listos para la siguiente rafaga
-                encolar(&colaListos, p);
+        }
+
+        if (!estaVaciaCola(&colaListos)) {
+
+            if (algoritmo == ALG_FCFS) {
+                // ── FCFS ──────────────────────────────────────────────────
+                Proceso *p = desencolar(&colaListos);
+                procesarEntradaCPU(p);
+
+                if (p->ciclosRestantes <= 0) {
+                    procesarTerminacion(p);
+                    if (procesoPrivilId == (int)(p - tablaSistema.tablaBCPs)) {
+                        printf("  [RR] Proceso apropiativo %s finalizo\n", p->id);
+                        procesoPrivilId = -1;
+                    }
+                } else if (p->tipoProceso == 1 && rand() % 3 == 0) {
+                    asignarES(p, &es, &colaListos);
+                } else {
+                    if (p->esApropiativo)
+                        encolarAlFrente(&colaListos, p);
+                    else
+                        encolar(&colaListos, p);
+                }
+
+            } else {
+                // ── ROUND ROBIN ───────────────────────────────────────────
+                Proceso *p = desencolar(&colaListos);
+                procesarEntradaCPU(p);
+                iteracionesRR++;
+
+                int q = tablaSistema.quantumActual;
+                // Cuanto uso del quantum en esta rafaga
+                int usado = (p->rafagaActual < q) ? p->rafagaActual : q;
+                int desp  = q - usado;
+                p->aprovechamiento = (usado * 100) / (q ? q : 1);
+                p->desperdicio     = desp;
+
+                // Guardar en historial
+                histDesp[histIdx]  = desp * 100 / (q ? q : 1);
+                histCiclo[histIdx] = reloj;
+                histIdx = (histIdx + 1) % 100;
+
+                // Ajuste automatico cada 20 iteraciones RR
+                ajustarQuantumAutomatico(&colaListos, &es, iteracionesRR);
+                quantum = tablaSistema.quantumActual;
+
+                if (p->ciclosRestantes <= 0) {
+                    procesarTerminacion(p);
+                    if (procesoPrivilId == (int)(p - tablaSistema.tablaBCPs)) {
+                        printf("  [RR] Proceso apropiativo %s finalizo\n", p->id);
+                        procesoPrivilId = -1;
+                    }
+                } else if (p->tipoProceso == 1 && rand() % 3 == 0) {
+                    asignarES(p, &es, &colaListos);
+                } else {
+                    // Si uso mas del quantum, va al final; si es apropiativo va al frente
+                    if (p->esApropiativo)
+                        encolarAlFrente(&colaListos, p);
+                    else
+                        encolar(&colaListos, p);
+                }
             }
 
             tablaSistema.totalCambiosContexto++;
         }
 
-        // Actualizar estadisticas de memoria (enunciado: datos de rendimiento)
+        // Estadisticas
         calcularDesperdicioExterno();
         actualizarPromedioFinalizados(reloj);
-        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
-                                    &colaListos, &es, reloj);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
 
-        if (reloj % 100 == 0)
-        {
-            vistaMostrarColaListos(&colaListos);
+        // Checkpoint cada 100 ciclos
+        if (reloj % 100 == 0) {
             vistaMostrarTablaGlobal();
-            mostrarEstadisticasMemoria(); // <-- mostrar estadisticas completas
+            mostrarEstadisticasMemoria();
+            if (algoritmo == ALG_RR) {
+                vistaBarrasAprovechamiento(&colaListos, histDesp, histCiclo, histIdx);
+                mostrarEnvejecimiento(&colaListos);
+            }
             guardarBCPs(&enEjecucion, "bcps.log");
             guardarVariablesGlobales("variables.log");
             logEvento("Checkpoint");
         }
+
+        // Verificar si todos terminaron
+        int activos = 0;
+        for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
+            if (n->proceso->estado != 3) activos++;
+        if (activos == 0 && solicitudes.tamanio == 0 && estaVaciaCola(&colaListos))
+            terminado = 1;
 
         pthread_mutex_unlock(&ctx.mutexPrincipal);
         usleep(1000);
@@ -143,12 +217,12 @@ int main(void)
     sem_post(&ctx.semTeclado);
     sem_post(&ctx.semImpresora);
 
-    pthread_join(thDisco, NULL);
-    pthread_join(thPantalla, NULL);
-    pthread_join(thTeclado, NULL);
+    pthread_join(thDisco,     NULL);
+    pthread_join(thPantalla,  NULL);
+    pthread_join(thTeclado,   NULL);
     pthread_join(thImpresora, NULL);
-    pthread_join(thReloj, NULL);
-    pthread_join(thEntrada, NULL);
+    pthread_join(thReloj,     NULL);
+    pthread_join(thEntrada,   NULL);
 
     pthread_mutex_destroy(&ctx.mutexPrincipal);
     sem_destroy(&ctx.semDisco);
@@ -159,7 +233,7 @@ int main(void)
     guardarBCPs(&enEjecucion, "bcps.log");
     guardarVariablesGlobales("variables.log");
     logEvento("Simulacion finalizada");
-
+    mostrarEstadisticasMemoria();
     vistaCierre(reloj, tablaSistema.procesosTerminados);
     return 0;
 }

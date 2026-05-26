@@ -11,7 +11,10 @@ void  guardarBCPs(Lista *enEjecucion, const char *ruta);
 void  guardarVariablesGlobales(const char *ruta);
 void  logEvento(const char *msg);
 
-void procesarEntradaCPU(Proceso *p);
-void procesarTerminacion(Proceso *p);
+// RR
+void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId);
+void mostrarEnvejecimiento(Cola *colaListos);
+void mostrarDesperdiciadores(Cola *colaListos);
+void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR);
 
 #endif

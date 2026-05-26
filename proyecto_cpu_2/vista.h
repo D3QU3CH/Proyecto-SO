@@ -3,7 +3,6 @@
 
 #include "modelo.h"
 
-// Colores ANSI
 #define RESET    "\033[0m"
 #define ROJO     "\033[31m"
 #define VERDE    "\033[32m"
@@ -21,6 +20,8 @@ void vistaMostrarTablaGlobal(void);
 void vistaMostrarBuddy(void);
 void vistaEstadoES(SistemaES *es);
 void vistaMostrarBCP(Proceso *p);
-
+void vistaMostrarPaginacion(Proceso *p);
+void vistaMostrarMasRezagados(Cola *c);
+void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int histIdx);
 
 #endif
