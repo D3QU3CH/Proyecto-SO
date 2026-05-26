@@ -88,12 +88,45 @@ int main(void)
         reloj++;
         ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
         actualizarEspera(&colaListos);
-        actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
+
+        // ── SCHEDULER FCFS: tomar el siguiente de la cola y ejecutarlo ──
+        if (!estaVaciaCola(&colaListos))
+        {
+            Proceso *p = desencolar(&colaListos);
+
+            // Requisitos: re-sortear cc, crecer memoria, descontar ciclos
+            procesarEntradaCPU(p);
+
+            if (p->ciclosRestantes <= 0)
+            {
+                // Proceso terminado: liberar Buddy + slot
+                procesarTerminacion(p);
+            }
+            else if (p->tipoProceso == 1 && rand() % 3 == 0)
+            {
+                // Proceso ES-bound: enviar a E/S con probabilidad 1/3
+                asignarES(p, &es);
+            }
+            else
+            {
+                // Vuelve a la cola de listos para la siguiente rafaga
+                encolar(&colaListos, p);
+            }
+
+            tablaSistema.totalCambiosContexto++;
+        }
+
+        // Actualizar estadisticas de memoria (enunciado: datos de rendimiento)
+        calcularDesperdicioExterno();
+        actualizarPromedioFinalizados(reloj);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
+                                    &colaListos, &es, reloj);
 
         if (reloj % 100 == 0)
         {
             vistaMostrarColaListos(&colaListos);
             vistaMostrarTablaGlobal();
+            mostrarEstadisticasMemoria(); // <-- mostrar estadisticas completas
             guardarBCPs(&enEjecucion, "bcps.log");
             guardarVariablesGlobales("variables.log");
             logEvento("Checkpoint");

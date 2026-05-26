@@ -618,14 +618,103 @@ void liberarSlotMemoria(Proceso *p)
     }
 }
 
-// Muestra estadisticas de rendimiento de la MemoriaPrincipal + Buddy
+
+// Calcula desperdicio externo: suma de bloques Buddy libres no contiguos
+// El enunciado pide este dato como estadistica de rendimiento del algoritmo
+void calcularDesperdicioExterno(void)
+{
+    pthread_mutex_lock(&memoriaBuddy.mutex);
+
+    // Recolectar todos los bloques libres validos
+    int libres[512], nLibres = 0;
+    for (int i = 0; i < memoriaBuddy.numBloques; i++) {
+        BloqueBS *b = &memoriaBuddy.bloques[i];
+        if (b->libre && b->tamanioKB > 0)
+            libres[nLibres++] = b->tamanioKB;
+    }
+
+    // Si hay 0 o 1 bloque libre no hay fragmentacion externa
+    if (nLibres <= 1) {
+        memoriaPrincipal.desperdicioExterno = 0;
+        pthread_mutex_unlock(&memoriaBuddy.mutex);
+        return;
+    }
+
+    // El bloque libre mas grande puede satisfacer la siguiente solicitud.
+    // Todo lo demas es desperdicio externo (no contiguo, inutilizable para
+    // solicitudes grandes). Formula: total_libre - bloque_libre_mas_grande
+    int maxLibre = 0, totalLibre = 0;
+    for (int i = 0; i < nLibres; i++) {
+        totalLibre += libres[i];
+        if (libres[i] > maxLibre) maxLibre = libres[i];
+    }
+    memoriaPrincipal.desperdicioExterno = totalLibre - maxLibre;
+
+    pthread_mutex_unlock(&memoriaBuddy.mutex);
+}
+
+// Actualiza el promedio de procesos finalizados por unidad de tiempo
+// El enunciado pide: "Promedio de proceso finalizados por unidad de tiempo"
+void actualizarPromedioFinalizados(int cicloActual)
+{
+    int term = memoriaPrincipal.procesosTerminados;
+    if (term == 0 || cicloActual == 0) {
+        memoriaPrincipal.promedioFinalizadosPorCiclo = 0.0f;
+        return;
+    }
+    // procesos terminados / ciclos transcurridos
+    memoriaPrincipal.promedioFinalizadosPorCiclo =
+        (float)term / (float)cicloActual;
+}
+
+// Llamar cada vez que un proceso pasa a estado EJECUTANDO (estado = 1)
+// Cubre 3 requisitos del enunciado:
+//   1. "cambiosContexto diferente en cada ocasion que entre a ejecucion"
+//   2. "cada vez que entre a ejecucion solicitara una nueva porcion de memoria"
+//   3. descontar ciclos de la rafaga actual
+void procesarEntradaCPU(Proceso *p)
+{
+    // Requisito 1: re-sortear cambios de contexto
+    p->cambiosContexto = rand() % 21 + 10;
+
+    // Requisito 2: crecer memoria (usa la lista crecimientoMem del proceso)
+    crecerMemoriaProceso(p);
+
+    // Actualizar estado y contadores del BCP
+    p->estado       = 1;   // EJECUTANDO
+    p->vecesEnCPU++;
+
+    // Descontar la rafaga: cuantos ciclos ejecutara esta instancia (10-70)
+    int estaInstancia = rand() % 61 + 10;
+    if (estaInstancia > p->ciclosRestantes)
+        estaInstancia = p->ciclosRestantes;
+
+    p->rafagaActual     = estaInstancia;
+    p->ciclosRestantes -= estaInstancia;
+    p->tiempoEjecucion += estaInstancia;
+}
+
+// Llamar cuando el proceso llega a ciclosRestantes == 0
+// Libera memoria Buddy y slot, marca como terminado
+void procesarTerminacion(Proceso *p)
+{
+    p->estado = 3;  // TERMINADO
+    liberarMemoriaBuddy(p);
+    liberarSlotMemoria(p);
+    tablaSistema.procesosTerminados++;
+    printf("  [CPU] %s TERMINO (ciclos=%d espera=%d)\n",
+           p->id, p->tiempoEjecucion, p->tiempoEspera);
+}
+
 void mostrarEstadisticasMemoria(void)
 {
     int term = memoriaPrincipal.procesosTerminados;
 
-    printf("\n  === ESTADISTICAS MEMORIA ===\n");
-    printf("  Desperdicio interno (Buddy)  : %d KB\n",
+    printf("\n  === ESTADISTICAS MEMORIA (Buddy System) ===\n");
+    printf("  Desperdicio interno          : %d KB\n",
            memoriaBuddy.desperdicioInternoTotal);
+    printf("  Desperdicio externo          : %d KB\n",   // <-- NUEVO
+           memoriaPrincipal.desperdicioExterno);
     printf("  Memoria libre (Buddy)        : %d KB\n",
            memoriaBuddy.memoriaLibreKB);
     printf("  Memoria usada (Buddy)        : %d KB\n",
@@ -635,6 +724,8 @@ void mostrarEstadisticasMemoria(void)
     printf("  Procesos en ejecucion        : %d\n",
            memoriaPrincipal.procesosEnEjecucion);
     printf("  Procesos terminados          : %d\n", term);
+    printf("  Prom. terminados/ciclo       : %.4f\n",    // <-- NUEVO
+           memoriaPrincipal.promedioFinalizadosPorCiclo);
     printf("  Prom. tiempo ejec. proceso   : %d ciclos\n",
            term ? memoriaPrincipal.tiempoTotalEjecucion / term : 0);
     printf("  Palabras en banco            : %d\n",

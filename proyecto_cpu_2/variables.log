@@ -966,3 +966,927 @@
 18.  Ingr. dinamico   : 100
 19.  Mem. libre (KB)  : 200
 20.  Desperdicio (KB) : 240
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 6
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 100
+12.  Cambios ctx      : 100
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 10
+19.  Mem. libre (KB)  : 12
+20.  Desperdicio (KB) : 277
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 12
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 200
+12.  Cambios ctx      : 200
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 20
+19.  Mem. libre (KB)  : 4
+20.  Desperdicio (KB) : 279
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 21
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 300
+12.  Cambios ctx      : 300
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 33
+19.  Mem. libre (KB)  : 4
+20.  Desperdicio (KB) : 279
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 30
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 400
+12.  Cambios ctx      : 400
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 47
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 37
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 500
+12.  Cambios ctx      : 500
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 59
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:39 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 38
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 600
+12.  Cambios ctx      : 600
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 69
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 700
+12.  Cambios ctx      : 700
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 84
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 58
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 800
+12.  Cambios ctx      : 800
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 900
+12.  Cambios ctx      : 900
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 52
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1000
+12.  Cambios ctx      : 1000
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1100
+12.  Cambios ctx      : 1100
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1200
+12.  Cambios ctx      : 1200
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1300
+12.  Cambios ctx      : 1300
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1400
+12.  Cambios ctx      : 1400
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:40 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1500
+12.  Cambios ctx      : 1500
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1600
+12.  Cambios ctx      : 1600
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1700
+12.  Cambios ctx      : 1700
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1800
+12.  Cambios ctx      : 1800
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 1900
+12.  Cambios ctx      : 1900
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2000
+12.  Cambios ctx      : 2000
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2100
+12.  Cambios ctx      : 2100
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2200
+12.  Cambios ctx      : 2200
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2300
+12.  Cambios ctx      : 2300
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:41 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2400
+12.  Cambios ctx      : 2400
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2500
+12.  Cambios ctx      : 2500
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2600
+12.  Cambios ctx      : 2600
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2700
+12.  Cambios ctx      : 2700
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2800
+12.  Cambios ctx      : 2800
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 2900
+12.  Cambios ctx      : 2900
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3000
+12.  Cambios ctx      : 3000
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3100
+12.  Cambios ctx      : 3100
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 51
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3200
+12.  Cambios ctx      : 3200
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:42 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3300
+12.  Cambios ctx      : 3300
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3400
+12.  Cambios ctx      : 3400
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 50
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3500
+12.  Cambios ctx      : 3500
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3600
+12.  Cambios ctx      : 3600
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3700
+12.  Cambios ctx      : 3700
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3800
+12.  Cambios ctx      : 3800
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 3900
+12.  Cambios ctx      : 3900
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 4000
+12.  Cambios ctx      : 4000
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 4100
+12.  Cambios ctx      : 4100
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281
+
+=== VARIABLES GLOBALES Mon May 25 19:54:43 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 100
+ 4.  Cola listos      : 49
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 0
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : 0
+10.  Quantum          : 0
+11.  Ciclo actual     : 4200
+12.  Cambios ctx      : 4200
+13.  Fallos pagina    : 0
+14.  Suma espera      : 0
+15.  Suma ciclos      : 6368689
+16.  Prom. espera     : 0
+17.  Prom. ciclos     : 42457
+18.  Ingr. dinamico   : 100
+19.  Mem. libre (KB)  : 0
+20.  Desperdicio (KB) : 281

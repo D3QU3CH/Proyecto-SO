@@ -181,6 +181,8 @@ void vistaBienvenida(void)
     printf("  Teclas: [s]=tabla global  [b]=buddy  [e]=ES  [q]=salir\n\n");
 }
 
+
+
 void vistaCierre(int reloj, int terminados)
 {
     printf(NEGRITA VERDE

@@ -22,4 +22,5 @@ void vistaMostrarBuddy(void);
 void vistaEstadoES(SistemaES *es);
 void vistaMostrarBCP(Proceso *p);
 
+
 #endif
