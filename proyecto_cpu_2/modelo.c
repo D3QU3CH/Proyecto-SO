@@ -570,7 +570,9 @@ void agregarPalabrasAlSlot(Proceso *p, int cantidad)
 // Consulta crecimientoMem[indiceCrecimiento], si es > 0 pide mas Buddy
 // y trae las palabras correspondientes.
 void crecerMemoriaProceso(Proceso *p)
-{
+{   
+    if (p->bloqueMemoriaKB == 0) return;
+
     int extra = p->crecimientoMem[p->indiceCrecimiento % 20];
     p->indiceCrecimiento++;
 
