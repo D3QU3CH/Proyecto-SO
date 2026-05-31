@@ -1,0 +1,14 @@
+CC     = gcc
+CFLAGS = -Wall -Wextra -g
+LIBS   = -lpthread
+
+TARGET = simulador
+SRCS   = main.c modelo.c controlador.c vista.c
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LIBS)
+
+clean:
+	rm -f $(TARGET) *.log
