@@ -13,5 +13,7 @@ void  logEvento(const char *msg);
 void  ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR);
 void  mostrarEnvejecimiento(Cola *colaListos);
 void  mostrarDesperdiciadores(Cola *colaListos);
+void  ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId);
+void  ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int *quantum, int *iteracionesRR, int histDesp[], int histCiclo[], int *histIdx, int reloj);
 
 #endif

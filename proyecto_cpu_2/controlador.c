@@ -3,10 +3,130 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
 #include "controlador.h"
 #include "vista.h"
 
-// Hilo E/S: decrementa tiempoES de cada proceso en su cola, cuando llega a 0 pasa a cola de listos
+static struct termios termOriginal;
+static int termConfigurada = 0;
+
+static void configurarTerminalRaw(void)
+{
+    struct termios raw;
+    tcgetattr(STDIN_FILENO, &termOriginal);
+    raw = termOriginal;
+    raw.c_lflag &= ~(ICANON | ECHO);
+    raw.c_cc[VMIN]  = 0;
+    raw.c_cc[VTIME] = 1;
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+    termConfigurada = 1;
+}
+
+static void restaurarTerminal(void)
+{
+    if (termConfigurada)
+        tcsetattr(STDIN_FILENO, TCSANOW, &termOriginal);
+}
+
+static void leerLineaConsola(char *buf, int max)
+{
+    // Restaurar terminal para que scanf/fgets funcione normal
+    restaurarTerminal();
+    fflush(stdout);
+    if (fgets(buf, max, stdin) != NULL) {
+        int len = strlen(buf);
+        if (len > 0 && buf[len-1] == '\n') buf[len-1] = '\0';
+    }
+    // Volver a raw
+    configurarTerminalRaw();
+}
+
+// ─── FCFS ────────────────────────────────────────────────────────────────────
+// El proceso toma su rafaga completa sin limite de tiempo
+void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId)
+{
+    if (estaVaciaCola(colaListos)) return;
+
+    Proceso *p = desencolar(colaListos);
+    procesarEntradaCPU(p);
+    tablaSistema.totalCambiosContexto++;
+
+    if (p->ciclosRestantes <= 0) {
+        procesarTerminacion(p);
+        if (*procesoPrivilId == (int)(p - tablaSistema.tablaBCPs)) {
+            printf("[FCFS] Proceso %s termino (era apropiativo)\n", p->id);
+            *procesoPrivilId = -1;
+        }
+    } else if (p->tipoProceso == 1 && rand() % 3 == 0) {
+        // Va a E/S: si es apropiativo igual queda en frente cuando vuelva
+        asignarES(p, es);
+    } else {
+        p->estado = ESTADO_LISTO;
+        // Apropiativo siempre al frente, en cualquier cola
+        if (p->esApropiativo)
+            encolarAlFrente(colaListos, p);
+        else
+            encolar(colaListos, p);
+    }
+}
+
+// ─── ROUND ROBIN ─────────────────────────────────────────────────────────────
+// Si rafagaActual > quantum: proceso interrumpido, vuelve al final (o frente si es apropiativo)
+// Si rafagaActual <= quantum: termino su turno, va a E/S o vuelve a cola
+void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
+                int *quantum, int *iteracionesRR,
+                int histDesp[], int histCiclo[], int *histIdx, int reloj)
+{
+    if (estaVaciaCola(colaListos)) return;
+
+    Proceso *p = desencolar(colaListos);
+    procesarEntradaCPU(p);
+    tablaSistema.totalCambiosContexto++;
+    (*iteracionesRR)++;
+
+    int q     = tablaSistema.quantumActual;
+    int usado = (p->rafagaActual < q) ? p->rafagaActual : q;
+    int desp  = q - usado;
+
+    p->aprovechamiento = (usado * 100) / (q ? q : 1);
+    p->desperdicio     = desp;
+
+    histDesp[*histIdx]  = desp * 100 / (q ? q : 1);
+    histCiclo[*histIdx] = reloj;
+    *histIdx = (*histIdx + 1) % 100;
+
+    ajustarQuantumAutomatico(colaListos, es, *iteracionesRR);
+    *quantum = tablaSistema.quantumActual;
+
+    if (p->ciclosRestantes <= 0) {
+        procesarTerminacion(p);
+        if (*procesoPrivilId == (int)(p - tablaSistema.tablaBCPs)) {
+            printf("[RR] Proceso %s termino (era apropiativo)\n", p->id);
+            *procesoPrivilId = -1;
+        }
+    } else if (p->rafagaActual > q) {
+        // Quantum insuficiente: proceso interrumpido, regresa a cola
+        p->estado = ESTADO_LISTO;
+        if (p->esApropiativo)
+            encolarAlFrente(colaListos, p);
+        else
+            encolar(colaListos, p);
+    } else if (p->tipoProceso == 1 && rand() % 3 == 0) {
+        // Uso menos que el quantum, es ES-bound: va a E/S
+        asignarES(p, es);
+    } else {
+        p->estado = ESTADO_LISTO;
+        if (p->esApropiativo)
+            encolarAlFrente(colaListos, p);
+        else
+            encolar(colaListos, p);
+    }
+}
+
+// ─── HILO E/S ────────────────────────────────────────────────────────────────
+// Cuando un proceso termina su tiempo de E/S vuelve a colaListos
+// Si es apropiativo siempre va al frente
 void procesarColaES(Cola *colaES, Cola *colaListos)
 {
     int n = colaES->tamanio;
@@ -40,7 +160,7 @@ void *hiloDispositivoES(void *arg)
     return NULL;
 }
 
-// Hilo reloj: tick cada 50ms, despierta hilos E/S
+// ─── HILO RELOJ ──────────────────────────────────────────────────────────────
 void *hiloReloj(void *arg)
 {
     ContextoHilos *ctx = (ContextoHilos *)arg;
@@ -56,89 +176,109 @@ void *hiloReloj(void *arg)
     return NULL;
 }
 
-// Hilo entrada: solo escucha X (cambiar algoritmo) y A (apropiatividad RR)
+// ─── HILO ENTRADA ────────────────────────────────────────────────────────────
+// Terminal en modo raw: detecta tecla sin necesitar Enter
+// X: toggle FCFS <-> RR inmediato
+// A: pedir ID y marcar proceso como apropiativo (solo en RR)
 void *hiloEntrada(void *arg)
 {
     ContextoHilos *ctx = (ContextoHilos *)arg;
+    configurarTerminalRaw();
+
     while (!(*ctx->terminado)) {
         int c = getchar();
-        if (c == EOF) { usleep(30000); continue; }
-
-        pthread_mutex_lock(&ctx->mutexPrincipal);
+        if (c == EOF || c == -1) { usleep(20000); continue; }
 
         switch (c) {
+
         case 'x': case 'X':
             {
-                int actual = *ctx->algoritmo;
-                pthread_mutex_unlock(&ctx->mutexPrincipal);
-                printf("\nAlgoritmo actual: %s\n", actual == ALG_FCFS ? "FCFS" : "RR");
-                printf("Opciones: [1] FCFS   [2] Round Robin\n> ");
-                fflush(stdout);
-                int opcion = 0;
-                scanf("%d", &opcion);
                 pthread_mutex_lock(&ctx->mutexPrincipal);
-                if (opcion == 1) {
-                    *ctx->algoritmo = ALG_FCFS;
-                    tablaSistema.algoritmoActual = ALG_FCFS;
-                    printf("[ALG] Cambiado a FCFS\n");
-                } else if (opcion == 2) {
+                int actual = *ctx->algoritmo;
+                if (actual == ALG_FCFS) {
+                    // Cambiar a RR: pedir quantum
+                    pthread_mutex_unlock(&ctx->mutexPrincipal);
+                    restaurarTerminal();
+                    printf("\n[X] Cambiando a Round Robin\n");
                     printf("Ingrese Quantum: ");
                     fflush(stdout);
-                    pthread_mutex_unlock(&ctx->mutexPrincipal);
-                    int q = 0;
-                    scanf("%d", &q);
+                    char buf[32] = {0};
+                    leerLineaConsola(buf, sizeof(buf));
+                    int q = atoi(buf);
+                    if (q <= 0) q = 20;
                     pthread_mutex_lock(&ctx->mutexPrincipal);
-                    if (q > 0) {
-                        *ctx->quantum = q;
-                        tablaSistema.quantumActual = q;
-                    }
-                    *ctx->algoritmo = ALG_RR;
+                    *ctx->algoritmo              = ALG_RR;
+                    *ctx->quantum                = q;
                     tablaSistema.algoritmoActual = ALG_RR;
-                    printf("[ALG] Cambiado a RR (Q=%d)\n", *ctx->quantum);
+                    tablaSistema.quantumActual   = q;
+                    printf("[X] Algoritmo cambiado a RR (Q=%d)\n", q);
+                    pthread_mutex_unlock(&ctx->mutexPrincipal);
+                } else {
+                    // Cambiar a FCFS directamente sin preguntar
+                    *ctx->algoritmo              = ALG_FCFS;
+                    tablaSistema.algoritmoActual = ALG_FCFS;
+                    printf("\n[X] Algoritmo cambiado a FCFS\n");
+                    pthread_mutex_unlock(&ctx->mutexPrincipal);
                 }
             }
             break;
 
         case 'a': case 'A':
-            if (*ctx->algoritmo == ALG_RR) {
+            {
+                pthread_mutex_lock(&ctx->mutexPrincipal);
+                if (*ctx->algoritmo != ALG_RR) {
+                    printf("\n[A] Apropiatividad solo disponible en Round Robin\n");
+                    pthread_mutex_unlock(&ctx->mutexPrincipal);
+                    break;
+                }
+                // Mostrar los 5 mas rezagados para que el usuario elija
                 vistaMostrarMasRezagados(ctx->colaListos);
                 pthread_mutex_unlock(&ctx->mutexPrincipal);
+
+                restaurarTerminal();
                 printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
                 fflush(stdout);
-                char idBuf[16];
-                scanf("%15s", idBuf);
+                char idBuf[32] = {0};
+                leerLineaConsola(idBuf, sizeof(idBuf));
+                // leerLineaConsola ya devolvio a raw
+
                 pthread_mutex_lock(&ctx->mutexPrincipal);
+                int encontrado = 0;
                 for (int i = 0; i < TOTAL_PROCESOS; i++) {
                     Proceso *p = &tablaSistema.tablaBCPs[i];
                     if (strcmp(p->id, idBuf) == 0 && p->estado != ESTADO_TERMINADO) {
+                        // Quitar apropiatividad al anterior
                         if (*ctx->procesoPrivilId >= 0)
                             tablaSistema.tablaBCPs[*ctx->procesoPrivilId].esApropiativo = 0;
-                        p->esApropiativo    = 1;
+                        p->esApropiativo     = 1;
                         *ctx->procesoPrivilId = i;
-                        printf("[RR] Proceso %s marcado como apropiativo\n", p->id);
+                        printf("[A] Proceso %s marcado como apropiativo\n", p->id);
+                        encontrado = 1;
                         break;
                     }
                 }
-            } else {
-                printf("[RR] Apropiatividad solo disponible en Round Robin\n");
+                if (!encontrado)
+                    printf("[A] Proceso '%s' no encontrado o ya termino\n", idBuf);
+                pthread_mutex_unlock(&ctx->mutexPrincipal);
             }
             break;
 
         case 'q': case 'Q':
+            pthread_mutex_lock(&ctx->mutexPrincipal);
             *ctx->terminado = 1;
+            pthread_mutex_unlock(&ctx->mutexPrincipal);
             break;
 
         default:
             break;
         }
-
-        pthread_mutex_unlock(&ctx->mutexPrincipal);
     }
+
+    restaurarTerminal();
     return NULL;
 }
 
-// Ajuste automatico de quantum cada 20 iteraciones RR
-// Si cola listos > 75%: bajar Q; si cola E/S > 75%: subir Q
+// ─── AJUSTE AUTOMATICO DE QUANTUM ────────────────────────────────────────────
 void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR)
 {
     if (iteracionesRR % 20 != 0) return;
@@ -151,7 +291,6 @@ void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR
 
     float propListos = (float)enListos / total;
     float propES     = (float)enES     / total;
-
     int q = tablaSistema.quantumActual;
 
     if (propListos > 0.75f) {
@@ -167,18 +306,17 @@ void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR
     tablaSistema.quantumActual = q;
 }
 
-// Top 5 procesos con mas iteraciones en CPU (envejecimiento)
+// ─── ENVEJECIMIENTO Y DESPERDICIADORES ───────────────────────────────────────
 void mostrarEnvejecimiento(Cola *colaListos)
 {
-    printf("\n--- TOP 5 ENVEJECIMIENTO (mas iteraciones CPU) ---\n");
+    printf("\n--- TOP 5 ENVEJECIMIENTO ---\n");
     Proceso *top[5] = {NULL};
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         for (int i = 0; i < 5; i++) {
             if (!top[i] || p->vecesEnCPU > top[i]->vecesEnCPU) {
                 for (int j = 4; j > i; j--) top[j] = top[j-1];
-                top[i] = p;
-                break;
+                top[i] = p; break;
             }
         }
     }
@@ -189,10 +327,9 @@ void mostrarEnvejecimiento(Cola *colaListos)
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
-// Top 5 procesos que mas desperdician quantum (rafaga << quantum)
 void mostrarDesperdiciadores(Cola *colaListos)
 {
-    printf("\n--- TOP 5 DESPERDICIADORES (rafaga vs quantum) ---\n");
+    printf("\n--- TOP 5 DESPERDICIADORES ---\n");
     Proceso *top[5] = {NULL};
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
         Proceso *p = n->proceso;
@@ -204,8 +341,7 @@ void mostrarDesperdiciadores(Cola *colaListos)
             if (despTop < 0) despTop = 0;
             if (desp > despTop) {
                 for (int j = 4; j > i; j--) top[j] = top[j-1];
-                top[i] = p;
-                break;
+                top[i] = p; break;
             }
         }
     }
@@ -219,7 +355,7 @@ void mostrarDesperdiciadores(Cola *colaListos)
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
-// PERSISTENCIA
+// ─── PERSISTENCIA ────────────────────────────────────────────────────────────
 void guardarBCPs(Lista *enEjecucion, const char *ruta)
 {
     FILE *f = fopen(ruta, "a");
