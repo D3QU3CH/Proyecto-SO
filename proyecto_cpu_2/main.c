@@ -5,6 +5,7 @@
 #include "modelo.h"
 #include "vista.h"
 #include "controlador.h"
+#include "master.h"
 
 static int histDesp[100];
 static int histCiclo[100];
@@ -17,14 +18,16 @@ typedef struct {
     int             *terminado;
 } ArgHiloCreacion;
 
+// Hilo que crea procesos de solicitudes con sleep aleatorio 1-50ms
+// Emula llegada escalonada: cuando sale el primer proceso del CPU
+// probablemente ya llegaron 2-5 mas
 void *hiloCreacionProcesos(void *arg)
 {
     ArgHiloCreacion *a = (ArgHiloCreacion *)arg;
     for (int i = 0; i < TOTAL_PROCESOS && !(*a->terminado); i++) {
         Proceso *p = &tablaSistema.tablaBCPs[i];
         if (p->yaIngresado) continue;
-        int sleepMs = rand() % 50 + 1;
-        usleep(sleepMs * 1000);
+        usleep((rand() % 50 + 1) * 1000);
         pthread_mutex_lock(a->mutex);
         if (asignarMemoriaBuddy(p, p->memoriaUsadaKB) >= 0) {
             asignarSlotMemoria(p);
@@ -53,6 +56,7 @@ int main(void)
 
     poblarListas(&enEjecucion, &solicitudes);
 
+    // Asignar memoria a los 150 del ciclo inicial
     for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (asignarMemoriaBuddy(p, p->memoriaUsadaKB) < 0) continue;
@@ -61,9 +65,11 @@ int main(void)
         p->yaIngresado = 1;
     }
 
+    // Cola de listos: orden por tiempo de llegada (FCFS inicial)
     Cola colaListos;
     inicializarCola(&colaListos);
 
+    // Encolar los del ciclo que llegan en t=0
     for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (p->tiempoLlegada == 0) {
@@ -107,45 +113,51 @@ int main(void)
     ArgHiloES argImpresora = {&es.impresora, &colaListos, &ctx.mutexPrincipal, &ctx.semImpresora, &terminado, "Impresora"};
     ArgHiloCreacion argCreacion = {&solicitudes, &ctx.mutexPrincipal, &terminado};
 
-    pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thEntrada, thCreacion;
+    pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thCreacion;
     pthread_create(&thDisco,     NULL, hiloDispositivoES,    &argDisco);
     pthread_create(&thPantalla,  NULL, hiloDispositivoES,    &argPantalla);
     pthread_create(&thTeclado,   NULL, hiloDispositivoES,    &argTeclado);
     pthread_create(&thImpresora, NULL, hiloDispositivoES,    &argImpresora);
     pthread_create(&thReloj,     NULL, hiloReloj,            &ctx);
-    pthread_create(&thEntrada,   NULL, hiloEntrada,          &ctx);
     pthread_create(&thCreacion,  NULL, hiloCreacionProcesos, &argCreacion);
 
     vistaBienvenida();
     logEvento("Simulacion iniciada");
 
     while (!terminado) {
+
+        // Detectar teclado sin bloquear (X=cambiar algoritmo, A=apropiativo, Q=salir)
+        manejarEntrada(&ctx);
+
+        if (*ctx.terminado) break;
+
         pthread_mutex_lock(&ctx.mutexPrincipal);
 
         reloj++;
         resetarBitsR(reloj);
 
-        // Encolar procesos del ciclo que ya llegaron
+        // Encolar procesos del ciclo segun tiempoLlegada
         for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
             Proceso *p = n->proceso;
             if (!p->yaIngresado && p->tiempoLlegada <= reloj) {
-                encolar(&colaListos, p);
+                if (p->esApropiativo) encolarAlFrente(&colaListos, p);
+                else                  encolar(&colaListos, p);
                 p->estado = ESTADO_LISTO;
                 p->yaIngresado = 1;
             }
         }
 
-        // Encolar solicitudes que llegaron (las elimina de la lista)
+        // Encolar solicitudes que llegaron (se eliminan de la lista)
         ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
 
-        // Incrementar espera de procesos en cola listos
+        // Incrementar espera de los que estan en cola listos
         actualizarEspera(&colaListos);
 
         // Redimension automatica cada 300 ciclos
         if (reloj % 300 == 0)
             redimensionarMemoriaPrincipal(&enEjecucion, reloj);
 
-        // Evaluacion automatica de algoritmo cada 50 ciclos
+        // Cambio automatico de algoritmo cada 50 ciclos
         if (reloj % 50 == 0) {
             int nuevoAlg = evaluarCambioAlgoritmo(&colaListos, &es);
             if (nuevoAlg != algoritmo) {
@@ -158,10 +170,10 @@ int main(void)
             }
         }
 
-        // Ejecutar segun algoritmo actual
+        // Ejecutar algoritmo activo
         if (!estaVaciaCola(&colaListos)) {
             if (algoritmo == ALG_FCFS)
-                ejecutarFCFS(&colaListos, &es, &procesoPrivilId);
+                ejecutarFCFS(&colaListos, &es, &procesoPrivilId, reloj);
             else
                 ejecutarRR(&colaListos, &es, &procesoPrivilId,
                            &quantum, &iteracionesRR,
@@ -172,7 +184,9 @@ int main(void)
         actualizarPromedioFinalizados(reloj);
         actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
 
+        // Checkpoint cada 100 ciclos
         if (reloj % 100 == 0) {
+            ejecutarMasterPVM(&enEjecucion, quantum);
             vistaMostrarTablaGlobal();
             vistaEstadoES(&es);
             mostrarEstadisticasMemoria();
@@ -186,7 +200,7 @@ int main(void)
             logEvento("Checkpoint");
         }
 
-        // Condicion de fin
+        // Condicion de fin: todos terminaron y no hay mas en colas
         int activos = 0;
         for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
             if (n->proceso->estado != ESTADO_TERMINADO) activos++;
@@ -197,6 +211,7 @@ int main(void)
         usleep(1000);
     }
 
+    // Cierre limpio
     terminado = 1;
     sem_post(&ctx.semDisco);
     sem_post(&ctx.semPantalla);
@@ -208,7 +223,6 @@ int main(void)
     pthread_join(thTeclado,   NULL);
     pthread_join(thImpresora, NULL);
     pthread_join(thReloj,     NULL);
-    pthread_join(thEntrada,   NULL);
     pthread_join(thCreacion,  NULL);
 
     pthread_mutex_destroy(&ctx.mutexPrincipal);

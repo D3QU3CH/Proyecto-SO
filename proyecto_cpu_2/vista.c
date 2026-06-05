@@ -1,28 +1,6 @@
 #include <stdio.h>
 #include "vista.h"
 
-static const char *nomEstado(int e)
-{
-    switch (e) {
-        case ESTADO_LISTO:      return "LISTO";
-        case ESTADO_EJECUTANDO: return "EJECUTANDO";
-        case ESTADO_ESPERA_ES:  return "ESPERA_ES";
-        case ESTADO_TERMINADO:  return "TERMINADO";
-        default:                return "?";
-    }
-}
-
-static const char *nomDispES(int d)
-{
-    switch (d) {
-        case 0: return "Disco";
-        case 1: return "Pantalla";
-        case 2: return "Teclado";
-        case 3: return "Impresora";
-        default: return "Ninguno";
-    }
-}
-
 void vistaMostrarTablaGlobal(void)
 {
     TablaProcesos *t = &tablaSistema;
@@ -42,7 +20,7 @@ void vistaMostrarTablaGlobal(void)
     printf(" Desperdicio KB : %d\n", t->desperdicioTotal);
 }
 
-// 5 procesos con mas ciclos restantes (los mas rezagados)
+// Top 5 mas rezagados (mayor ciclosRestantes)
 void vistaMostrarMasRezagados(Cola *c)
 {
     printf("\n--- 5 PROCESOS MAS REZAGADOS ---\n");
@@ -52,8 +30,7 @@ void vistaMostrarMasRezagados(Cola *c)
         for (int i = 0; i < 5; i++) {
             if (!top[i] || p->ciclosRestantes > top[i]->ciclosRestantes) {
                 for (int j = 4; j > i; j--) top[j] = top[j-1];
-                top[i] = p;
-                break;
+                top[i] = p; break;
             }
         }
     }
@@ -64,7 +41,7 @@ void vistaMostrarMasRezagados(Cola *c)
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
-// 5 barras de aprovechamiento: estado actual + 4 anteriores
+// 5 barras de aprovechamiento: 4 anteriores + actual
 void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int histIdx)
 {
     int totalQ = 0, totalRafaga = 0, cnt = 0;
@@ -80,22 +57,20 @@ void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int hi
 
     printf("\n--- APROVECHAMIENTO CPU (RR, Q=%d) ---\n", tablaSistema.quantumActual);
 
-    // Mostrar los 4 anteriores del historico
     int indices[4], mostrar = 0;
     for (int i = 0; i < 4 && mostrar < 4; i++) {
         int idx = (histIdx - 1 - i + 100) % 100;
         if (histCiclo[idx] > 0) indices[mostrar++] = idx;
     }
-    for (int i = mostrar - 1; i >= 0; i--) {
+    for (int i = mostrar-1; i >= 0; i--) {
         int idx   = indices[i];
         int aprov = 100 - histDesp[idx];
         printf("  Ciclo %4d | Aprov:%3d%% [", histCiclo[idx], aprov);
-        for (int b = 0; b < 20; b++) printf("%c", b < aprov / 5 ? '#' : '.');
+        for (int b = 0; b < 20; b++) printf("%c", b < aprov/5 ? '#' : '.');
         printf("] Desp:%3d%%\n", histDesp[idx]);
     }
-    // Estado actual
     printf("  Ciclo %4d | Aprov:%3d%% [", tablaSistema.cicloActual, aprovActual);
-    for (int b = 0; b < 20; b++) printf("%c", b < aprovActual / 5 ? '#' : '.');
+    for (int b = 0; b < 20; b++) printf("%c", b < aprovActual/5 ? '#' : '.');
     printf("] Desp:%3d%% <-- ACTUAL\n", despActual);
 }
 
@@ -117,7 +92,7 @@ void vistaBienvenida(void)
     printf("  %d procesos | %d en ciclo | %d en solicitudes\n",
            TOTAL_PROCESOS, PROCESOS_EN_CICLO, PROCESOS_EN_SOLICITUD);
     printf("  Algoritmo inicial: FCFS\n");
-    printf("  Teclas: [x] cambiar algoritmo   [a] apropiativo RR   [q] salir\n\n");
+    printf("  Teclas: [x] cambiar algoritmo   [a] apropiativo   [q] salir\n\n");
 }
 
 void vistaCierre(int reloj, int terminados)

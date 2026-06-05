@@ -50,7 +50,7 @@ typedef struct {
     int  tipoProceso;      // 17  0=CPU-bound 1=ES-bound
     int  aprovechamiento;  // 18
     int  desperdicio;      // 19
-    int  dispositivoES;    // 20  -1=ninguno 0=disco 1=pantalla 2=teclado 3=impresora
+    int  dispositivoES;    // 20
     int  tiempoES;         // 21
     int  bloqueado;        // 22
     int  variable1;        // 23
@@ -64,7 +64,7 @@ typedef struct {
     int bloqueMemoriaKB;
     int desperdicioInterno;
 
-    // Crecimiento de memoria (lista 20 valores: 15 ceros + 5 entre 1-50)
+    // Crecimiento (15 ceros + 5 valores 1-50)
     int crecimientoMem[20];
     int indiceCrecimiento;
 
@@ -79,7 +79,6 @@ typedef struct {
 // Tabla del sistema - 20 variables
 typedef struct {
     Proceso tablaBCPs[TOTAL_PROCESOS];
-
     int totalProcesos;           //  1
     int procesosEnCiclo;         //  2
     int procesosEnSolicitud;     //  3
@@ -129,7 +128,7 @@ typedef struct {
     int       tamanio;
 } Cola;
 
-// Sistema E/S - 4 colas (disco x2, pantalla x4, teclado x8, impresora x12)
+// Sistema E/S - 4 dispositivos x2 x4 x8 x12
 typedef struct {
     Cola disco;
     Cola pantalla;
@@ -157,7 +156,6 @@ typedef struct {
 
 extern MemoriaBuddy memoriaBuddy;
 
-// Banco de palabras
 typedef struct {
     char palabras[MAX_PALABRAS][MAX_LEN_PALABRA];
     int  totalPalabras;
@@ -166,7 +164,6 @@ typedef struct {
 
 extern BancoPalabras bancoPalabras;
 
-// Pagina (RAM o SWAP)
 typedef struct {
     char palabras[PALABRAS_POR_PAGINA][MAX_LEN_PALABRA];
     int  numPalabras;
@@ -177,7 +174,6 @@ typedef struct {
     int  tiempoEntrada;
 } Pagina;
 
-// Memoria principal paginada
 typedef struct {
     Pagina marcos[MARCOS_MAX * TOTAL_PROCESOS];
     int    numMarcosTotal;
@@ -191,7 +187,6 @@ typedef struct {
 
 extern MemoriaPrincipal memoriaPrincipal;
 
-// Area SWAP
 typedef struct {
     Pagina paginas[MAX_PAGINAS_SWAP];
     int    numPaginas;
@@ -199,7 +194,6 @@ typedef struct {
 
 extern AreaSwap areaSwap;
 
-// Slot legacy
 typedef struct {
     int  ocupado;
     int  indiceProceso;
@@ -232,7 +226,6 @@ typedef struct {
     int       *algoritmo;
     int       *quantum;
     int       *procesoPrivilId;
-
     pthread_mutex_t mutexPrincipal;
     sem_t semDisco;
     sem_t semPantalla;
@@ -249,7 +242,7 @@ typedef struct {
     const char      *nombre;
 } ArgHiloES;
 
-// Prototipos modelo.c
+// Prototipos
 void    inicializarTablaSistema(void);
 void    poblarListas(Lista *enEjecucion, Lista *solicitudes);
 void    actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes, Cola *colaListos, SistemaES *es, int reloj);
@@ -264,6 +257,7 @@ void     encolar(Cola *c, Proceso *p);
 void     encolarAlFrente(Cola *c, Proceso *p);
 Proceso *desencolar(Cola *c);
 int      estaVaciaCola(Cola *c);
+void     moverAlFrenteCola(Cola *c, Proceso *p);
 
 void inicializarSistemaES(SistemaES *es);
 void asignarES(Proceso *p, SistemaES *es);
@@ -296,7 +290,7 @@ void calcularDesperdicioExterno(void);
 void actualizarPromedioFinalizados(int cicloActual);
 void mostrarEstadisticasMemoria(void);
 
-void procesarEntradaCPU(Proceso *p);
+void procesarEntradaCPU(Proceso *p, int reloj);
 void procesarTerminacion(Proceso *p);
 
 int  evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es);

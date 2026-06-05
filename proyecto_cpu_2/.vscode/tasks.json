@@ -2,9 +2,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Compilar y ejecutar C",
+      "label": "Compilar slave PVM",
       "type": "shell",
-      "command": "gcc *.c -o simulador && ./simulador",
+      "command": "gcc slave.c -o slave -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64 && cp slave ~/pvm3/bin/LINUX64/",
+      "group": "build",
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Compilar y ejecutar simulador",
+      "type": "shell",
+      "command": "gcc modelo.c controlador.c vista.c master.c main.c -o simulador -lpthread -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64 && ./simulador",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -12,6 +21,16 @@
       "problemMatcher": [
         "$gcc"
       ]
+    },
+    {
+      "label": "Compilar todo (slave + simulador)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Compilar slave PVM",
+        "Compilar y ejecutar simulador"
+      ],
+      "group": "build",
+      "problemMatcher": []
     }
   ]
 }
