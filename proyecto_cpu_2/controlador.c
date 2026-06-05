@@ -8,7 +8,7 @@
 #include "controlador.h"
 #include "vista.h"
 
-// ─── DETECCION DE TECLA SIN BLOQUEO ──────────────────────────────────────────
+/* ─── Detección de tecla sin bloqueo ───────────────────────────────────────── */
 static int hayTecla(void)
 {
     struct termios oldt, newt;
@@ -38,16 +38,20 @@ static char leerTecla(void)
     return c;
 }
 
-// ─── MANEJO DE ENTRADA ────────────────────────────────────────────────────────
-// Se llama en cada ciclo del loop principal (sin bloquear).
-// X: toggle FCFS <-> RR (en cualquier algoritmo)
-// A: apropiatividad - marcar proceso al frente siempre (en cualquier algoritmo)
+/* ─── Manejo de entrada ─────────────────────────────────────────────────────── */
 void manejarEntrada(ContextoHilos *ctx)
 {
     if (!hayTecla()) return;
     char tecla = leerTecla();
 
-    // ── CAMBIO MANUAL DE ALGORITMO ────────────────────────────────────────
+    /* ── Q: salir ──────────────────────────────────────────────────────────── */
+    if (tecla == 'q' || tecla == 'Q') {
+        printf("\n[Q] Terminando simulacion por solicitud del usuario...\n");
+        *ctx->terminado = 1;
+        return;
+    }
+
+    /* ── X: cambiar algoritmo ──────────────────────────────────────────────── */
     if (tecla == 'x' || tecla == 'X') {
         if (*ctx->algoritmo == ALG_FCFS) {
             printf("\n[X] Cambiar a Round Robin\nIngrese Quantum: ");
@@ -68,8 +72,7 @@ void manejarEntrada(ContextoHilos *ctx)
         logEvento("Cambio manual de algoritmo");
     }
 
-    // ── APROPIATIVIDAD (disponible en ambos algoritmos) ───────────────────
-    // El proceso marcado siempre va al frente de cola listos y cola E/S
+    /* ── A: apropiatividad ─────────────────────────────────────────────────── */
     if (tecla == 'a' || tecla == 'A') {
         vistaMostrarMasRezagados(ctx->colaListos);
         printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
@@ -81,16 +84,12 @@ void manejarEntrada(ContextoHilos *ctx)
         for (int i = 0; i < TOTAL_PROCESOS; i++) {
             Proceso *p = &tablaSistema.tablaBCPs[i];
             if (strcmp(p->id, idBuf) == 0 && p->estado != ESTADO_TERMINADO) {
-                // Quitar apropiatividad al anterior
                 if (*ctx->procesoPrivilId >= 0)
                     tablaSistema.tablaBCPs[*ctx->procesoPrivilId].esApropiativo = 0;
                 p->esApropiativo      = 1;
                 *ctx->procesoPrivilId = i;
 
-                // Si ya esta en cola listos, moverlo al frente ahora mismo
                 moverAlFrenteCola(ctx->colaListos, p);
-
-                // Si ya esta en alguna cola E/S, moverlo al frente tambien
                 moverAlFrenteCola(&ctx->es->disco,     p);
                 moverAlFrenteCola(&ctx->es->pantalla,  p);
                 moverAlFrenteCola(&ctx->es->teclado,   p);
@@ -107,7 +106,7 @@ void manejarEntrada(ContextoHilos *ctx)
     }
 }
 
-// ─── HELPER: poner apropiativo al frente antes de desencolar ─────────────────
+/* ─── Helper: proceso apropiativo siempre al frente ───────────────────────── */
 static void ponerApropiatvioAlFrente(Cola *colaListos)
 {
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
@@ -118,7 +117,10 @@ static void ponerApropiatvioAlFrente(Cola *colaListos)
     }
 }
 
-// ─── FCFS ─────────────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   FCFS  —  CORREGIDO
+   La terminación se verifica ANTES de ejecutar y también DESPUÉS.
+   ═══════════════════════════════════════════════════════════════════════════ */
 void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int reloj)
 {
     if (estaVaciaCola(colaListos)) return;
@@ -128,21 +130,32 @@ void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int rel
     Proceso *p = desencolar(colaListos);
     if (!p) return;
 
-    procesarEntradaCPU(p, reloj);
-    tablaSistema.totalCambiosContexto++;
-
+    /* ─ Si ya terminó (ciclosRestantes == 0 al llegar) terminar de inmediato ─ */
     if (p->ciclosRestantes <= 0) {
         if (p->esApropiativo) {
             printf("[FCFS] Proceso %s termino (era apropiativo)\n", p->id);
             *procesoPrivilId = -1;
         }
-        procesarTerminacion(p);
+        procesarTerminacion(p, reloj);
         printf("[FCFS] %s TERMINO\n", p->id);
+        tablaSistema.totalCambiosContexto++;
+        return;
+    }
+
+    procesarEntradaCPU(p, reloj);
+    tablaSistema.totalCambiosContexto++;
+
+    if (p->ciclosRestantes <= 0) {
+        /* Terminó en esta ráfaga */
+        if (p->esApropiativo) {
+            printf("[FCFS] Proceso %s termino (era apropiativo)\n", p->id);
+            *procesoPrivilId = -1;
+        }
+        procesarTerminacion(p, reloj);
+        printf("[FCFS] %s TERMINO (ciclos=%d)\n", p->id, p->ciclosTotales);
     } else if (p->tipoProceso == 1 && rand() % 3 == 0) {
-        // ES-bound: va a E/S (asignarES ya pone al frente si es apropiativo)
         asignarES(p, es);
     } else {
-        // CPU-bound: vuelve a cola
         p->estado = ESTADO_LISTO;
         if (p->esApropiativo)
             encolarAlFrente(colaListos, p);
@@ -151,7 +164,9 @@ void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int rel
     }
 }
 
-// ─── ROUND ROBIN ──────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROUND ROBIN  —  CORREGIDO
+   ═══════════════════════════════════════════════════════════════════════════ */
 void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
                 int *quantum, int *iteracionesRR,
                 int histDesp[], int histCiclo[], int *histIdx, int reloj)
@@ -162,6 +177,18 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
 
     Proceso *p = desencolar(colaListos);
     if (!p) return;
+
+    /* ─ Si ya terminó al llegar ─────────────────────────────────────────── */
+    if (p->ciclosRestantes <= 0) {
+        if (p->esApropiativo) {
+            printf("[RR] Proceso %s termino (era apropiativo)\n", p->id);
+            *procesoPrivilId = -1;
+        }
+        procesarTerminacion(p, reloj);
+        printf("[RR] %s TERMINO\n", p->id);
+        tablaSistema.totalCambiosContexto++;
+        return;
+    }
 
     procesarEntradaCPU(p, reloj);
     tablaSistema.totalCambiosContexto++;
@@ -182,14 +209,15 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
     *quantum = tablaSistema.quantumActual;
 
     if (p->ciclosRestantes <= 0) {
+        /* Terminó en esta ráfaga */
         if (p->esApropiativo) {
             printf("[RR] Proceso %s termino (era apropiativo)\n", p->id);
             *procesoPrivilId = -1;
         }
-        procesarTerminacion(p);
-        printf("[RR] %s TERMINO\n", p->id);
-    } else if (p->rafagaActual > q) {
-        // Rafaga supero quantum: se interrumpe, vuelve a cola
+        procesarTerminacion(p, reloj);
+        printf("[RR] %s TERMINO (ciclos=%d)\n", p->id, p->ciclosTotales);
+    } else if (p->rafagaActual >= q) {
+        /* Ráfaga superó o igualó quantum: se interrumpe, vuelve a cola */
         p->estado = ESTADO_LISTO;
         p->restanteQuantum = p->rafagaActual - ejecuta;
         if (p->esApropiativo)
@@ -197,23 +225,30 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
         else
             encolar(colaListos, p);
     } else {
-        // Uso menos que el quantum: va a E/S
-        // asignarES pone al frente de la cola E/S si es apropiativo
+        /* Usó menos que el quantum: va a E/S */
         asignarES(p, es);
     }
 }
 
-// ─── HILO E/S ─────────────────────────────────────────────────────────────────
-// Cuando un proceso termina E/S vuelve a colaListos.
-// Apropiativo siempre al frente.
+/* ═══════════════════════════════════════════════════════════════════════════
+   HILO E/S  —  CORREGIDO
+   El tick de E/S ahora descuenta un valor proporcional al tiempo real
+   transcurrido, en lugar de decrementar de 1 en 1 por semáforo.
+   Cada vez que el semáforo se dispara (cada ~50ms del hilo reloj) se
+   descuentan TICKS_POR_CICLO_ES ciclos de E/S, lo que hace que los procesos
+   salgan de E/S en tiempo razonable.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#define TICKS_ES 10  /* cuántos ciclos de E/S se consumen por cada tick del reloj */
+
 void procesarColaES(Cola *colaES, Cola *colaListos)
 {
     int n = colaES->tamanio;
     while (n--) {
         Proceso *p = desencolar(colaES);
         if (!p) continue;
-        p->tiempoES--;
+        p->tiempoES -= TICKS_ES;
         if (p->tiempoES <= 0) {
+            p->tiempoES      = 0;
             p->dispositivoES = -1;
             p->estado        = ESTADO_LISTO;
             if (p->esApropiativo)
@@ -243,7 +278,7 @@ void *hiloReloj(void *arg)
 {
     ContextoHilos *ctx = (ContextoHilos *)arg;
     while (!(*ctx->terminado)) {
-        usleep(50000);
+        usleep(50000);   /* 50 ms */
         pthread_mutex_lock(&ctx->mutexPrincipal);
         sem_post(&ctx->semDisco);
         sem_post(&ctx->semPantalla);
@@ -254,7 +289,7 @@ void *hiloReloj(void *arg)
     return NULL;
 }
 
-// ─── AJUSTE AUTOMATICO QUANTUM (cada 20 iteraciones RR) ──────────────────────
+/* ─── Ajuste automático de quantum (cada 20 iteraciones RR) ─────────────── */
 void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR)
 {
     if (iteracionesRR % 20 != 0) return;
@@ -279,7 +314,7 @@ void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR
     tablaSistema.quantumActual = q;
 }
 
-// ─── ENVEJECIMIENTO: top 5 con mas veces en CPU ───────────────────────────────
+/* ─── Envejecimiento: top 5 con más veces en CPU ────────────────────────── */
 void mostrarEnvejecimiento(Cola *colaListos)
 {
     printf("\n--- TOP 5 ENVEJECIMIENTO ---\n");
@@ -288,19 +323,19 @@ void mostrarEnvejecimiento(Cola *colaListos)
         Proceso *p = n->proceso;
         for (int i = 0; i < 5; i++) {
             if (!top[i] || p->vecesEnCPU > top[i]->vecesEnCPU) {
-                for (int j = 4; j > i; j--) top[j] = top[j-1];
+                for (int j = 4; j > i; j--) top[j] = top[j - 1];
                 top[i] = p; break;
             }
         }
     }
     for (int i = 0; i < 5 && top[i]; i++)
         printf("  %d. %-8s | vecesEnCPU:%3d | ciclosRest:%6d | espera:%d\n",
-               i+1, top[i]->id, top[i]->vecesEnCPU,
+               i + 1, top[i]->id, top[i]->vecesEnCPU,
                top[i]->ciclosRestantes, top[i]->tiempoEspera);
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
-// ─── DESPERDICIADORES: top 5 con mayor (quantum - rafaga) ────────────────────
+/* ─── Desperdiciadores: top 5 con mayor (quantum − ráfaga) ─────────────── */
 void mostrarDesperdiciadores(Cola *colaListos)
 {
     printf("\n--- TOP 5 DESPERDICIADORES ---\n");
@@ -314,7 +349,7 @@ void mostrarDesperdiciadores(Cola *colaListos)
             int despTop = tablaSistema.quantumActual - top[i]->rafagaActual;
             if (despTop < 0) despTop = 0;
             if (desp > despTop) {
-                for (int j = 4; j > i; j--) top[j] = top[j-1];
+                for (int j = 4; j > i; j--) top[j] = top[j - 1];
                 top[i] = p; break;
             }
         }
@@ -323,13 +358,15 @@ void mostrarDesperdiciadores(Cola *colaListos)
         int desp = tablaSistema.quantumActual - top[i]->rafagaActual;
         if (desp < 0) desp = 0;
         printf("  %d. %-8s | rafaga:%3d | Q:%3d | desperdicio:%3d\n",
-               i+1, top[i]->id, top[i]->rafagaActual,
+               i + 1, top[i]->id, top[i]->rafagaActual,
                tablaSistema.quantumActual, desp);
     }
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
-// ─── PERSISTENCIA ─────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   PERSISTENCIA
+   ═══════════════════════════════════════════════════════════════════════════ */
 void guardarBCPs(Lista *enEjecucion, const char *ruta)
 {
     FILE *f = fopen(ruta, "a");

@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
 #include "modelo.h"
 #include "vista.h"
 #include "controlador.h"
@@ -9,7 +12,7 @@
 
 static int histDesp[100];
 static int histCiclo[100];
-static int histIdx     = 0;
+static int histIdx       = 0;
 static int iteracionesRR = 0;
 
 typedef struct {
@@ -18,9 +21,6 @@ typedef struct {
     int             *terminado;
 } ArgHiloCreacion;
 
-// Hilo que crea procesos de solicitudes con sleep aleatorio 1-50ms
-// Emula llegada escalonada: cuando sale el primer proceso del CPU
-// probablemente ya llegaron 2-5 mas
 void *hiloCreacionProcesos(void *arg)
 {
     ArgHiloCreacion *a = (ArgHiloCreacion *)arg;
@@ -36,6 +36,33 @@ void *hiloCreacionProcesos(void *arg)
         pthread_mutex_unlock(a->mutex);
     }
     return NULL;
+}
+
+/* Lee una tecla sin bloquear. Devuelve 1 y escribe en *out si hay tecla. */
+static int teclaDisponible(char *out)
+{
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    newt.c_cc[VMIN]  = 0;
+    newt.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    int c = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    if (c != EOF) { *out = (char)c; return 1; }
+    return 0;
+}
+
+/* Pone el terminal en modo normal (canónico) para leer con scanf */
+static void modoNormal(void)
+{
+    struct termios t;
+    tcgetattr(STDIN_FILENO, &t);
+    t.c_lflag |= (ICANON | ECHO);
+    t.c_cc[VMIN]  = 1;
+    t.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
 
 int main(void)
@@ -56,7 +83,6 @@ int main(void)
 
     poblarListas(&enEjecucion, &solicitudes);
 
-    // Asignar memoria a los 150 del ciclo inicial
     for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (asignarMemoriaBuddy(p, p->memoriaUsadaKB) < 0) continue;
@@ -65,11 +91,9 @@ int main(void)
         p->yaIngresado = 1;
     }
 
-    // Cola de listos: orden por tiempo de llegada (FCFS inicial)
     Cola colaListos;
     inicializarCola(&colaListos);
 
-    // Encolar los del ciclo que llegan en t=0
     for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (p->tiempoLlegada == 0) {
@@ -90,74 +114,120 @@ int main(void)
     tablaSistema.algoritmoActual = ALG_FCFS;
     tablaSistema.quantumActual   = quantum;
 
-    ContextoHilos ctx;
-    ctx.procesosEnEjecucion = &enEjecucion;
-    ctx.solicitudes         = &solicitudes;
-    ctx.colaListos          = &colaListos;
-    ctx.es                  = &es;
-    ctx.reloj               = &reloj;
-    ctx.terminado           = &terminado;
-    ctx.algoritmo           = &algoritmo;
-    ctx.quantum             = &quantum;
-    ctx.procesoPrivilId     = &procesoPrivilId;
+    pthread_mutex_t mutex;
+    pthread_mutex_init(&mutex, NULL);
 
-    pthread_mutex_init(&ctx.mutexPrincipal, NULL);
-    sem_init(&ctx.semDisco,     0, 0);
-    sem_init(&ctx.semPantalla,  0, 0);
-    sem_init(&ctx.semTeclado,   0, 0);
-    sem_init(&ctx.semImpresora, 0, 0);
-
-    ArgHiloES argDisco     = {&es.disco,     &colaListos, &ctx.mutexPrincipal, &ctx.semDisco,     &terminado, "Disco"};
-    ArgHiloES argPantalla  = {&es.pantalla,  &colaListos, &ctx.mutexPrincipal, &ctx.semPantalla,  &terminado, "Pantalla"};
-    ArgHiloES argTeclado   = {&es.teclado,   &colaListos, &ctx.mutexPrincipal, &ctx.semTeclado,   &terminado, "Teclado"};
-    ArgHiloES argImpresora = {&es.impresora, &colaListos, &ctx.mutexPrincipal, &ctx.semImpresora, &terminado, "Impresora"};
-    ArgHiloCreacion argCreacion = {&solicitudes, &ctx.mutexPrincipal, &terminado};
-
-    pthread_t thDisco, thPantalla, thTeclado, thImpresora, thReloj, thCreacion;
-    pthread_create(&thDisco,     NULL, hiloDispositivoES,    &argDisco);
-    pthread_create(&thPantalla,  NULL, hiloDispositivoES,    &argPantalla);
-    pthread_create(&thTeclado,   NULL, hiloDispositivoES,    &argTeclado);
-    pthread_create(&thImpresora, NULL, hiloDispositivoES,    &argImpresora);
-    pthread_create(&thReloj,     NULL, hiloReloj,            &ctx);
-    pthread_create(&thCreacion,  NULL, hiloCreacionProcesos, &argCreacion);
+    ArgHiloCreacion argCreacion = {&solicitudes, &mutex, &terminado};
+    pthread_t thCreacion;
+    pthread_create(&thCreacion, NULL, hiloCreacionProcesos, &argCreacion);
 
     vistaBienvenida();
     logEvento("Simulacion iniciada");
 
     while (!terminado) {
 
-        // Detectar teclado sin bloquear (X=cambiar algoritmo, A=apropiativo, Q=salir)
-        manejarEntrada(&ctx);
+        /* ── PASO 1: leer tecla SIN mutex ─────────────────────────────────── */
+        char tecla = 0;
+        int  hayTecla = teclaDisponible(&tecla);
 
-        if (*ctx.terminado) break;
+        /* ── PASO 2: si hay tecla que necesita input del usuario,
+               procesarla ANTES de tomar el mutex                   ───────── */
+        if (hayTecla) {
+            if (tecla == 'q' || tecla == 'Q') {
+                printf("\n[Q] Terminando simulacion...\n");
+                terminado = 1;
+                break;
+            }
 
-        pthread_mutex_lock(&ctx.mutexPrincipal);
+            if (tecla == 'x' || tecla == 'X') {
+                /* Cambio de algoritmo: necesita scanf → modo normal ANTES del mutex */
+                modoNormal();
+                int nuevoAlg, nuevoQ = quantum;
+                if (algoritmo == ALG_FCFS) {
+                    printf("\n[X] Cambiar a Round Robin\nIngrese Quantum (>0): ");
+                    fflush(stdout);
+                    if (scanf("%d", &nuevoQ) != 1 || nuevoQ <= 0) nuevoQ = 20;
+                    nuevoAlg = ALG_RR;
+                } else {
+                    nuevoAlg = ALG_FCFS;
+                }
+                /* Ahora sí tomamos el mutex para actualizar estado */
+                pthread_mutex_lock(&mutex);
+                algoritmo = nuevoAlg;
+                quantum   = nuevoQ;
+                tablaSistema.algoritmoActual = nuevoAlg;
+                tablaSistema.quantumActual   = nuevoQ;
+                if (nuevoAlg == ALG_RR)
+                    printf("[X] Algoritmo -> RR (Q=%d)\n", nuevoQ);
+                else
+                    printf("\n[X] Algoritmo -> FCFS\n");
+                logEvento("Cambio manual de algoritmo");
+                pthread_mutex_unlock(&mutex);
+            }
+
+            if (tecla == 'a' || tecla == 'A') {
+                modoNormal();
+                /* Mostrar rezagados no necesita mutex (solo lectura rápida) */
+                vistaMostrarMasRezagados(&colaListos);
+                printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
+                fflush(stdout);
+                char idBuf[32] = {0};
+                if (scanf("%31s", idBuf) == 1) {
+                    pthread_mutex_lock(&mutex);
+                    int encontrado = 0;
+                    for (int i = 0; i < TOTAL_PROCESOS; i++) {
+                        Proceso *p = &tablaSistema.tablaBCPs[i];
+                        if (strcmp(p->id, idBuf) == 0 &&
+                            p->estado != ESTADO_TERMINADO) {
+                            if (procesoPrivilId >= 0)
+                                tablaSistema.tablaBCPs[procesoPrivilId].esApropiativo = 0;
+                            p->esApropiativo = 1;
+                            procesoPrivilId  = i;
+                            moverAlFrenteCola(&colaListos,   p);
+                            moverAlFrenteCola(&es.disco,     p);
+                            moverAlFrenteCola(&es.pantalla,  p);
+                            moverAlFrenteCola(&es.teclado,   p);
+                            moverAlFrenteCola(&es.impresora, p);
+                            printf("[A] Proceso %s marcado como apropiativo\n", p->id);
+                            logEvento("Proceso marcado como apropiativo");
+                            encontrado = 1;
+                            break;
+                        }
+                    }
+                    if (!encontrado)
+                        printf("[A] Proceso '%s' no encontrado\n", idBuf);
+                    pthread_mutex_unlock(&mutex);
+                }
+            }
+        }
+
+        /* ── PASO 3: lógica del simulador ─────────────────────────────────── */
+        pthread_mutex_lock(&mutex);
 
         reloj++;
         resetarBitsR(reloj);
 
-        // Encolar procesos del ciclo segun tiempoLlegada
         for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
             Proceso *p = n->proceso;
             if (!p->yaIngresado && p->tiempoLlegada <= reloj) {
                 if (p->esApropiativo) encolarAlFrente(&colaListos, p);
                 else                  encolar(&colaListos, p);
-                p->estado = ESTADO_LISTO;
+                p->estado      = ESTADO_LISTO;
                 p->yaIngresado = 1;
             }
         }
 
-        // Encolar solicitudes que llegaron (se eliminan de la lista)
         ingresarProcesosNuevos(&solicitudes, &colaListos, reloj);
-
-        // Incrementar espera de los que estan en cola listos
         actualizarEspera(&colaListos);
 
-        // Redimension automatica cada 300 ciclos
+        procesarColaES(&es.disco,     &colaListos);
+        procesarColaES(&es.pantalla,  &colaListos);
+        procesarColaES(&es.teclado,   &colaListos);
+        procesarColaES(&es.impresora, &colaListos);
+
         if (reloj % 300 == 0)
             redimensionarMemoriaPrincipal(&enEjecucion, reloj);
 
-        // Cambio automatico de algoritmo cada 50 ciclos
         if (reloj % 50 == 0) {
             int nuevoAlg = evaluarCambioAlgoritmo(&colaListos, &es);
             if (nuevoAlg != algoritmo) {
@@ -170,7 +240,6 @@ int main(void)
             }
         }
 
-        // Ejecutar algoritmo activo
         if (!estaVaciaCola(&colaListos)) {
             if (algoritmo == ALG_FCFS)
                 ejecutarFCFS(&colaListos, &es, &procesoPrivilId, reloj);
@@ -182,16 +251,17 @@ int main(void)
 
         calcularDesperdicioExterno();
         actualizarPromedioFinalizados(reloj);
-        actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
+                                    &colaListos, &es, reloj);
 
-        // Checkpoint cada 100 ciclos
         if (reloj % 100 == 0) {
             ejecutarMasterPVM(&enEjecucion, quantum);
             vistaMostrarTablaGlobal();
             vistaEstadoES(&es);
             mostrarEstadisticasMemoria();
             if (algoritmo == ALG_RR) {
-                vistaBarrasAprovechamiento(&colaListos, histDesp, histCiclo, histIdx);
+                vistaBarrasAprovechamiento(&colaListos,
+                                           histDesp, histCiclo, histIdx);
                 mostrarEnvejecimiento(&colaListos);
                 mostrarDesperdiciadores(&colaListos);
             }
@@ -200,36 +270,21 @@ int main(void)
             logEvento("Checkpoint");
         }
 
-        // Condicion de fin: todos terminaron y no hay mas en colas
         int activos = 0;
         for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
             if (n->proceso->estado != ESTADO_TERMINADO) activos++;
-        if (activos == 0 && solicitudes.tamanio == 0 && estaVaciaCola(&colaListos))
+        if (activos == 0 && solicitudes.tamanio == 0 &&
+            estaVaciaCola(&colaListos))
             terminado = 1;
 
-        pthread_mutex_unlock(&ctx.mutexPrincipal);
+        pthread_mutex_unlock(&mutex);
+
         usleep(1000);
     }
 
-    // Cierre limpio
     terminado = 1;
-    sem_post(&ctx.semDisco);
-    sem_post(&ctx.semPantalla);
-    sem_post(&ctx.semTeclado);
-    sem_post(&ctx.semImpresora);
-
-    pthread_join(thDisco,     NULL);
-    pthread_join(thPantalla,  NULL);
-    pthread_join(thTeclado,   NULL);
-    pthread_join(thImpresora, NULL);
-    pthread_join(thReloj,     NULL);
-    pthread_join(thCreacion,  NULL);
-
-    pthread_mutex_destroy(&ctx.mutexPrincipal);
-    sem_destroy(&ctx.semDisco);
-    sem_destroy(&ctx.semPantalla);
-    sem_destroy(&ctx.semTeclado);
-    sem_destroy(&ctx.semImpresora);
+    pthread_join(thCreacion, NULL);
+    pthread_mutex_destroy(&mutex);
 
     guardarBCPs(&enEjecucion, "bcps.log");
     guardarVariablesGlobales("variables.log");

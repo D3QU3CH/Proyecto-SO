@@ -29,81 +29,82 @@
 #define ESTADO_ESPERA_ES  2
 #define ESTADO_TERMINADO  3
 
-// BCP - 25 variables
+/* ─── BCP – 25 variables obligatorias ─────────────────────────────────────── */
 typedef struct {
-    char id[12];           //  1
-    char nombre[50];       //  2
-    int  tiempoLlegada;    //  3
-    int  ciclosTotales;    //  4
-    int  ciclosRestantes;  //  5
-    int  rafagaActual;     //  6
-    int  tiempoEjecucion;  //  7
-    int  tiempoEspera;     //  8
-    int  tiempoRespuesta;  //  9
-    int  tiempoRetorno;    // 10
-    int  estado;           // 11
-    int  vecesEnCPU;       // 12
-    int  iteraciones;      // 13
-    int  restanteQuantum;  // 14
-    int  cambiosContexto;  // 15
-    int  esApropiativo;    // 16
-    int  tipoProceso;      // 17  0=CPU-bound 1=ES-bound
-    int  aprovechamiento;  // 18
-    int  desperdicio;      // 19
-    int  dispositivoES;    // 20
-    int  tiempoES;         // 21
-    int  bloqueado;        // 22
-    int  variable1;        // 23
-    int  variable2;        // 24
-    int  fallosPagina;     // 25
+    char id[12];           /*  1 */
+    char nombre[50];       /*  2 */
+    int  tiempoLlegada;    /*  3 */
+    int  ciclosTotales;    /*  4 */
+    int  ciclosRestantes;  /*  5 */
+    int  rafagaActual;     /*  6 */
+    int  tiempoEjecucion;  /*  7 */
+    int  tiempoEspera;     /*  8 */
+    int  tiempoRespuesta;  /*  9 */
+    int  tiempoRetorno;    /* 10 */
+    int  estado;           /* 11 */
+    int  vecesEnCPU;       /* 12 */
+    int  iteraciones;      /* 13 */
+    int  restanteQuantum;  /* 14 */
+    int  cambiosContexto;  /* 15 */
+    int  esApropiativo;    /* 16 */
+    int  tipoProceso;      /* 17  0=CPU-bound  1=ES-bound */
+    int  aprovechamiento;  /* 18 */
+    int  desperdicio;      /* 19 */
+    int  dispositivoES;    /* 20 */
+    int  tiempoES;         /* 21 */
+    int  bloqueado;        /* 22 */
+    int  variable1;        /* 23 */
+    int  variable2;        /* 24 */
+    int  fallosPagina;     /* 25 */
 
-    int yaIngresado;
+    int  yaIngresado;
 
-    // Buddy System
-    int memoriaUsadaKB;
-    int bloqueMemoriaKB;
-    int desperdicioInterno;
+    /* Buddy System */
+    int  memoriaUsadaKB;
+    int  bloqueMemoriaKB;
+    int  desperdicioInterno;
+    int  idxBuddy;          /* índice en bloques[] para liberar correctamente */
 
-    // Crecimiento (15 ceros + 5 valores 1-50)
-    int crecimientoMem[20];
-    int indiceCrecimiento;
+    /* Crecimiento (15 ceros + 5 valores 1-50) */
+    int  crecimientoMem[20];
+    int  indiceCrecimiento;
 
-    // Paginacion NRU
-    int numMarcos;
-    int numPaginas;
-    int paginasEnRAM[MAX_PAGINAS_PROCESO];
-    int bitReferencia[MAX_PAGINAS_PROCESO];
-    int bitModificado[MAX_PAGINAS_PROCESO];
+    /* Paginación NRU */
+    int  numMarcos;
+    int  numPaginas;
+    int  paginasEnRAM[MAX_PAGINAS_PROCESO];
+    int  bitReferencia[MAX_PAGINAS_PROCESO];
+    int  bitModificado[MAX_PAGINAS_PROCESO];
 } Proceso;
 
-// Tabla del sistema - 20 variables
+/* ─── Tabla del sistema – 20 variables obligatorias ───────────────────────── */
 typedef struct {
     Proceso tablaBCPs[TOTAL_PROCESOS];
-    int totalProcesos;           //  1
-    int procesosEnCiclo;         //  2
-    int procesosEnSolicitud;     //  3
-    int procesosEnColaListos;    //  4
-    int procesosEjecutando;      //  5
-    int procesosEnES;            //  6
-    int procesosTerminados;      //  7
-    int procesosBloqueados;      //  8
-    int algoritmoActual;         //  9
-    int quantumActual;           // 10
-    int cicloActual;             // 11
-    int totalCambiosContexto;    // 12
-    int totalFallosPagina;       // 13
-    int sumaEspera;              // 14
-    int sumaCiclosRestantes;     // 15
-    int promedioEspera;          // 16
-    int promedioCiclos;          // 17
-    int procesosIngresadosDinam; // 18
-    int memoriaLibreKB;          // 19
-    int desperdicioTotal;        // 20
+    int totalProcesos;           /*  1 */
+    int procesosEnCiclo;         /*  2 */
+    int procesosEnSolicitud;     /*  3 */
+    int procesosEnColaListos;    /*  4 */
+    int procesosEjecutando;      /*  5 */
+    int procesosEnES;            /*  6 */
+    int procesosTerminados;      /*  7 */
+    int procesosBloqueados;      /*  8 */
+    int algoritmoActual;         /*  9 */
+    int quantumActual;           /* 10 */
+    int cicloActual;             /* 11 */
+    int totalCambiosContexto;    /* 12 */
+    int totalFallosPagina;       /* 13 */
+    int sumaEspera;              /* 14 */
+    int sumaCiclosRestantes;     /* 15 */
+    int promedioEspera;          /* 16 */
+    int promedioCiclos;          /* 17 */
+    int procesosIngresadosDinam; /* 18 */
+    int memoriaLibreKB;          /* 19 */
+    int desperdicioTotal;        /* 20 */
 } TablaProcesos;
 
 extern TablaProcesos tablaSistema;
 
-// Lista doblemente enlazada
+/* ─── Lista doblemente enlazada ────────────────────────────────────────────── */
 typedef struct Nodo {
     Proceso     *proceso;
     struct Nodo *siguiente;
@@ -116,7 +117,7 @@ typedef struct {
     int   tamanio;
 } Lista;
 
-// Cola FIFO
+/* ─── Cola FIFO ────────────────────────────────────────────────────────────── */
 typedef struct NodoCola {
     Proceso         *proceso;
     struct NodoCola *siguiente;
@@ -128,7 +129,7 @@ typedef struct {
     int       tamanio;
 } Cola;
 
-// Sistema E/S - 4 dispositivos x2 x4 x8 x12
+/* ─── Sistema E/S – 4 dispositivos ────────────────────────────────────────── */
 typedef struct {
     Cola disco;
     Cola pantalla;
@@ -136,17 +137,17 @@ typedef struct {
     Cola impresora;
 } SistemaES;
 
-// Buddy System
+/* ─── Buddy System ─────────────────────────────────────────────────────────── */
 typedef struct BloqueBS {
     int tamanioKB;
     int baseDir;
     int libre;
     int indexProceso;
-    struct BloqueBS *socio;
+    int socioIdx;           /* índice del socio en el array (−1 si no tiene) */
 } BloqueBS;
 
 typedef struct {
-    BloqueBS        bloques[512];
+    BloqueBS        bloques[1024];   /* más espacio para divisiones repetidas */
     int             numBloques;
     int             memoriaLibreKB;
     int             memoriaUsadaKB;
@@ -156,6 +157,7 @@ typedef struct {
 
 extern MemoriaBuddy memoriaBuddy;
 
+/* ─── Banco de palabras ────────────────────────────────────────────────────── */
 typedef struct {
     char palabras[MAX_PALABRAS][MAX_LEN_PALABRA];
     int  totalPalabras;
@@ -164,6 +166,7 @@ typedef struct {
 
 extern BancoPalabras bancoPalabras;
 
+/* ─── Paginación + área SWAP ───────────────────────────────────────────────── */
 typedef struct {
     char palabras[PALABRAS_POR_PAGINA][MAX_LEN_PALABRA];
     int  numPalabras;
@@ -194,6 +197,7 @@ typedef struct {
 
 extern AreaSwap areaSwap;
 
+/* ─── Memoria Legacy (slots) ───────────────────────────────────────────────── */
 typedef struct {
     int  ocupado;
     int  indiceProceso;
@@ -215,7 +219,7 @@ typedef struct {
 
 extern MemoriaPrincipalLegacy memoriaPrincipalLegacy;
 
-// Contexto de hilos
+/* ─── Contexto de hilos ────────────────────────────────────────────────────── */
 typedef struct {
     Lista     *procesosEnEjecucion;
     Lista     *solicitudes;
@@ -242,10 +246,11 @@ typedef struct {
     const char      *nombre;
 } ArgHiloES;
 
-// Prototipos
+/* ─── Prototipos ───────────────────────────────────────────────────────────── */
 void    inicializarTablaSistema(void);
 void    poblarListas(Lista *enEjecucion, Lista *solicitudes);
-void    actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes, Cola *colaListos, SistemaES *es, int reloj);
+void    actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
+                                    Cola *colaListos, SistemaES *es, int reloj);
 
 void    inicializarLista(Lista *l);
 void    insertarEnLista(Lista *l, Proceso *p);
@@ -291,7 +296,7 @@ void actualizarPromedioFinalizados(int cicloActual);
 void mostrarEstadisticasMemoria(void);
 
 void procesarEntradaCPU(Proceso *p, int reloj);
-void procesarTerminacion(Proceso *p);
+void procesarTerminacion(Proceso *p, int reloj);
 
 int  evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es);
 
