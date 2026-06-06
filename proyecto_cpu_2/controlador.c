@@ -1,3 +1,8 @@
+/* controlador.c — CORREGIDO
+ * Bug fix: el flush de residuos del raw-mode ahora ocurre ANTES de llamar
+ * termBlocking(), y el mutex se suelta mientras se espera input del usuario.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,28 +43,39 @@ static char leerTecla(void)
     return c;
 }
 
-/* Lee una línea en modo bloqueante normal (para quantum e ID) */
+/*
+ * leerLinea — modo bloqueante canónico para leer quantum e ID.
+ * FIX: primero drena residuos en O_NONBLOCK, LUEGO pone el fd bloqueante.
+ */
 static int leerLinea(char *buf, int maxlen)
 {
-    /* Restaurar modo canónico con eco para que el usuario pueda escribir */
+    /* 1. Drenar residuos del raw-mode ANTES de poner fd bloqueante */
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);   /* asegurar nonblock */
+    {
+        int c;
+        while ((c = getchar()) != EOF && c != -1 && c != '\n' && c != '\0')
+            ;   /* descarta basura; retorna EOF inmediato cuando no hay más */
+    }
+
+    /* 2. Ahora sí: modo canónico bloqueante con eco */
     struct termios t;
     tcgetattr(STDIN_FILENO, &t);
     t.c_lflag |= (ICANON | ECHO);
     t.c_cc[VMIN]  = 1;
     t.c_cc[VTIME] = 0;
-    /* Quitar O_NONBLOCK si estuviera puesto */
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);  /* quitar O_NONBLOCK */
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
     fflush(stdout);
 
+    /* 3. Leer la línea real del usuario */
     if (fgets(buf, maxlen, stdin) == NULL) { buf[0] = '\0'; return 0; }
     int len = (int)strlen(buf);
     if (len > 0 && buf[len-1] == '\n') buf[--len] = '\0';
     return len;
 }
 
-/* ─── Manejo de entrada ─────────────────────────────────────────────────────── */
+/* ─── Manejo de entrada (usado desde ContextoHilos, versión alternativa) ──── */
 void manejarEntrada(ContextoHilos *ctx)
 {
     if (!hayTecla()) return;
@@ -74,13 +90,19 @@ void manejarEntrada(ContextoHilos *ctx)
 
     /* ── X: cambiar algoritmo ──────────────────────────────────────────────── */
     if (tecla == 'x' || tecla == 'X') {
-        /* Tomar mutex: pausa el loop de simulacion mientras escribimos */
+        /* FIX: soltamos el mutex ANTES de leer, lo retomamos después */
         pthread_mutex_lock(&ctx->mutexPrincipal);
 
         if (*ctx->algoritmo == ALG_FCFS) {
             char buf[64] = {0};
             printf("\n[X] Cambiar a Round Robin\nIngrese Quantum (>0): ");
+            fflush(stdout);
+
+            /* Soltar mutex mientras el usuario escribe */
+            pthread_mutex_unlock(&ctx->mutexPrincipal);
             leerLinea(buf, sizeof(buf));
+            pthread_mutex_lock(&ctx->mutexPrincipal);
+
             int q = atoi(buf);
             if (q <= 0) q = 20;
             *ctx->algoritmo              = ALG_RR;
@@ -99,13 +121,17 @@ void manejarEntrada(ContextoHilos *ctx)
 
     /* ── A: apropiatividad ─────────────────────────────────────────────────── */
     if (tecla == 'a' || tecla == 'A') {
-        /* Tomar mutex: pausa el loop de simulacion mientras escribimos */
         pthread_mutex_lock(&ctx->mutexPrincipal);
 
         vistaMostrarMasRezagados(ctx->colaListos);
         char idBuf[32] = {0};
         printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
+        fflush(stdout);
+
+        /* Soltar mutex mientras el usuario escribe */
+        pthread_mutex_unlock(&ctx->mutexPrincipal);
         leerLinea(idBuf, sizeof(idBuf));
+        pthread_mutex_lock(&ctx->mutexPrincipal);
 
         int encontrado = 0;
         for (int i = 0; i < TOTAL_PROCESOS; i++) {

@@ -15,6 +15,11 @@ static int histCiclo[100];
 static int histIdx       = 0;
 static int iteracionesRR = 0;
 
+/* Ciclo en que se hizo el último cambio MANUAL de algoritmo.
+   Durante 200 ciclos tras un cambio manual, el cambio automático
+   queda bloqueado para que el usuario vea el efecto. */
+static int cicloUltimoCambioManual = -200;
+
 typedef struct {
     Lista           *solicitudes;
     pthread_mutex_t *mutex;
@@ -40,50 +45,38 @@ void *hiloCreacionProcesos(void *arg)
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MANEJO DE TERMINAL
+   read() directo al fd — stdio bufferiza y no respeta O_NONBLOCK en Linux.
+   ISIG se mantiene activo para que Ctrl+C funcione.
    ═══════════════════════════════════════════════════════════════════════════ */
 static struct termios g_termOrig;
 
-static void termSave(void)
-{
-    tcgetattr(STDIN_FILENO, &g_termOrig);
-}
+static void termSave(void)   { tcgetattr(STDIN_FILENO, &g_termOrig); }
 
 static void termRestore(void)
 {
     tcsetattr(STDIN_FILENO, TCSANOW, &g_termOrig);
-    /* Restaurar fd a bloqueante */
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+    int f = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, f & ~O_NONBLOCK);
 }
 
-/*
- * termRaw: sin eco, sin buffering, NO bloqueante.
- * O_NONBLOCK en el fd es CLAVE para que getchar() no bloquee el loop.
- */
+/* raw + nonblocking — SIN tocar ISIG para que Ctrl+C siga funcionando */
 static void termRaw(void)
 {
     struct termios t = g_termOrig;
-    t.c_lflag &= ~(ICANON | ECHO);
-    t.c_cc[VMIN]  = 0;   /* no esperar ningún carácter */
-    t.c_cc[VTIME] = 0;   /* sin timeout */
+    t.c_lflag &= ~(ICANON | ECHO);   /* NO quitamos ISIG */
+    t.c_iflag &= ~(IXON | ICRNL);
+    t.c_cc[VMIN]  = 0;
+    t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
-
-    /* Poner fd en non-blocking */
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+    int f = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, f | O_NONBLOCK);
 }
 
-/*
- * termBlocking: restaura modo canónico bloqueante para leer input del usuario.
- * Se usa SOLO cuando necesitamos leer texto (quantum, ID de proceso).
- */
+/* canónico bloqueante con eco para leer texto del usuario */
 static void termBlocking(void)
 {
-    /* Primero quitar O_NONBLOCK del fd */
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
-
-    /* Restaurar modo canónico con eco */
+    int f = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, f & ~O_NONBLOCK);
     struct termios t = g_termOrig;
     t.c_lflag |= (ICANON | ECHO);
     t.c_cc[VMIN]  = 1;
@@ -91,35 +84,40 @@ static void termBlocking(void)
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
 
-/*
- * leerLineaSegura: cambia a modo bloqueante, lee la línea, limpia el buffer
- * y vuelve a raw+nonblocking.
- */
+/* Retorna el carácter leído o 0 si no había nada (nunca bloquea) */
+static char leerTeclaSinBloquear(void)
+{
+    char c = 0;
+    if (read(STDIN_FILENO, &c, 1) == 1) return c;
+    return 0;
+}
+
+/* Lee línea del usuario: cambia a bloqueante, lee byte a byte, vuelve a raw */
 static int leerLineaSegura(char *buf, int maxlen)
 {
     termBlocking();
     fflush(stdout);
-
-    /* Limpiar cualquier basura pendiente en stdin */
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF && c != '\0')
-        ;   /* descartar basura del raw mode */
-
-    /* Leer la línea real */
-    if (fgets(buf, maxlen, stdin) == NULL) {
-        buf[0] = '\0';
-        termRaw();
-        return 0;
+    int len = 0;
+    while (len < maxlen - 1) {
+        char c;
+        if (read(STDIN_FILENO, &c, 1) <= 0) break;
+        if (c == '\n' || c == '\r') break;
+        if (c == 127 || c == '\b') {
+            if (len > 0) { len--; write(STDOUT_FILENO, "\b \b", 3); }
+            continue;
+        }
+        buf[len++] = c;
+        write(STDOUT_FILENO, &c, 1);
     }
-
-    /* Quitar newline */
-    int len = (int)strlen(buf);
-    if (len > 0 && buf[len - 1] == '\n') buf[--len] = '\0';
-
+    buf[len] = '\0';
+    write(STDOUT_FILENO, "\n", 1);
     termRaw();
     return len;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN
+   ═══════════════════════════════════════════════════════════════════════════ */
 int main(void)
 {
     srand((unsigned)time(NULL));
@@ -149,13 +147,9 @@ int main(void)
 
     Cola colaListos;
     inicializarCola(&colaListos);
-
     for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
-        if (p->tiempoLlegada == 0) {
-            encolar(&colaListos, p);
-            p->estado = ESTADO_LISTO;
-        }
+        if (p->tiempoLlegada == 0) { encolar(&colaListos, p); p->estado = ESTADO_LISTO; }
     }
 
     SistemaES es;
@@ -179,19 +173,16 @@ int main(void)
 
     vistaBienvenida();
     logEvento("Simulacion iniciada");
-
-    /* Entrar en modo raw + non-blocking */
     termRaw();
 
     while (!terminado) {
 
-        /* ── Leer tecla SIN BLOQUEAR ──────────────────────────────────────── */
-        int c = getchar();   /* retorna EOF/−1 inmediatamente si no hay tecla */
+        /* ── Tecla sin bloquear ───────────────────────────────────────────── */
+        char tecla = leerTeclaSinBloquear();
 
-        if (c != EOF && c != -1) {
-            char tecla = (char)c;
+        if (tecla != 0) {
 
-            /* ── Q: salir ──────────────────────────────────────────────────── */
+            /* Q: salir */
             if (tecla == 'q' || tecla == 'Q') {
                 termRestore();
                 printf("\n[Q] Terminando simulacion...\n");
@@ -199,45 +190,66 @@ int main(void)
                 break;
             }
 
-            /* ── X: cambiar algoritmo ─────────────────────────────────────── */
+            /* ── X: toggle de algoritmo ───────────────────────────────────── */
             if (tecla == 'x' || tecla == 'X') {
-                pthread_mutex_lock(&mutex);
 
                 if (algoritmo == ALG_FCFS) {
+                    /* FCFS → RR: pedir quantum */
                     char buf[64] = {0};
                     printf("\n[X] Cambiar a Round Robin\nIngrese Quantum (>0): ");
+                    fflush(stdout);
                     leerLineaSegura(buf, sizeof(buf));
                     int q = atoi(buf);
                     if (q <= 0) q = 20;
-                    algoritmo = ALG_RR;
-                    quantum   = q;
+
+                    pthread_mutex_lock(&mutex);
+                    algoritmo  = ALG_RR;
+                    quantum    = q;
                     tablaSistema.algoritmoActual = ALG_RR;
                     tablaSistema.quantumActual   = q;
+                    cicloUltimoCambioManual      = reloj;
+                    pthread_mutex_unlock(&mutex);
                     printf("[X] Algoritmo -> RR (Q=%d)\n", q);
+
                 } else {
-                    algoritmo = ALG_FCFS;
-                    tablaSistema.algoritmoActual = ALG_FCFS;
-                    printf("\n[X] Algoritmo -> FCFS\n");
+                    /* RR → FCFS: pedir confirmacion para evitar cambio accidental */
+                    printf("\n[X] Cambiar a FCFS? (s/n): ");
+                    fflush(stdout);
+                    char conf[4] = {0};
+                    leerLineaSegura(conf, sizeof(conf));
+                    if (conf[0] == 's' || conf[0] == 'S' || conf[0] == 'y' || conf[0] == 'Y') {
+                        pthread_mutex_lock(&mutex);
+                        algoritmo  = ALG_FCFS;
+                        tablaSistema.algoritmoActual = ALG_FCFS;
+                        cicloUltimoCambioManual      = reloj;
+                        pthread_mutex_unlock(&mutex);
+                        printf("[X] Algoritmo -> FCFS\n");
+                    } else {
+                        printf("[X] Cancelado, sigue en RR (Q=%d)\n", quantum);
+                    }
                 }
                 logEvento("Cambio manual de algoritmo");
-                pthread_mutex_unlock(&mutex);
+
+                /* Drenar cualquier tecla repetida que haya quedado en el buffer */
+                { char tmp; while (read(STDIN_FILENO, &tmp, 1) == 1); }
             }
 
             /* ── A: apropiatividad ────────────────────────────────────────── */
             if (tecla == 'a' || tecla == 'A') {
                 pthread_mutex_lock(&mutex);
-
                 vistaMostrarMasRezagados(&colaListos);
+                pthread_mutex_unlock(&mutex);
+
                 char idBuf[32] = {0};
                 printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
+                fflush(stdout);
                 leerLineaSegura(idBuf, sizeof(idBuf));
 
+                pthread_mutex_lock(&mutex);
                 int encontrado = 0;
                 for (int i = 0; i < TOTAL_PROCESOS; i++) {
                     Proceso *p = &tablaSistema.tablaBCPs[i];
-                    if (strcmp(p->id, idBuf) == 0 &&
-                        p->estado != ESTADO_TERMINADO) {
-                        /* Quitar apropiatividad anterior */
+                    if (strcmp(p->id, idBuf) == 0 && p->estado != ESTADO_TERMINADO) {
                         if (procesoPrivilId >= 0)
                             tablaSistema.tablaBCPs[procesoPrivilId].esApropiativo = 0;
                         p->esApropiativo = 1;
@@ -255,12 +267,11 @@ int main(void)
                 }
                 if (!encontrado)
                     printf("[A] Proceso '%s' no encontrado o ya termino\n", idBuf);
-
                 pthread_mutex_unlock(&mutex);
             }
         }
 
-        /* ── Logica del simulador ─────────────────────────────────────────── */
+        /* ── Lógica del simulador ─────────────────────────────────────────── */
         pthread_mutex_lock(&mutex);
 
         reloj++;
@@ -271,8 +282,7 @@ int main(void)
             if (!p->yaIngresado && p->tiempoLlegada <= reloj) {
                 if (p->esApropiativo) encolarAlFrente(&colaListos, p);
                 else                  encolar(&colaListos, p);
-                p->estado      = ESTADO_LISTO;
-                p->yaIngresado = 1;
+                p->estado = ESTADO_LISTO; p->yaIngresado = 1;
             }
         }
 
@@ -287,7 +297,8 @@ int main(void)
         if (reloj % 300 == 0)
             redimensionarMemoriaPrincipal(&enEjecucion, reloj);
 
-        if (reloj % 50 == 0) {
+        /* Cambio automático — bloqueado 200 ciclos tras cambio manual */
+        if (reloj % 50 == 0 && (reloj - cicloUltimoCambioManual) > 200) {
             int nuevoAlg = evaluarCambioAlgoritmo(&colaListos, &es);
             if (nuevoAlg != algoritmo) {
                 algoritmo = nuevoAlg;
@@ -310,8 +321,7 @@ int main(void)
 
         calcularDesperdicioExterno();
         actualizarPromedioFinalizados(reloj);
-        actualizarVariablesGlobales(&enEjecucion, &solicitudes,
-                                    &colaListos, &es, reloj);
+        actualizarVariablesGlobales(&enEjecucion, &solicitudes, &colaListos, &es, reloj);
 
         if (reloj % 100 == 0) {
             ejecutarMasterPVM(&enEjecucion, quantum);
@@ -319,8 +329,7 @@ int main(void)
             vistaEstadoES(&es);
             mostrarEstadisticasMemoria();
             if (algoritmo == ALG_RR) {
-                vistaBarrasAprovechamiento(&colaListos,
-                                           histDesp, histCiclo, histIdx);
+                vistaBarrasAprovechamiento(&colaListos, histDesp, histCiclo, histIdx);
                 mostrarEnvejecimiento(&colaListos);
                 mostrarDesperdiciadores(&colaListos);
             }
@@ -332,8 +341,7 @@ int main(void)
         int activos = 0;
         for (Nodo *n = enEjecucion.cabeza; n; n = n->siguiente)
             if (n->proceso->estado != ESTADO_TERMINADO) activos++;
-        if (activos == 0 && solicitudes.tamanio == 0 &&
-            estaVaciaCola(&colaListos))
+        if (activos == 0 && solicitudes.tamanio == 0 && estaVaciaCola(&colaListos))
             terminado = 1;
 
         pthread_mutex_unlock(&mutex);
