@@ -96,12 +96,14 @@ void ejecutarMasterPVM(Lista *enEjecucion, int quantum)
     // Crear 2 slaves
     int tids[2];
     int info = pvm_spawn("slave", NULL, PvmTaskDefault, "", 2, tids);
-    if (info < 2) {
+    if (info < 2)
+    {
         printf("[PVM] Error al crear slaves (info=%d). Verifique PVM.\n", info);
-        for (int i = 0; i < info; i++) pvm_kill(tids[i]);
+        for (int i = 0; i < info; i++)
+            pvm_kill(tids[i]);
         return;
     }
-
+    
     printf("[PVM] Slaves creados: TID0=%d TID1=%d\n", tids[0], tids[1]);
 
     // ── TAREA 1: estadísticas parciales ──────────────────────────────────────

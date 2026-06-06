@@ -4,6 +4,7 @@
 #include <pvm3.h>
 #include "master.h"
 #include "slave.h"
+#include <unistd.h>
 
 // ─── RECIBIR SUBCONJUNTO ──────────────────────────────────────────────────────
 static int recibirSubconjunto(ProcesoSerial *buf, int tag)
@@ -112,6 +113,7 @@ static void procesarRR(ProcesoSerial *arr, int n, int quantum)
 // ─── BUCLE PRINCIPAL SLAVE ────────────────────────────────────────────────────
 void ejecutarSlave(void)
 {
+    sleep(3);
     static ProcesoSerial buf[TOTAL_PROCESOS];
 
     while (1) {
@@ -156,7 +158,8 @@ void ejecutarSlave(void)
 
 // ─── MAIN DEL SLAVE (ejecutable independiente) ───────────────────────────────
 int main(void)
-{
+{   
+
     ejecutarSlave();
     return 0;
 }
