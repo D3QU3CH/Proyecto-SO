@@ -113,7 +113,7 @@ static void procesarRR(ProcesoSerial *arr, int n, int quantum)
 // ─── BUCLE PRINCIPAL SLAVE ────────────────────────────────────────────────────
 void ejecutarSlave(void)
 {
-    sleep(3);
+    sleep(1);
     static ProcesoSerial buf[TOTAL_PROCESOS];
 
     while (1) {
