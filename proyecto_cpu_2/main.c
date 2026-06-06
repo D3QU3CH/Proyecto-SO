@@ -38,36 +38,92 @@ void *hiloCreacionProcesos(void *arg)
     return NULL;
 }
 
-/* Lee una tecla sin bloquear. Devuelve 1 y escribe en *out si hay tecla. */
-static int teclaDisponible(char *out)
+/* ═══════════════════════════════════════════════════════════════════════════
+   MANEJO DE TERMINAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+static struct termios g_termOrig;
+
+static void termSave(void)
 {
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    newt.c_cc[VMIN]  = 0;
-    newt.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    int c = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    if (c != EOF) { *out = (char)c; return 1; }
-    return 0;
+    tcgetattr(STDIN_FILENO, &g_termOrig);
 }
 
-/* Pone el terminal en modo normal (canónico) para leer con scanf */
-static void modoNormal(void)
+static void termRestore(void)
 {
-    struct termios t;
-    tcgetattr(STDIN_FILENO, &t);
+    tcsetattr(STDIN_FILENO, TCSANOW, &g_termOrig);
+    /* Restaurar fd a bloqueante */
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+}
+
+/*
+ * termRaw: sin eco, sin buffering, NO bloqueante.
+ * O_NONBLOCK en el fd es CLAVE para que getchar() no bloquee el loop.
+ */
+static void termRaw(void)
+{
+    struct termios t = g_termOrig;
+    t.c_lflag &= ~(ICANON | ECHO);
+    t.c_cc[VMIN]  = 0;   /* no esperar ningún carácter */
+    t.c_cc[VTIME] = 0;   /* sin timeout */
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
+
+    /* Poner fd en non-blocking */
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+}
+
+/*
+ * termBlocking: restaura modo canónico bloqueante para leer input del usuario.
+ * Se usa SOLO cuando necesitamos leer texto (quantum, ID de proceso).
+ */
+static void termBlocking(void)
+{
+    /* Primero quitar O_NONBLOCK del fd */
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+
+    /* Restaurar modo canónico con eco */
+    struct termios t = g_termOrig;
     t.c_lflag |= (ICANON | ECHO);
     t.c_cc[VMIN]  = 1;
     t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
 
+/*
+ * leerLineaSegura: cambia a modo bloqueante, lee la línea, limpia el buffer
+ * y vuelve a raw+nonblocking.
+ */
+static int leerLineaSegura(char *buf, int maxlen)
+{
+    termBlocking();
+    fflush(stdout);
+
+    /* Limpiar cualquier basura pendiente en stdin */
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF && c != '\0')
+        ;   /* descartar basura del raw mode */
+
+    /* Leer la línea real */
+    if (fgets(buf, maxlen, stdin) == NULL) {
+        buf[0] = '\0';
+        termRaw();
+        return 0;
+    }
+
+    /* Quitar newline */
+    int len = (int)strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n') buf[--len] = '\0';
+
+    termRaw();
+    return len;
+}
+
 int main(void)
 {
     srand((unsigned)time(NULL));
+    termSave();
 
     inicializarBuddy();
     inicializarTablaSistema();
@@ -124,84 +180,87 @@ int main(void)
     vistaBienvenida();
     logEvento("Simulacion iniciada");
 
+    /* Entrar en modo raw + non-blocking */
+    termRaw();
+
     while (!terminado) {
 
-        /* ── PASO 1: leer tecla SIN mutex ─────────────────────────────────── */
-        char tecla = 0;
-        int  hayTecla = teclaDisponible(&tecla);
+        /* ── Leer tecla SIN BLOQUEAR ──────────────────────────────────────── */
+        int c = getchar();   /* retorna EOF/−1 inmediatamente si no hay tecla */
 
-        /* ── PASO 2: si hay tecla que necesita input del usuario,
-               procesarla ANTES de tomar el mutex                   ───────── */
-        if (hayTecla) {
+        if (c != EOF && c != -1) {
+            char tecla = (char)c;
+
+            /* ── Q: salir ──────────────────────────────────────────────────── */
             if (tecla == 'q' || tecla == 'Q') {
+                termRestore();
                 printf("\n[Q] Terminando simulacion...\n");
                 terminado = 1;
                 break;
             }
 
+            /* ── X: cambiar algoritmo ─────────────────────────────────────── */
             if (tecla == 'x' || tecla == 'X') {
-                /* Cambio de algoritmo: necesita scanf → modo normal ANTES del mutex */
-                modoNormal();
-                int nuevoAlg, nuevoQ = quantum;
-                if (algoritmo == ALG_FCFS) {
-                    printf("\n[X] Cambiar a Round Robin\nIngrese Quantum (>0): ");
-                    fflush(stdout);
-                    if (scanf("%d", &nuevoQ) != 1 || nuevoQ <= 0) nuevoQ = 20;
-                    nuevoAlg = ALG_RR;
-                } else {
-                    nuevoAlg = ALG_FCFS;
-                }
-                /* Ahora sí tomamos el mutex para actualizar estado */
                 pthread_mutex_lock(&mutex);
-                algoritmo = nuevoAlg;
-                quantum   = nuevoQ;
-                tablaSistema.algoritmoActual = nuevoAlg;
-                tablaSistema.quantumActual   = nuevoQ;
-                if (nuevoAlg == ALG_RR)
-                    printf("[X] Algoritmo -> RR (Q=%d)\n", nuevoQ);
-                else
+
+                if (algoritmo == ALG_FCFS) {
+                    char buf[64] = {0};
+                    printf("\n[X] Cambiar a Round Robin\nIngrese Quantum (>0): ");
+                    leerLineaSegura(buf, sizeof(buf));
+                    int q = atoi(buf);
+                    if (q <= 0) q = 20;
+                    algoritmo = ALG_RR;
+                    quantum   = q;
+                    tablaSistema.algoritmoActual = ALG_RR;
+                    tablaSistema.quantumActual   = q;
+                    printf("[X] Algoritmo -> RR (Q=%d)\n", q);
+                } else {
+                    algoritmo = ALG_FCFS;
+                    tablaSistema.algoritmoActual = ALG_FCFS;
                     printf("\n[X] Algoritmo -> FCFS\n");
+                }
                 logEvento("Cambio manual de algoritmo");
                 pthread_mutex_unlock(&mutex);
             }
 
+            /* ── A: apropiatividad ────────────────────────────────────────── */
             if (tecla == 'a' || tecla == 'A') {
-                modoNormal();
-                /* Mostrar rezagados no necesita mutex (solo lectura rápida) */
+                pthread_mutex_lock(&mutex);
+
                 vistaMostrarMasRezagados(&colaListos);
-                printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
-                fflush(stdout);
                 char idBuf[32] = {0};
-                if (scanf("%31s", idBuf) == 1) {
-                    pthread_mutex_lock(&mutex);
-                    int encontrado = 0;
-                    for (int i = 0; i < TOTAL_PROCESOS; i++) {
-                        Proceso *p = &tablaSistema.tablaBCPs[i];
-                        if (strcmp(p->id, idBuf) == 0 &&
-                            p->estado != ESTADO_TERMINADO) {
-                            if (procesoPrivilId >= 0)
-                                tablaSistema.tablaBCPs[procesoPrivilId].esApropiativo = 0;
-                            p->esApropiativo = 1;
-                            procesoPrivilId  = i;
-                            moverAlFrenteCola(&colaListos,   p);
-                            moverAlFrenteCola(&es.disco,     p);
-                            moverAlFrenteCola(&es.pantalla,  p);
-                            moverAlFrenteCola(&es.teclado,   p);
-                            moverAlFrenteCola(&es.impresora, p);
-                            printf("[A] Proceso %s marcado como apropiativo\n", p->id);
-                            logEvento("Proceso marcado como apropiativo");
-                            encontrado = 1;
-                            break;
-                        }
+                printf("Ingrese ID del proceso a privilegiar (ej: A-0): ");
+                leerLineaSegura(idBuf, sizeof(idBuf));
+
+                int encontrado = 0;
+                for (int i = 0; i < TOTAL_PROCESOS; i++) {
+                    Proceso *p = &tablaSistema.tablaBCPs[i];
+                    if (strcmp(p->id, idBuf) == 0 &&
+                        p->estado != ESTADO_TERMINADO) {
+                        /* Quitar apropiatividad anterior */
+                        if (procesoPrivilId >= 0)
+                            tablaSistema.tablaBCPs[procesoPrivilId].esApropiativo = 0;
+                        p->esApropiativo = 1;
+                        procesoPrivilId  = i;
+                        moverAlFrenteCola(&colaListos,   p);
+                        moverAlFrenteCola(&es.disco,     p);
+                        moverAlFrenteCola(&es.pantalla,  p);
+                        moverAlFrenteCola(&es.teclado,   p);
+                        moverAlFrenteCola(&es.impresora, p);
+                        printf("[A] Proceso %s marcado como apropiativo\n", p->id);
+                        logEvento("Proceso marcado como apropiativo");
+                        encontrado = 1;
+                        break;
                     }
-                    if (!encontrado)
-                        printf("[A] Proceso '%s' no encontrado\n", idBuf);
-                    pthread_mutex_unlock(&mutex);
                 }
+                if (!encontrado)
+                    printf("[A] Proceso '%s' no encontrado o ya termino\n", idBuf);
+
+                pthread_mutex_unlock(&mutex);
             }
         }
 
-        /* ── PASO 3: lógica del simulador ─────────────────────────────────── */
+        /* ── Logica del simulador ─────────────────────────────────────────── */
         pthread_mutex_lock(&mutex);
 
         reloj++;
@@ -278,10 +337,10 @@ int main(void)
             terminado = 1;
 
         pthread_mutex_unlock(&mutex);
-
         usleep(1000);
     }
 
+    termRestore();
     terminado = 1;
     pthread_join(thCreacion, NULL);
     pthread_mutex_destroy(&mutex);
