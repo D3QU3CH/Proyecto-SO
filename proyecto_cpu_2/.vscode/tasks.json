@@ -4,9 +4,9 @@
     {
       "label": "Compilar slave PVM",
       "type": "shell",
-      "command": "pkill -x slave; sleep 1; ssh chinito@10.0.0.3 'pkill -x slave; rm -f /tmp/pvm_slave.log'; ssh andres@10.0.0.4 'pkill -x slave; rm -f /tmp/pvm_slave.log'; gcc slave.c -o slave -lpvm3 -I/home/andres/pvm3/include -L/home/andres/pvm3/lib/LINUX64 && cp -f slave ~/pvm3/bin/LINUX64/ && scp slave chinito@10.0.0.3:~/pvm3/bin/LINUX64/slave; scp slave andres@10.0.0.4:~/pvm3/bin/LINUX64/slave",
+      "command": "pkill -x slave; sleep 1; ssh chinito@10.0.0.3 'pkill -x slave; rm -f /tmp/pvm_slave.log'; ssh andres@10.0.0.4 'pkill -x slave; rm -f /tmp/pvm_slave.log'; gcc slave.c -o slave -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64 && cp -f slave ~/pvm3/bin/LINUX64/ && scp slave chinito@10.0.0.3:~/pvm3/bin/LINUX64/slave; scp slave andres@10.0.0.4:~/pvm3/bin/LINUX64/slave",
       "options": {
-        "cwd": "/home/andres/Documentos/GitHub/Proyecto-SO/proyecto_cpu_2"
+        "cwd": "/home/dequech/Documentos/GitHub/Proyecto-SO/proyecto_cpu_2"
       },
       "group": "build",
       "problemMatcher": ["$gcc"]
@@ -14,9 +14,9 @@
     {
       "label": "Compilar y ejecutar simulador",
       "type": "shell",
-      "command": "gcc modelo.c controlador.c vista.c master.c main.c -o simulador -lpthread -lpvm3 -I/home/andres/pvm3/include -L/home/andres/pvm3/lib/LINUX64 && ./simulador",
+      "command": "gcc modelo.c controlador.c vista.c master.c main.c -o simulador -lpthread -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64 && ./simulador",
       "options": {
-        "cwd": "/home/andres/Documentos/GitHub/Proyecto-SO/proyecto_cpu_2"
+        "cwd": "/home/dequech/Documentos/GitHub/Proyecto-SO/proyecto_cpu_2"
       },
       "group": "build",
       "problemMatcher": ["$gcc"]
@@ -30,7 +30,7 @@
       ],
       "group": {
         "kind": "build",
-        "isDefault": true
+        //"isDefault": true
       },
       "problemMatcher": []
     }

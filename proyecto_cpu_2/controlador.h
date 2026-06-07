@@ -17,6 +17,5 @@ void mostrarDesperdiciadores(Cola *colaListos);
 
 void guardarBCPs(Lista *enEjecucion, const char *ruta);
 void guardarVariablesGlobales(const char *ruta);
-void logEvento(const char *msg);
 
 #endif

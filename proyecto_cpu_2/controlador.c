@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
 #include "controlador.h"
 #include "vista.h"
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   HELPER INTERNO: Proceso apropiativo siempre al frente
-   ═══════════════════════════════════════════════════════════════════════════ */
-static void ponerApropiatvioAlFrente(Cola *colaListos)
+/* Ciclos acumulados antes de solicitar E/S */
+#define CICLOS_PARA_ES 100
+/* Ticks que avanza cada proceso en E/S por ciclo de simulacion */
+#define TICKS_ES       10
+
+/* ── Poner proceso apropiativo al frente ─── */
+static void ponerApropiativoAlFrente(Cola *colaListos)
 {
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
         if (n->proceso->esApropiativo) {
@@ -18,47 +24,21 @@ static void ponerApropiatvioAlFrente(Cola *colaListos)
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   FCFS
-   ═══════════════════════════════════════════════════════════════════════════ */
-void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int reloj)
+/* ── Lógica post-ejecución compartida por FCFS y RR ─────────────────────
+   Decide si el proceso: termina, va a E/S, o vuelve a listos.
+   En RR, ciclosEjecutados puede ser < rafagaActual (preempción por quantum).  */
+static void postEjecucion(Proceso *p, Cola *colaListos, SistemaES *es,
+                          int *procesoPrivilId, int reloj, int ciclosEjecutados)
 {
-    if (estaVaciaCola(colaListos)) return;
-
-    ponerApropiatvioAlFrente(colaListos);
-
-    Proceso *p = desencolar(colaListos);
-    if (!p) return;
-
-    /* Proceso ya sin ciclos pendientes (puede ocurrir si llegó marcado) */
     if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) {
-            printf("[FCFS] Proceso %s termino (era apropiativo)\n", p->id);
-            *procesoPrivilId = -1;
-        }
+        /* TERMINÓ */
+        if (p->esApropiativo) *procesoPrivilId = -1;
         procesarTerminacion(p, reloj);
-        printf("[FCFS] %s TERMINO\n", p->id);
-        tablaSistema.totalCambiosContexto++;
-        return;
-    }
-
-    procesarEntradaCPU(p, reloj);
-    tablaSistema.totalCambiosContexto++;
-
-    if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) {
-            printf("[FCFS] Proceso %s termino (era apropiativo)\n", p->id);
-            *procesoPrivilId = -1;
-        }
-        procesarTerminacion(p, reloj);
-        printf("[FCFS] %s TERMINO (ciclos=%d)\n", p->id, p->ciclosTotales);
-    } else if (p->tipoProceso == 1 && rand() % 2 == 0) {
-        /* ES-bound: 50% de probabilidad de ir a E/S → activa fallos de página */
-        asignarES(p, es);
-    } else if (p->tipoProceso == 0 && rand() % 4 == 0) {
-        /* CPU-bound: 25% de probabilidad de ir a E/S ocasionalmente */
-        asignarES(p, es);
+    } else if (p->ciclosEnEjecucion >= CICLOS_PARA_ES) {
+        /* Acumuló 200 ciclos → E/S */
+        asignarES(p, es, reloj);
     } else {
+        /* Vuelve a cola de listos */
         p->estado = ESTADO_LISTO;
         if (p->esApropiativo) encolarAlFrente(colaListos, p);
         else                  encolar(colaListos, p);
@@ -66,7 +46,36 @@ void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int rel
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   FCFS — no hay preempción, el proceso ejecuta su ráfaga completa
+   ═══════════════════════════════════════════════════════════════════════════ */
+void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int reloj)
+{
+    if (estaVaciaCola(colaListos)) return;
+
+    ponerApropiativoAlFrente(colaListos);
+    Proceso *p = desencolar(colaListos);
+    if (!p) return;
+
+    /* Si llegó con ciclos=0 (caso borde) terminar directo */
+    if (p->ciclosRestantes <= 0) {
+        if (p->esApropiativo) *procesoPrivilId = -1;
+        procesarTerminacion(p, reloj);
+        tablaSistema.totalCambiosContexto++;
+        return;
+    }
+
+    procesarEntradaCPU(p, reloj);          /* descuenta ráfaga completa */
+    tablaSistema.totalCambiosContexto++;
+
+    postEjecucion(p, colaListos, es, procesoPrivilId, reloj, p->rafagaActual);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    ROUND ROBIN
+   - Si rafagaActual > quantum → preempción: solo ejecuta `quantum` ciclos,
+     se devuelven los sobrantes, desperdicio = 0 (usó todo el quantum).
+   - Si rafagaActual <= quantum → terminó su ráfaga antes del quantum,
+     desperdicio = quantum - rafagaActual.
    ═══════════════════════════════════════════════════════════════════════════ */
 void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
                 int *quantum, int *iteracionesRR,
@@ -74,82 +83,59 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
 {
     if (estaVaciaCola(colaListos)) return;
 
-    ponerApropiatvioAlFrente(colaListos);
-
+    ponerApropiativoAlFrente(colaListos);
     Proceso *p = desencolar(colaListos);
     if (!p) return;
 
     if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) {
-            printf("[RR] Proceso %s termino (era apropiativo)\n", p->id);
-            *procesoPrivilId = -1;
-        }
+        if (p->esApropiativo) *procesoPrivilId = -1;
         procesarTerminacion(p, reloj);
-        printf("[RR] %s TERMINO\n", p->id);
         tablaSistema.totalCambiosContexto++;
         return;
     }
 
-    procesarEntradaCPU(p, reloj);
+    procesarEntradaCPU(p, reloj);   /* descuenta rafagaActual completa */
     tablaSistema.totalCambiosContexto++;
     (*iteracionesRR)++;
 
-    int q       = tablaSistema.quantumActual;
-    int ejecuta = (p->rafagaActual < q) ? p->rafagaActual : q;
-    int desp    = q - ejecuta;
+    int q = tablaSistema.quantumActual;
+    int ejecuta, desp;
 
-    p->aprovechamiento = (q == 0) ? 0 : (ejecuta * 100) / q;
+    if (p->rafagaActual > q) {
+        /* PREEMPCIÓN: el proceso quería más que el quantum.
+           procesarEntradaCPU ya descontó rafagaActual; devolvemos el sobrante. */
+        int sobrante = p->rafagaActual - q;
+        p->ciclosRestantes   += sobrante;
+        p->tiempoEjecucion   -= sobrante;
+        p->ciclosEnEjecucion -= sobrante;
+        ejecuta = q;
+        desp    = 0;            /* usó todo el quantum: no hay desperdicio */
+    } else {
+        /* Terminó ráfaga antes del quantum → hay desperdicio de CPU */
+        ejecuta = p->rafagaActual;
+        desp    = q - ejecuta;
+    }
+
+    p->aprovechamiento = (q > 0) ? (ejecuta * 100) / q : 0;
     p->desperdicio     = desp;
 
-    histDesp[*histIdx]  = (q == 0) ? 0 : (desp * 100) / q;
+    /* Guardar en historial (porcentaje de desperdicio) */
+    histDesp[*histIdx]  = (q > 0) ? (desp * 100) / q : 0;
     histCiclo[*histIdx] = reloj;
     *histIdx = (*histIdx + 1) % 100;
 
+    /* Ajuste automático de quantum cada 20 iteraciones */
     ajustarQuantumAutomatico(colaListos, es, *iteracionesRR);
     *quantum = tablaSistema.quantumActual;
 
-    if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) {
-            printf("[RR] Proceso %s termino (era apropiativo)\n", p->id);
-            *procesoPrivilId = -1;
-        }
-        procesarTerminacion(p, reloj);
-        printf("[RR] %s TERMINO (ciclos=%d)\n", p->id, p->ciclosTotales);
-    } else if (p->rafagaActual >= q) {
-        /*
-         * No completó el quantum: vuelve a cola.
-         * Procesos ES-bound (tipoProceso==1) van a E/S cada 3 vueltas
-         * para garantizar que procesarFraseES se ejecute y haya fallos NRU.
-         */
-        if (p->tipoProceso == 1 && p->vecesEnCPU % 3 == 0) {
-            asignarES(p, es);
-        } else {
-            p->estado          = ESTADO_LISTO;
-            p->restanteQuantum = p->rafagaActual - ejecuta;
-            if (p->esApropiativo) encolarAlFrente(colaListos, p);
-            else                  encolar(colaListos, p);
-        }
-    } else {
-        /*
-         * Completó su ráfaga antes del quantum.
-         * Procesos CPU-bound van ocasionalmente a E/S (1 de cada 4).
-         * Procesos ES-bound siempre van a E/S.
-         */
-        if (p->tipoProceso == 1 || rand() % 4 == 0) {
-            asignarES(p, es);
-        } else {
-            p->estado = ESTADO_LISTO;
-            if (p->esApropiativo) encolarAlFrente(colaListos, p);
-            else                  encolar(colaListos, p);
-        }
-    }
+    postEjecucion(p, colaListos, es, procesoPrivilId, reloj, ejecuta);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PROCESAMIENTO DE COLA E/S
+   Cada ciclo se descuentan TICKS_ES por proceso.
+   Al terminar su tiempo de E/S, el proceso vuelve a la cola de listos.
    ═══════════════════════════════════════════════════════════════════════════ */
-#define TICKS_ES 10
-
 void procesarColaES(Cola *colaES, Cola *colaListos)
 {
     int n = colaES->tamanio;
@@ -170,9 +156,9 @@ void procesarColaES(Cola *colaES, Cola *colaListos)
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   AJUSTE AUTOMÁTICO DE QUANTUM
-   Cada 20 iteraciones RR evalúa proporciones de colas.
-   Si desbalance > 75-25 ajusta Q en ±5.
+   AJUSTE AUTOMÁTICO DE QUANTUM (cada 20 iteraciones de RR)
+   Si listos > 75% → reducir Q (menos espera por proceso)
+   Si E/S   > 75% → aumentar Q (menos preempciones)
    ═══════════════════════════════════════════════════════════════════════════ */
 void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR)
 {
@@ -189,22 +175,21 @@ void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR
     int   q          = tablaSistema.quantumActual;
 
     if (propListos > 0.75f) {
-        /* Cola de listos muy llena: reducir Q para dar más turnos */
-        q = (q > 5) ? q - 5 : q;
+        q = (q > 20) ? q - 5 : q; 
         printf("[RR] Desbalance listos>75%% -> Q reducido a %d\n", q);
     } else if (propES > 0.75f) {
-        /* Cola E/S muy llena: aumentar Q para que procesos terminen ráfaga */
         q = (q < 100) ? q + 5 : q;
         printf("[RR] Desbalance ES>75%% -> Q aumentado a %d\n", q);
-    } else if (propListos > 0.4f && propListos < 0.6f) {
-        printf("[RR] Colas balanceadas (listos=%.0f%% ES=%.0f%%)\n",
-               propListos * 100, propES * 100);
+    } else {
+        printf("[RR] Colas balanceadas (listos=%.0f%% ES=%.0f%%) Q=%d\n",
+               propListos * 100, propES * 100, q);
     }
     tablaSistema.quantumActual = q;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ENVEJECIMIENTO — 5 procesos más perjudicados (mayor vecesEnCPU)
+   TOP 5 ENVEJECIMIENTO — los que más veces han pasado por CPU
+   (los que el quantum les queda pequeño y necesitan más iteraciones)
    ═══════════════════════════════════════════════════════════════════════════ */
 void mostrarEnvejecimiento(Cola *colaListos)
 {
@@ -215,56 +200,51 @@ void mostrarEnvejecimiento(Cola *colaListos)
         for (int i = 0; i < 5; i++) {
             if (!top[i] || p->vecesEnCPU > top[i]->vecesEnCPU) {
                 for (int j = 4; j > i; j--) top[j] = top[j-1];
-                top[i] = p;
-                break;
+                top[i] = p; break;
             }
         }
     }
     for (int i = 0; i < 5 && top[i]; i++)
-        printf("  %d. %-8s | vecesEnCPU:%3d | ciclosRest:%6d | espera:%d\n",
+        printf("  %d. %-8s | vecesEnCPU:%3d | ciclosRest:%5d | espera:%d\n",
                i+1, top[i]->id, top[i]->vecesEnCPU,
                top[i]->ciclosRestantes, top[i]->tiempoEspera);
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   DESPERDICIADORES — 5 procesos con mayor desperdicio de CPU
+   TOP 5 DESPERDICIADORES — los que más quantum dejan sin usar
+   (rafagaActual < quantum → desp = quantum - rafagaActual)
    ═══════════════════════════════════════════════════════════════════════════ */
 void mostrarDesperdiciadores(Cola *colaListos)
 {
     printf("\n--- TOP 5 DESPERDICIADORES DE CPU ---\n");
     Proceso *top[5] = {NULL};
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
-        Proceso *p    = n->proceso;
-        int      desp = tablaSistema.quantumActual - p->rafagaActual;
-        if (desp < 0) desp = 0;
+        Proceso *p = n->proceso;
+        /* El desperdicio real de este proceso en su última ejecución */
+        int desp = p->desperdicio;
         for (int i = 0; i < 5; i++) {
             if (!top[i]) { top[i] = p; break; }
-            int despTop = tablaSistema.quantumActual - top[i]->rafagaActual;
-            if (despTop < 0) despTop = 0;
-            if (desp > despTop) {
+            if (desp > top[i]->desperdicio) {
                 for (int j = 4; j > i; j--) top[j] = top[j-1];
-                top[i] = p;
-                break;
+                top[i] = p; break;
             }
         }
     }
-    for (int i = 0; i < 5 && top[i]; i++) {
-        int desp = tablaSistema.quantumActual - top[i]->rafagaActual;
-        if (desp < 0) desp = 0;
-        printf("  %d. %-8s | rafaga:%3d | Q:%3d | desperdicio:%3d\n",
+    int q = tablaSistema.quantumActual;
+    for (int i = 0; i < 5 && top[i]; i++)
+        printf("  %d. %-8s | rafaga:%3d | Q:%3d | desp:%3d | aprov:%3d%%\n",
                i+1, top[i]->id, top[i]->rafagaActual,
-               tablaSistema.quantumActual, desp);
-    }
+               q, top[i]->desperdicio, top[i]->aprovechamiento);
     if (!top[0]) printf("  (cola vacia)\n");
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PERSISTENCIA — BCP en archivo
+   PERSISTENCIA — BCP y variables globales
    ═══════════════════════════════════════════════════════════════════════════ */
 void guardarBCPs(Lista *enEjecucion, const char *ruta)
 {
-    FILE *f = fopen(ruta, "a");
+    FILE *f = fopen(ruta, "w");
     if (!f) return;
     time_t ahora = time(NULL);
     fprintf(f, "\n=== CHECKPOINT %s", ctime(&ahora));
@@ -289,7 +269,7 @@ void guardarBCPs(Lista *enEjecucion, const char *ruta)
         fprintf(f, " CambiosCtx   : %d\n",   p->cambiosContexto);
         fprintf(f, " Apropiativo  : %d\n",   p->esApropiativo);
         fprintf(f, " TipoProceso  : %d\n",   p->tipoProceso);
-        fprintf(f, " Aprovech     : %d\n",   p->aprovechamiento);
+        fprintf(f, " Aprovech%%    : %d\n",   p->aprovechamiento);
         fprintf(f, " Desperdicio  : %d\n",   p->desperdicio);
         fprintf(f, " DispositivoES: %d\n",   p->dispositivoES);
         fprintf(f, " TiempoES     : %d\n",   p->tiempoES);
@@ -301,12 +281,9 @@ void guardarBCPs(Lista *enEjecucion, const char *ruta)
     fclose(f);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PERSISTENCIA — Variables globales en archivo (20 variables)
-   ═══════════════════════════════════════════════════════════════════════════ */
 void guardarVariablesGlobales(const char *ruta)
 {
-    FILE *f = fopen(ruta, "a");
+    FILE *f = fopen(ruta, "w");
     if (!f) return;
     TablaProcesos *t = &tablaSistema;
     time_t ahora = time(NULL);
@@ -319,8 +296,7 @@ void guardarVariablesGlobales(const char *ruta)
     fprintf(f, " 6.  En E/S           : %d\n", t->procesosEnES);
     fprintf(f, " 7.  Terminados       : %d\n", t->procesosTerminados);
     fprintf(f, " 8.  Bloqueados       : %d\n", t->procesosBloqueados);
-    fprintf(f, " 9.  Algoritmo        : %s\n",
-            t->algoritmoActual == ALG_FCFS ? "FCFS" : "RR");
+    fprintf(f, " 9.  Algoritmo        : %s\n", t->algoritmoActual == ALG_FCFS ? "FCFS" : "RR");
     fprintf(f, "10.  Quantum          : %d\n", t->quantumActual);
     fprintf(f, "11.  Ciclo actual     : %d\n", t->cicloActual);
     fprintf(f, "12.  Cambios ctx      : %d\n", t->totalCambiosContexto);
@@ -332,19 +308,5 @@ void guardarVariablesGlobales(const char *ruta)
     fprintf(f, "18.  Ingr. dinamico   : %d\n", t->procesosIngresadosDinam);
     fprintf(f, "19.  Mem. libre (KB)  : %d\n", t->memoriaLibreKB);
     fprintf(f, "20.  Desperdicio (KB) : %d\n", t->desperdicioTotal);
-    fclose(f);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LOG DE EVENTOS
-   ═══════════════════════════════════════════════════════════════════════════ */
-void logEvento(const char *msg)
-{
-    FILE *f = fopen("eventos.log", "a");
-    if (!f) return;
-    time_t ahora = time(NULL);
-    char   buf[32];
-    strftime(buf, sizeof(buf), "%H:%M:%S", localtime(&ahora));
-    fprintf(f, "[%s] %s\n", buf, msg);
     fclose(f);
 }
