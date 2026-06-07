@@ -358,5 +358,10 @@ int main(void)
     logEvento("Simulacion finalizada");
     mostrarEstadisticasMemoria();
     vistaCierre(reloj, tablaSistema.procesosTerminados);
+
+
+    system("ssh slave1 'rm -f /tmp/pvm_slave.log'");
+    system("ssh slave2 'rm -f /tmp/pvm_slave.log'");
+
     return 0;
 }
