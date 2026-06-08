@@ -48,4 +48,7 @@ typedef struct {
 
 void ejecutarMasterPVM(Lista *enEjecucion, int quantum);
 
+void inicializarSlavesPVM(void);
+void terminarSlavesPVM(void);
+
 #endif

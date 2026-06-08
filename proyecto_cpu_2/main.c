@@ -80,6 +80,8 @@ int main(void)
     vistaBienvenida();
     termRaw();
 
+    inicializarSlavesPVM();
+
     while (!terminado && !g_salir) {
 
         char tecla = leerTecla();
@@ -150,6 +152,7 @@ int main(void)
 
         if (reloj % 100 == 0) {
             ejecutarMasterPVM(&enEjecucion, quantum);
+            sleep(3);
             vistaMostrarTablaGlobal();
             vistaEstadoES(&es);
             mostrarEstadisticasMemoria();
@@ -180,5 +183,7 @@ int main(void)
     guardarVariablesGlobales("variables.log");
     mostrarEstadisticasMemoria();
     vistaCierre(reloj, tablaSistema.procesosTerminados);
+
+    terminarSlavesPVM();
     return 0;
 }

@@ -4,29 +4,6 @@
 #include <time.h>
 #include "modelo.h"
 
-/* =========================================================
- * CORRECCIONES APLICADAS EN ESTE ARCHIVO:
- *
- *  1. [MEDIO] Fusion Buddy jerarquica incompleta:
- *     liberarUnBloque() ahora usa un indice "actual" que sigue
- *     al bloque fusionado hacia arriba en la jerarquia.
- *     La fusion propaga correctamente sin perder el socioIdx.
- *
- *  2. [MEDIO] procesarFraseES(): la funcion ahora garantiza
- *     que siempre produce al menos 1 fallo de pagina por llamada
- *     forzando un swap-out y luego un swap-in inmediato cuando
- *     no hay paginas en SWAP. Esto asegura actividad NRU visible.
- *
- *  3. [BAJO]  actualizarVariablesGlobales(): ahora calcula
- *     procesosBloqueados correctamente (no estaba siendo llenado).
- *
- *  4. [BAJO]  Memory leak en colas: se agrego vaciarCola() y
- *     vaciarLista() para liberar nodos al finalizar.
- *
- *  5. [INFORMATIVO] procesarTerminacion(): imprime un mensaje
- *     mas completo para que sea visible que procesos terminan.
- * ========================================================= */
-
 // VARIABLES GLOBALES
 
 TablaProcesos    tablaSistema;
@@ -117,24 +94,6 @@ void cargarFrases(const char *ruta)
     }
 }
 
-/* ---------------------------------------------------------
- * FIX #2: procesarFraseES()
- *
- * PROBLEMA ORIGINAL:
- *   Si todas las paginas del proceso estaban en RAM y bitR == 1
- *   (proceso recien ejecutado), la funcion no movia ninguna
- *   pagina a SWAP y tampoco generaba fallos. Esto resultaba en
- *   0 fallos de pagina durante ejecuciones largas.
- *
- * CORRECCION:
- *   a) Primero intenta recuperar hasta 3 paginas de SWAP
- *      (genera fallos visibles).
- *   b) Si no habia nada en SWAP, fuerza un swap-out de la
- *      pagina de clase NRU mas baja (bitR=0, bitM=0 > clase 0)
- *      y de inmediato genera un fallo de pagina al traerla de
- *      vuelta. Esto garantiza al menos 1 fallo por llamada a E/S,
- *      manteniendo la actividad NRU observable en las estadisticas.
- * --------------------------------------------------------- */
 void procesarFraseES(Proceso *p, int cicloActual)
 {
     if (p->numPaginas == 0) return;
@@ -511,9 +470,7 @@ void actualizarEspera(Cola *colaListos)
             n->proceso->tiempoEspera++;
 }
 
-// =========================================================
 // BUDDY SYSTEM
-// =========================================================
 
 void inicializarBuddy(void)
 {
@@ -576,23 +533,6 @@ int asignarMemoriaBuddy(Proceso *p, int memoriaKB)
     return idx;
 }
 
-/* ---------------------------------------------------------
- * FIX #1: liberarUnBloque() con fusion jerarquica correcta.
- *
- * PROBLEMA ORIGINAL:
- *   Al fusionar dos buddies, se copiaba el socioIdx del buddy
- *   absorbido al bloque fusionado, pero ese socioIdx podia
- *   apuntar a un bloque del nivel anterior (ya invalido como
- *   socio del nuevo bloque de mayor tamano). Esto rompia la
- *   cadena de fusion en jerarquias de mas de 2 niveles.
- *
- * CORRECCION:
- *   Despues de fusionar, se busca el nuevo socio del bloque
- *   resultante recorriendo todos los bloques y encontrando
- *   el que tiene el mismo tamano, esta libre y su baseDir
- *   corresponde al buddy matematico del bloque fusionado.
- *   Formula del buddy: baseDir XOR tamanioKB
- * --------------------------------------------------------- */
 static void liberarUnBloque(int idx, int ip)
 {
     if (idx < 0 || idx >= memoriaBuddy.numBloques) return;
@@ -672,9 +612,7 @@ void liberarTodosLosBloquesBuddy(Proceso *p)
     pthread_mutex_unlock(&memoriaBuddy.mutex);
 }
 
-// =========================================================
 // PAGINACION NRU + SWAP
-// =========================================================
 
 void inicializarPaginacion(void)
 {
