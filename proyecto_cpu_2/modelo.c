@@ -4,6 +4,29 @@
 #include <time.h>
 #include "modelo.h"
 
+/* =========================================================
+ * CORRECCIONES APLICADAS EN ESTE ARCHIVO:
+ *
+ *  1. [MEDIO] Fusion Buddy jerarquica incompleta:
+ *     liberarUnBloque() ahora usa un indice "actual" que sigue
+ *     al bloque fusionado hacia arriba en la jerarquia.
+ *     La fusion propaga correctamente sin perder el socioIdx.
+ *
+ *  2. [MEDIO] procesarFraseES(): la funcion ahora garantiza
+ *     que siempre produce al menos 1 fallo de pagina por llamada
+ *     forzando un swap-out y luego un swap-in inmediato cuando
+ *     no hay paginas en SWAP. Esto asegura actividad NRU visible.
+ *
+ *  3. [BAJO]  actualizarVariablesGlobales(): ahora calcula
+ *     procesosBloqueados correctamente (no estaba siendo llenado).
+ *
+ *  4. [BAJO]  Memory leak en colas: se agrego vaciarCola() y
+ *     vaciarLista() para liberar nodos al finalizar.
+ *
+ *  5. [INFORMATIVO] procesarTerminacion(): imprime un mensaje
+ *     mas completo para que sea visible que procesos terminan.
+ * ========================================================= */
+
 // VARIABLES GLOBALES
 
 TablaProcesos    tablaSistema;
@@ -17,10 +40,8 @@ static int tiemposUsados[801];
 
 static char frases[MAX_FRASES][MAX_LEN_FRASE];
 static int  totalFrases = 0;
-static int  cursorFrase = 0;
 
 // BANCO DE PALABRAS
-// Carga palabras del archivo o usa palabras de relleno si no existe
 
 void cargarPalabras(const char *ruta)
 {
@@ -28,7 +49,6 @@ void cargarPalabras(const char *ruta)
     FILE *f = fopen(ruta, "r");
 
     if (!f) {
-        // Si no hay archivo, generar palabras sinteticas
         const char *base[] = {
             "proceso","sistema","memoria","cpu","pagina",
             "bloque","ciclo","reloj","hilo","semaforo",
@@ -42,7 +62,6 @@ void cargarPalabras(const char *ruta)
         return;
     }
 
-    // Leer palabras del archivo
     char buf[MAX_LEN_PALABRA];
     while (bancoPalabras.totalPalabras < MAX_PALABRAS &&
            fscanf(f, "%63s", buf) == 1)
@@ -50,7 +69,6 @@ void cargarPalabras(const char *ruta)
                 buf, MAX_LEN_PALABRA - 1);
     fclose(f);
 
-    // Si el archivo estaba vacio, al menos una palabra
     if (bancoPalabras.totalPalabras == 0) {
         strncpy(bancoPalabras.palabras[0], "palabra", MAX_LEN_PALABRA - 1);
         bancoPalabras.totalPalabras = 1;
@@ -58,8 +76,6 @@ void cargarPalabras(const char *ruta)
 }
 
 // FRASES
-// Se arman con palabras del banco para que haya
-// probabilidad real de fallo de pagina NRU
 
 void cargarFrases(const char *ruta)
 {
@@ -67,7 +83,6 @@ void cargarFrases(const char *ruta)
     FILE *f = fopen(ruta, "r");
 
     if (!f) {
-        // Generar frases sinteticas repartidas por todo el banco
         int total = bancoPalabras.totalPalabras;
         for (int i = 0; i < 100 && total > 4; i++) {
             int b = (i * (total / 100));
@@ -80,13 +95,13 @@ void cargarFrases(const char *ruta)
             totalFrases++;
         }
         if (totalFrases == 0) {
-            snprintf(frases[0], MAX_LEN_FRASE, "proceso ejecuta instruccion sistema operativo");
+            snprintf(frases[0], MAX_LEN_FRASE,
+                     "proceso ejecuta instruccion sistema operativo");
             totalFrases = 1;
         }
         return;
     }
 
-    // Leer frases del archivo
     char buf[MAX_LEN_FRASE];
     while (totalFrases < MAX_FRASES && fgets(buf, sizeof(buf), f)) {
         buf[strcspn(buf, "\n")] = '\0';
@@ -96,68 +111,99 @@ void cargarFrases(const char *ruta)
     fclose(f);
 
     if (totalFrases == 0) {
-        snprintf(frases[0], MAX_LEN_FRASE, "frase de prueba del sistema operativo");
+        snprintf(frases[0], MAX_LEN_FRASE,
+                 "frase de prueba del sistema operativo");
         totalFrases = 1;
     }
 }
 
-// ---------------------------------------------------
-// PROCESAR FRASE EN E/S
-// Cuando el proceso va a E/S, lee una frase mezclando
-// palabras de RAM y SWAP. Las de SWAP causan fallos de pagina NRU.
-// Si no hay paginas en SWAP, fuerza al menos 1 fallo.
-// ---------------------------------------------------
+/* ---------------------------------------------------------
+ * FIX #2: procesarFraseES()
+ *
+ * PROBLEMA ORIGINAL:
+ *   Si todas las paginas del proceso estaban en RAM y bitR == 1
+ *   (proceso recien ejecutado), la funcion no movia ninguna
+ *   pagina a SWAP y tampoco generaba fallos. Esto resultaba en
+ *   0 fallos de pagina durante ejecuciones largas.
+ *
+ * CORRECCION:
+ *   a) Primero intenta recuperar hasta 3 paginas de SWAP
+ *      (genera fallos visibles).
+ *   b) Si no habia nada en SWAP, fuerza un swap-out de la
+ *      pagina de clase NRU mas baja (bitR=0, bitM=0 > clase 0)
+ *      y de inmediato genera un fallo de pagina al traerla de
+ *      vuelta. Esto garantiza al menos 1 fallo por llamada a E/S,
+ *      manteniendo la actividad NRU observable en las estadisticas.
+ * --------------------------------------------------------- */
 void procesarFraseES(Proceso *p, int cicloActual)
 {
     if (p->numPaginas == 0) return;
 
     int ip = (int)(p - tablaSistema.tablaBCPs);
+    int fallosGenerados = 0;
 
-    // Recorrer todas las paginas del proceso que estan en SWAP
-    for (int s = 0; s < areaSwap.numPaginas; s++) {
+    // Paso A: recuperar paginas que ya esten en SWAP (hasta 3 fallos)
+    for (int s = 0; s < areaSwap.numPaginas && fallosGenerados < 3; s++) {
         if (areaSwap.paginas[s].indiceProceso != ip) continue;
-        if (areaSwap.paginas[s].numPalabras == 0) continue;
+        if (areaSwap.paginas[s].numPalabras   == 0)  continue;
 
-        int pgIdx = areaSwap.paginas[s].indicePagina;
-
-        // Cada pagina en SWAP que pertenece al proceso es un fallo de pagina
+        int pgIdx    = areaSwap.paginas[s].indicePagina;
         int resultado = manejarFalloPagina(p, pgIdx, cicloActual);
         if (resultado >= 0) {
             p->fallosPagina++;
             tablaSistema.totalFallosPagina++;
+            fallosGenerados++;
+            s--;   // array se compacto en manejarFalloPagina
         }
-
-        // Con 1 fallo por llamada es suficiente para no saturar
-        break;
     }
 
-    // Si no habia nada en SWAP, forzar moviendo una pagina de RAM a SWAP
-    // para que la proxima llamada si genere fallo
-    int ip2 = ip;
-    int tieneEnSwap = 0;
-    for (int s = 0; s < areaSwap.numPaginas; s++)
-        if (areaSwap.paginas[s].indiceProceso == ip2) { tieneEnSwap = 1; break; }
+    // Paso B: si no hubo fallos, forzar swap-out de pagina clase NRU 0
+    // y luego inmediatamente swap-in (fallo garantizado)
+    if (fallosGenerados == 0) {
+        int candidata = -1;
+        int marcoElegido = -1;
 
-    if (!tieneEnSwap) {
-        // Mover la pagina con bitR=0 (clase NRU mas baja) a SWAP
         for (int pg = 0; pg < p->numPaginas; pg++) {
             int m = p->paginasEnRAM[pg];
             if (m < 0) continue;
-            if (memoriaPrincipal.marcos[m].bitR == 0 &&
-                areaSwap.numPaginas < MAX_PAGINAS_SWAP) {
+            if (areaSwap.numPaginas >= MAX_PAGINAS_SWAP) break;
 
-                areaSwap.paginas[areaSwap.numPaginas] = memoriaPrincipal.marcos[m];
-                areaSwap.paginas[areaSwap.numPaginas].indiceProceso = ip;
-                areaSwap.paginas[areaSwap.numPaginas].indicePagina  = pg;
-                areaSwap.numPaginas++;
+            // Preferir clase NRU mas baja: bitR=0, bitM=0
+            int clase = memoriaPrincipal.marcos[m].bitR * 2 +
+                        memoriaPrincipal.marcos[m].bitM;
+            if (candidata == -1 || clase <
+                (memoriaPrincipal.marcos[marcoElegido].bitR * 2 +
+                 memoriaPrincipal.marcos[marcoElegido].bitM)) {
+                candidata    = pg;
+                marcoElegido = m;
+            }
+        }
 
-                memoriaPrincipal.marcos[m].indiceProceso = -1;
-                memoriaPrincipal.marcos[m].indicePagina  = -1;
-                memoriaPrincipal.marcos[m].numPalabras   = 0;
-                memoriaPrincipal.numMarcosOcupados--;
-                p->paginasEnRAM[pg]  = -1;
-                p->bitReferencia[pg] = 0;
-                break;
+        if (candidata >= 0 && marcoElegido >= 0 &&
+            areaSwap.numPaginas < MAX_PAGINAS_SWAP) {
+
+            // Swap-out: mover pagina a SWAP
+            areaSwap.paginas[areaSwap.numPaginas] =
+                memoriaPrincipal.marcos[marcoElegido];
+            areaSwap.paginas[areaSwap.numPaginas].indiceProceso = ip;
+            areaSwap.paginas[areaSwap.numPaginas].indicePagina  = candidata;
+            areaSwap.numPaginas++;
+
+            memoriaPrincipal.marcos[marcoElegido].indiceProceso = -1;
+            memoriaPrincipal.marcos[marcoElegido].indicePagina  = -1;
+            memoriaPrincipal.marcos[marcoElegido].numPalabras   = 0;
+            memoriaPrincipal.marcos[marcoElegido].bitR          = 0;
+            memoriaPrincipal.marcos[marcoElegido].bitM          = 0;
+            memoriaPrincipal.numMarcosOcupados--;
+            p->paginasEnRAM[candidata]  = -1;
+            p->bitReferencia[candidata] = 0;
+            p->bitModificado[candidata] = 0;
+
+            // Swap-in inmediato: genera el fallo de pagina
+            int resultado = manejarFalloPagina(p, candidata, cicloActual);
+            if (resultado >= 0) {
+                p->fallosPagina++;
+                tablaSistema.totalFallosPagina++;
             }
         }
     }
@@ -165,7 +211,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
 
 // INICIALIZACION DE PROCESOS
 
-// Genera un tiempo de llegada unico entre 0 y 800
 static int tiempoLlegadaUnico(void)
 {
     int t;
@@ -174,7 +219,6 @@ static int tiempoLlegadaUnico(void)
     return t;
 }
 
-// Redondea un tamano en KB a la siguiente potencia de 2
 static int potencia2(int kb)
 {
     int p = BUDDY_MIN_KB;
@@ -182,7 +226,6 @@ static int potencia2(int kb)
     return p;
 }
 
-// Genera la lista de crecimiento de memoria: 15 ceros y 5 valores entre 1-50
 static void generarCrecimientoMem(Proceso *p)
 {
     memset(p->crecimientoMem, 0, sizeof(p->crecimientoMem));
@@ -198,7 +241,6 @@ static void generarCrecimientoMem(Proceso *p)
     }
 }
 
-// Inicializa todos los campos de un proceso con valores aleatorios
 static void inicializarProceso(Proceso *p, int index)
 {
     memset(p, 0, sizeof(Proceso));
@@ -206,17 +248,18 @@ static void inicializarProceso(Proceso *p, int index)
     snprintf(p->id,     sizeof(p->id),     "%c-%d", letra, index);
     snprintf(p->nombre, sizeof(p->nombre), "Proceso_%d", index);
     p->tiempoLlegada   = tiempoLlegadaUnico();
-    p->ciclosTotales   = rand() % 85001;        // 0 a 85000 ciclos
+    p->ciclosTotales   = rand() % 85001;
     p->ciclosRestantes = p->ciclosTotales;
-    p->rafagaActual    = rand() % 61 + 10;      // 10 a 70
-    p->cambiosContexto = rand() % 21 + 10;      // 10 a 30
+    p->rafagaActual    = rand() % 61 + 10;
+    p->cambiosContexto = rand() % 21 + 10;
     p->tipoProceso     = rand() % 2;
     p->estado          = ESTADO_LISTO;
     p->dispositivoES   = -1;
     p->variable1       = rand() % 1000;
     p->variable2       = rand() % 1000;
-    p->memoriaUsadaKB  = rand() % 29 + 4;       // 4 a 32 KB
-    p->numMarcos       = (rand() % ((MARCOS_MAX - MARCOS_MIN) / 2 + 1)) * 2 + MARCOS_MIN;
+    p->memoriaUsadaKB  = rand() % 29 + 4;
+    int rango = (MARCOS_MAX - MARCOS_MIN) / 2 + 1;
+    p->numMarcos = (rand() % rango) * 2 + MARCOS_MIN;
     if (p->numMarcos > MARCOS_MAX) p->numMarcos = MARCOS_MAX;
     for (int i = 0; i < MAX_PAGINAS_PROCESO; i++) p->paginasEnRAM[i] = -1;
     for (int i = 0; i < MAX_BLOQUES_BUDDY_PROC; i++) p->idxsBuddy[i] = -1;
@@ -236,7 +279,6 @@ void inicializarTablaSistema(void)
         inicializarProceso(&tablaSistema.tablaBCPs[i], i);
 }
 
-// Mezcla un arreglo de indices aleatoriamente (Fisher-Yates)
 static void mezclarIndices(int *idx, int n)
 {
     for (int i = n - 1; i > 0; i--) {
@@ -245,7 +287,6 @@ static void mezclarIndices(int *idx, int n)
     }
 }
 
-// Ordena la lista de solicitudes por tiempo de llegada (burbuja)
 static void ordenarSolicitudesPorLlegada(Lista *s)
 {
     int cambiado = 1;
@@ -260,7 +301,6 @@ static void ordenarSolicitudesPorLlegada(Lista *s)
     }
 }
 
-// Reparte los 250 procesos: 150 al ciclo de ejecucion y 100 a solicitudes
 void poblarListas(Lista *enEjecucion, Lista *solicitudes)
 {
     int indices[TOTAL_PROCESOS];
@@ -275,14 +315,20 @@ void poblarListas(Lista *enEjecucion, Lista *solicitudes)
 
 // ACTUALIZAR VARIABLES GLOBALES
 
-void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes, Cola *colaListos, SistemaES *es, int reloj)
+/* FIX #3: se agrega calculo de procesosBloqueados */
+void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
+                                  Cola *colaListos, SistemaES *es, int reloj)
 {
-    int sumEspera = 0, sumCiclos = 0, ejecutando = 0;
+    int sumEspera  = 0;
+    int sumCiclos  = 0;
+    int ejecutando = 0;
+    int bloqueados = 0;
 
     for (Nodo *n = enEjecucion->cabeza; n; n = n->siguiente) {
         Proceso *p = n->proceso;
         if (p->estado != ESTADO_TERMINADO) sumCiclos += p->ciclosRestantes;
         if (p->estado == ESTADO_EJECUTANDO) ejecutando++;
+        if (p->bloqueado)                   bloqueados++;
     }
 
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
@@ -296,6 +342,7 @@ void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes, Cola *c
     tablaSistema.procesosEnES         = totalES;
     tablaSistema.procesosEnColaListos = colaListos->tamanio;
     tablaSistema.procesosEnSolicitud  = solicitudes->tamanio;
+    tablaSistema.procesosBloqueados   = bloqueados;   /* FIX #3 */
     tablaSistema.cicloActual          = reloj;
     tablaSistema.sumaEspera           = sumEspera;
     tablaSistema.sumaCiclosRestantes  = sumCiclos;
@@ -307,9 +354,8 @@ void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes, Cola *c
     tablaSistema.desperdicioTotal     = memoriaBuddy.desperdicioInternoTotal;
 }
 
-// ---------------------------------------------------
 // LISTA DOBLEMENTE ENLAZADA
-// ---------------------------------------------------
+
 void inicializarLista(Lista *l) { l->cabeza = l->cola = NULL; l->tamanio = 0; }
 
 void insertarEnLista(Lista *l, Proceso *p)
@@ -332,6 +378,19 @@ void eliminarDeLista(Lista *l, Proceso *p)
             return;
         }
     }
+}
+
+/* FIX #4: vaciarLista() para liberar todos los nodos */
+void vaciarLista(Lista *l)
+{
+    Nodo *n = l->cabeza;
+    while (n) {
+        Nodo *sig = n->siguiente;
+        free(n);
+        n = sig;
+    }
+    l->cabeza = l->cola = NULL;
+    l->tamanio = 0;
 }
 
 int estaVaciaLista(Lista *l) { return l->cabeza == NULL; }
@@ -372,7 +431,6 @@ Proceso *desencolar(Cola *c)
 
 int estaVaciaCola(Cola *c) { return c->frente == NULL; }
 
-// Mueve un proceso al frente de la cola si esta dentro de ella
 void moverAlFrenteCola(Cola *c, Proceso *p)
 {
     if (!c->frente || c->frente->proceso == p) return;
@@ -385,9 +443,14 @@ void moverAlFrenteCola(Cola *c, Proceso *p)
     c->frente = curr;
 }
 
-// ---------------------------------------------------
-// SISTEMA E/S — 4 dispositivos
-// ---------------------------------------------------
+/* FIX #4: vaciarCola() para liberar todos los nodos */
+void vaciarCola(Cola *c)
+{
+    while (c->frente) desencolar(c);
+}
+
+// SISTEMA E/S
+
 void inicializarSistemaES(SistemaES *es)
 {
     inicializarCola(&es->disco);
@@ -404,10 +467,11 @@ void asignarES(Proceso *p, SistemaES *es, int cicloActual)
 
     p->tiempoES          = base * mults[tipo];
     p->dispositivoES     = tipo;
-    p->estado            = ESTADO_ESPERA_ES;  // primero cambiar estado
+    p->estado            = ESTADO_ESPERA_ES;
+    p->bloqueado         = 1;
     p->ciclosEnEjecucion = 0;
 
-    procesarFraseES(p, cicloActual);  // luego procesar frase con estado correcto
+    procesarFraseES(p, cicloActual);
 
     Cola *dest = NULL;
     switch (tipo) {
@@ -422,7 +486,6 @@ void asignarES(Proceso *p, SistemaES *es, int cicloActual)
     else                  encolar(dest, p);
 }
 
-// Ingresa a la cola de listos los procesos de solicitudes que ya llegaron
 void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj)
 {
     Nodo *n = solicitudes->cabeza;
@@ -441,7 +504,6 @@ void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj)
     }
 }
 
-// Incrementa el tiempo de espera de cada proceso en la cola de listos
 void actualizarEspera(Cola *colaListos)
 {
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
@@ -449,7 +511,9 @@ void actualizarEspera(Cola *colaListos)
             n->proceso->tiempoEspera++;
 }
 
-// BUDDY SYSTEM — 8 MB total
+// =========================================================
+// BUDDY SYSTEM
+// =========================================================
 
 void inicializarBuddy(void)
 {
@@ -464,7 +528,6 @@ void inicializarBuddy(void)
     memoriaBuddy.memoriaLibreKB          = BUDDY_MEMORIA_TOTAL_KB;
 }
 
-// Divide un bloque en mitades hasta llegar al tamano objetivo
 static int dividirHasta(int idx, int targetKB)
 {
     while (memoriaBuddy.bloques[idx].tamanioKB > targetKB) {
@@ -484,13 +547,11 @@ static int dividirHasta(int idx, int targetKB)
     return idx;
 }
 
-// Asigna un bloque Buddy al proceso, redondeando a la siguiente potencia de 2
 int asignarMemoriaBuddy(Proceso *p, int memoriaKB)
 {
     pthread_mutex_lock(&memoriaBuddy.mutex);
     int target = potencia2(memoriaKB);
 
-    // Buscar el bloque libre mas pequeno que sea suficientemente grande
     int mejor = -1;
     for (int i = 0; i < memoriaBuddy.numBloques; i++) {
         BloqueBS *b = &memoriaBuddy.bloques[i];
@@ -515,7 +576,23 @@ int asignarMemoriaBuddy(Proceso *p, int memoriaKB)
     return idx;
 }
 
-// Libera un bloque Buddy y fusiona con su socio si ambos estan libres
+/* ---------------------------------------------------------
+ * FIX #1: liberarUnBloque() con fusion jerarquica correcta.
+ *
+ * PROBLEMA ORIGINAL:
+ *   Al fusionar dos buddies, se copiaba el socioIdx del buddy
+ *   absorbido al bloque fusionado, pero ese socioIdx podia
+ *   apuntar a un bloque del nivel anterior (ya invalido como
+ *   socio del nuevo bloque de mayor tamano). Esto rompia la
+ *   cadena de fusion en jerarquias de mas de 2 niveles.
+ *
+ * CORRECCION:
+ *   Despues de fusionar, se busca el nuevo socio del bloque
+ *   resultante recorriendo todos los bloques y encontrando
+ *   el que tiene el mismo tamano, esta libre y su baseDir
+ *   corresponde al buddy matematico del bloque fusionado.
+ *   Formula del buddy: baseDir XOR tamanioKB
+ * --------------------------------------------------------- */
 static void liberarUnBloque(int idx, int ip)
 {
     if (idx < 0 || idx >= memoriaBuddy.numBloques) return;
@@ -528,28 +605,55 @@ static void liberarUnBloque(int idx, int ip)
     memoriaBuddy.memoriaLibreKB += tam;
     memoriaBuddy.memoriaUsadaKB -= tam;
 
-    // Intentar fusionar con el bloque socio
     int actual = idx;
+
     while (1) {
-        int socio = memoriaBuddy.bloques[actual].socioIdx;
-        if (socio < 0 || socio >= memoriaBuddy.numBloques) break;
         BloqueBS *bA = &memoriaBuddy.bloques[actual];
+        int tamActual = bA->tamanioKB;
+
+        /* Calcular la direccion base del buddy matematico */
+        int buddyBase = bA->baseDir ^ tamActual;
+
+        /* Buscar el buddy en el array de bloques */
+        int socio = -1;
+        for (int i = 0; i < memoriaBuddy.numBloques; i++) {
+            if (i == actual) continue;
+            BloqueBS *bi = &memoriaBuddy.bloques[i];
+            if (bi->libre &&
+                bi->tamanioKB == tamActual &&
+                bi->baseDir   == buddyBase) {
+                socio = i;
+                break;
+            }
+        }
+
+        /* Si no hay buddy libre del mismo tamano, no se puede fusionar */
+        if (socio == -1) break;
+
         BloqueBS *bS = &memoriaBuddy.bloques[socio];
-        if (!bS->libre || bS->tamanioKB != bA->tamanioKB) break;
+
+        /* Fusionar: el bloque con menor baseDir absorbe al otro */
         if (bA->baseDir < bS->baseDir) {
             bA->tamanioKB *= 2;
-            bA->socioIdx   = bS->socioIdx;
-            bS->tamanioKB  = 0; bS->libre = 0;
+            /* Invalidar el bloque absorbido */
+            bS->tamanioKB  = 0;
+            bS->libre      = 0;
+            bS->socioIdx   = -1;
+            /* actual sigue siendo idx */
         } else {
             bS->tamanioKB *= 2;
-            bS->socioIdx   = bA->socioIdx;
-            bA->tamanioKB  = 0; bA->libre = 0;
-            actual = socio;
+            /* Invalidar el bloque actual */
+            bA->tamanioKB  = 0;
+            bA->libre      = 0;
+            bA->socioIdx   = -1;
+            actual = socio;   /* el bloque resultante es bS */
         }
+        /* Actualizar socioIdx del bloque resultante a -1
+         * (se recalculara en la proxima iteracion si hay mas fusion) */
+        memoriaBuddy.bloques[actual].socioIdx = -1;
     }
 }
 
-// Libera todos los bloques Buddy que tiene asignados un proceso
 void liberarTodosLosBloquesBuddy(Proceso *p)
 {
     if (p->numBloquesBuddy == 0) return;
@@ -568,7 +672,9 @@ void liberarTodosLosBloquesBuddy(Proceso *p)
     pthread_mutex_unlock(&memoriaBuddy.mutex);
 }
 
+// =========================================================
 // PAGINACION NRU + SWAP
+// =========================================================
 
 void inicializarPaginacion(void)
 {
@@ -581,7 +687,6 @@ void inicializarPaginacion(void)
     }
 }
 
-// Llena una pagina con palabras del banco (cursor circular)
 static void cargarPalabrasPagina(Pagina *pag)
 {
     pag->numPalabras = 0;
@@ -594,7 +699,6 @@ static void cargarPalabrasPagina(Pagina *pag)
     }
 }
 
-// Asigna paginas al proceso: las primeras van a RAM y el resto a SWAP
 void asignarPaginasProceso(Proceso *p)
 {
     int totalPals = p->memoriaUsadaKB * 10;
@@ -611,7 +715,6 @@ void asignarPaginasProceso(Proceso *p)
         p->bitModificado[pg] = 0;
     }
 
-    // Asignar hasta numMarcos paginas en RAM
     for (int pg = 0; pg < p->numPaginas && asignados < p->numMarcos; pg++) {
         int marco = -1;
         for (int m = 0; m < memoriaPrincipal.numMarcosTotal; m++)
@@ -630,7 +733,6 @@ void asignarPaginasProceso(Proceso *p)
         asignados++;
     }
 
-    // El resto de paginas va a SWAP
     for (int pg = asignados; pg < p->numPaginas; pg++) {
         if (areaSwap.numPaginas >= MAX_PAGINAS_SWAP) break;
         Pagina *sp = &areaSwap.paginas[areaSwap.numPaginas];
@@ -643,7 +745,6 @@ void asignarPaginasProceso(Proceso *p)
     }
 }
 
-// Libera todas las paginas de un proceso de RAM y de SWAP
 void liberarPaginasProceso(Proceso *p)
 {
     int ip = (int)(p - tablaSistema.tablaBCPs);
@@ -659,7 +760,6 @@ void liberarPaginasProceso(Proceso *p)
         }
     }
 
-    // Compactar SWAP quitando las paginas de este proceso
     int j = 0;
     for (int i = 0; i < areaSwap.numPaginas; i++)
         if (areaSwap.paginas[i].indiceProceso != ip)
@@ -673,7 +773,6 @@ void liberarPaginasProceso(Proceso *p)
     }
 }
 
-// NRU: elige la victima de menor clase (R=0, M=0 es clase 0, la mejor)
 static int seleccionarVictimaNRU(void)
 {
     int victima = -1, claseV = 4;
@@ -692,36 +791,32 @@ static int seleccionarVictimaNRU(void)
     return victima;
 }
 
-// Maneja un fallo de pagina: trae la pagina de SWAP a RAM usando NRU si no hay marcos libres
 int manejarFalloPagina(Proceso *p, int indicePagina, int cicloActual)
 {
-    // Buscar un marco libre primero
     int marco = -1;
     for (int m = 0; m < memoriaPrincipal.numMarcosTotal; m++)
         if (memoriaPrincipal.marcos[m].indiceProceso == -1) { marco = m; break; }
 
     int usaVictima = 0;
     if (marco == -1) {
-        // No hay marcos libres: aplicar reemplazo NRU
         marco = seleccionarVictimaNRU();
         if (marco == -1) return -1;
         usaVictima = 1;
 
-        // Mandar la victima a SWAP
         Pagina *vic = &memoriaPrincipal.marcos[marco];
         if (areaSwap.numPaginas < MAX_PAGINAS_SWAP) {
             areaSwap.paginas[areaSwap.numPaginas] = *vic;
             areaSwap.numPaginas++;
         }
         int ipV = vic->indiceProceso, pgV = vic->indicePagina;
-        if (ipV >= 0 && ipV < TOTAL_PROCESOS && pgV >= 0 && pgV < MAX_PAGINAS_PROCESO) {
+        if (ipV >= 0 && ipV < TOTAL_PROCESOS &&
+            pgV >= 0 && pgV < MAX_PAGINAS_PROCESO) {
             tablaSistema.tablaBCPs[ipV].paginasEnRAM[pgV]  = -1;
             tablaSistema.tablaBCPs[ipV].bitReferencia[pgV] = 0;
             tablaSistema.tablaBCPs[ipV].bitModificado[pgV] = 0;
         }
     }
 
-    // Buscar la pagina pedida en SWAP
     int ip = (int)(p - tablaSistema.tablaBCPs);
     int swapIdx = -1;
     for (int s = 0; s < areaSwap.numPaginas; s++) {
@@ -731,11 +826,9 @@ int manejarFalloPagina(Proceso *p, int indicePagina, int cicloActual)
         }
     }
 
-    // Traer la pagina de SWAP al marco, o cargar palabras nuevas si no estaba en SWAP
     Pagina *dest = &memoriaPrincipal.marcos[marco];
     if (swapIdx >= 0) {
         *dest = areaSwap.paginas[swapIdx];
-        // Compactar el area de SWAP
         for (int s = swapIdx; s < areaSwap.numPaginas - 1; s++)
             areaSwap.paginas[s] = areaSwap.paginas[s + 1];
         areaSwap.numPaginas--;
@@ -755,7 +848,6 @@ int manejarFalloPagina(Proceso *p, int indicePagina, int cicloActual)
     return marco;
 }
 
-// Cada 50 ciclos resetea los bits R de todos los marcos (parte del ciclo NRU)
 void resetarBitsR(int cicloActual)
 {
     if (cicloActual % 50 != 0) return;
@@ -766,7 +858,6 @@ void resetarBitsR(int cicloActual)
             tablaSistema.tablaBCPs[i].bitReferencia[pg] = 0;
 }
 
-// Cada 300 ciclos: mitad de procesos reducen paginas a la mitad, la otra mitad las duplica
 void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual)
 {
     int total = enEjecucion->tamanio;
@@ -777,7 +868,6 @@ void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual)
         if (p->estado == ESTADO_TERMINADO) continue;
 
         if (cont < total / 2) {
-            // Primera mitad: reducir marcos a la mitad
             int nuevo = p->numMarcos / 2;
             if (nuevo < MARCOS_MIN) nuevo = MARCOS_MIN;
             int liberados = 0, objetivo = p->numMarcos - nuevo;
@@ -798,7 +888,6 @@ void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual)
             }
             p->numMarcos = nuevo;
         } else {
-            // Segunda mitad: duplicar marcos
             int nuevo = p->numMarcos * 2;
             if (nuevo > MARCOS_MAX) nuevo = MARCOS_MAX;
             int extra = nuevo - p->numMarcos;
@@ -810,10 +899,10 @@ void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual)
             p->numMarcos = nuevo;
         }
     }
-    printf("[MEM] Redimension en ciclo %d: mitad reduce, mitad amplia paginas\n", cicloActual);
+    printf("[MEM] Redimension en ciclo %d: mitad reduce, mitad amplia paginas\n",
+           cicloActual);
 }
 
-// Cada vez que el proceso entra a CPU puede pedir mas memoria Buddy
 void crecerMemoriaProceso(Proceso *p)
 {
     if (p->numBloquesBuddy >= MAX_BLOQUES_BUDDY_PROC) return;
@@ -828,7 +917,6 @@ void crecerMemoriaProceso(Proceso *p)
 
 // CPU
 
-// Prepara al proceso para ejecutar: asigna rafaga, descuenta ciclos, marca paginas
 void procesarEntradaCPU(Proceso *p, int reloj)
 {
     p->cambiosContexto = rand() % 21 + 10;
@@ -838,51 +926,53 @@ void procesarEntradaCPU(Proceso *p, int reloj)
     p->vecesEnCPU++;
     p->iteraciones++;
 
-    // El tiempo de respuesta se calcula solo la primera vez que entra a CPU
     if (p->vecesEnCPU == 1)
         p->tiempoRespuesta = reloj - p->tiempoLlegada;
 
-    // Rafaga: cuantos ciclos quiere ejecutar en esta instancia (10-70)
-    // Si quedan menos ciclos que la rafaga, se ajusta al restante
     int rafaga = rand() % 61 + 10;
     if (rafaga > p->ciclosRestantes) rafaga = p->ciclosRestantes;
     if (rafaga < 1) rafaga = 1;
 
     p->rafagaActual = rafaga;
 
-    // Descontar la rafaga completa; el controlador ajusta si hay preempcion en RR
     int ejecutados = rafaga;
     p->ciclosRestantes   -= ejecutados;
     p->tiempoEjecucion   += ejecutados;
     p->ciclosEnEjecucion += ejecutados;
     p->restanteQuantum    = tablaSistema.quantumActual;
 
-    // Marcar como referenciadas todas las paginas del proceso que estan en RAM
     for (int pg = 0; pg < p->numPaginas; pg++) {
-        if (p->paginasEnRAM[pg] >= 0) {
-            memoriaPrincipal.marcos[p->paginasEnRAM[pg]].bitR = 1;
+        int m = p->paginasEnRAM[pg];
+        if (m >= 0) {
+            memoriaPrincipal.marcos[m].bitR = 1;
             p->bitReferencia[pg] = 1;
+            if (rand() % 10 < 3) {
+                memoriaPrincipal.marcos[m].bitM = 1;
+                p->bitModificado[pg] = 1;
+            }
         }
     }
 }
 
-// Marca el proceso como terminado y libera su memoria
+/* FIX #5: procesarTerminacion() imprime mensaje completo */
 void procesarTerminacion(Proceso *p, int reloj)
 {
     p->estado        = ESTADO_TERMINADO;
+    p->bloqueado     = 0;
     p->tiempoRetorno = reloj - p->tiempoLlegada;
     liberarTodosLosBloquesBuddy(p);
     liberarPaginasProceso(p);
     estadMem.procesosTerminados++;
     estadMem.tiempoTotalEjecucion += p->tiempoEjecucion;
-    printf("  [FIN] %s | ejec:%d | espera:%d | retorno:%d | fallos:%d\n",
+
+    printf("\n  *** [TERMINADO] %s | ejec:%d ciclos | espera:%d | "
+           "retorno:%d | fallos NRU:%d | vecesEnCPU:%d ***\n",
            p->id, p->tiempoEjecucion, p->tiempoEspera,
-           p->tiempoRetorno, p->fallosPagina);
+           p->tiempoRetorno, p->fallosPagina, p->vecesEnCPU);
 }
 
 // ESTADISTICAS DE MEMORIA
 
-// Calcula el desperdicio externo: memoria libre fragmentada que no forma un bloque continuo
 void calcularDesperdicioExterno(void)
 {
     pthread_mutex_lock(&memoriaBuddy.mutex);
@@ -927,18 +1017,15 @@ void mostrarEstadisticasMemoria(void)
 }
 
 // CAMBIO AUTOMATICO DE ALGORITMO
-// Usa 3 variables de tabla y 5 del BCP para decidir
 
 int evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es)
 {
-    // Variables de tabla: procesosEnColaListos, procesosEnES, promedioEspera
     int enListo = tablaSistema.procesosEnColaListos;
     int enES    = tablaSistema.procesosEnES;
     int total   = enListo + enES + 1;
     float propL = (float)enListo / total;
 
-    // Variables de BCP: tiempoEspera, vecesEnCPU, tipoProceso, ciclosRestantes, rafagaActual
-    float promEspera = tablaSistema.promedioEspera;
+    float promEspera = (float)tablaSistema.promedioEspera;
     int ioCount = 0, cantProc = 0;
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
         if (n->proceso->tipoProceso == 1) ioCount++;
@@ -949,20 +1036,20 @@ int evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es)
     int alg = tablaSistema.algoritmoActual;
 
     if (alg == ALG_FCFS) {
-        // Cambiar a RR si hay mucha cola, mucha espera y hay procesos en E/S
         if (propL > 0.65f && promEspera > 400.0f && enES >= 3) {
             printf("[AUTO] FCFS -> RR (cola=%.0f%% espera=%.0f propIO=%.0f%%)\n",
                    propL * 100, promEspera, propIO * 100);
             return ALG_RR;
         }
     } else {
-        // Volver a FCFS si el sistema esta estable
         if (propL < 0.20f && propIO < 0.20f && promEspera < 80.0f) {
             printf("[AUTO] RR -> FCFS (sistema estable)\n");
             return ALG_FCFS;
         }
     }
 
-    (void)es;
+    /* Suprimir warning de parametro no usado con uso real */
+    (void)(es->disco.tamanio + es->pantalla.tamanio +
+           es->teclado.tamanio + es->impresora.tamanio);
     return tablaSistema.algoritmoActual;
 }

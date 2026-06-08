@@ -6,6 +6,11 @@
 #include <string.h>
 #include <pthread.h>
 
+/* =========================================================
+ * CORRECCIONES EN ESTE HEADER:
+ *  1. Agregados prototipos vaciarCola() y vaciarLista()
+ *     para evitar memory leaks al finalizar la simulacion.
+ * ========================================================= */
 
 // CONSTANTES
 #define TOTAL_PROCESOS        250
@@ -25,12 +30,12 @@
 #define BUDDY_MIN_KB            4
 #define BUDDY_MAX_BLOQUES       2048
 
-// Paginacion NRU
+// Paginacion NRU: marcos pares entre MARCOS_MIN(8) y MARCOS_MAX(20)
 #define PALABRAS_POR_PAGINA    20
-#define MARCOS_MIN  2
-#define MARCOS_MAX  6
-#define MAX_PAGINAS_PROCESO    32
-#define MAX_PAGINAS_SWAP      4096
+#define MARCOS_MIN  8
+#define MARCOS_MAX  20
+#define MAX_PAGINAS_PROCESO    64
+#define MAX_PAGINAS_SWAP      8192
 #define MAX_BLOQUES_BUDDY_PROC  8
 
 // Banco de palabras
@@ -73,7 +78,7 @@ typedef struct {
     int  fallosPagina;      /* 25 */
 
     // Soporte
-    int  ciclosEnEjecucion;     // acumulador para trigger E/S cada 200
+    int  ciclosEnEjecucion;
     int  yaIngresado;
 
     // Buddy
@@ -232,42 +237,37 @@ extern EstadisticasMem estadMem;
 
 // Prototipos - modelo.c
 
-// Inicializacion
 void    inicializarTablaSistema(void);
 void    poblarListas(Lista *enEjecucion, Lista *solicitudes);
 void    actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
                                     Cola *colaListos, SistemaES *es, int reloj);
 
-// Lista
 void    inicializarLista(Lista *l);
 void    insertarEnLista(Lista *l, Proceso *p);
 void    eliminarDeLista(Lista *l, Proceso *p);
+void    vaciarLista(Lista *l);          /* FIX: libera todos los nodos */
 int     estaVaciaLista(Lista *l);
 
-// Cola
 void     inicializarCola(Cola *c);
 void     encolar(Cola *c, Proceso *p);
 void     encolarAlFrente(Cola *c, Proceso *p);
 Proceso *desencolar(Cola *c);
 int      estaVaciaCola(Cola *c);
 void     moverAlFrenteCola(Cola *c, Proceso *p);
+void     vaciarCola(Cola *c);           /* FIX: libera todos los nodos */
 
-// E/S
 void inicializarSistemaES(SistemaES *es);
 void asignarES(Proceso *p, SistemaES *es, int cicloActual);
 void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj);
 void actualizarEspera(Cola *colaListos);
 
-// CPU
 void procesarEntradaCPU(Proceso *p, int reloj);
 void procesarTerminacion(Proceso *p, int reloj);
 
-// Buddy System
 void inicializarBuddy(void);
 int  asignarMemoriaBuddy(Proceso *p, int memoriaKB);
 void liberarTodosLosBloquesBuddy(Proceso *p);
 
-// Paginacion NRU
 void inicializarPaginacion(void);
 void asignarPaginasProceso(Proceso *p);
 void liberarPaginasProceso(Proceso *p);
@@ -276,17 +276,14 @@ void resetarBitsR(int cicloActual);
 void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual);
 void crecerMemoriaProceso(Proceso *p);
 
-// Banco de palabras
 void cargarPalabras(const char *ruta);
 void cargarFrases(const char *ruta);
 void procesarFraseES(Proceso *p, int cicloActual);
 
-// Estadisticas
 void calcularDesperdicioExterno(void);
 void actualizarPromedioFinalizados(int cicloActual);
 void mostrarEstadisticasMemoria(void);
 
-// Cambio automatico de algoritmo
 int  evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es);
 
 #endif
