@@ -7,6 +7,7 @@
 #include "modelo.h"
 #include "controlador.h"
 #include "vista.h"
+#include "master.h"
 
 extern volatile sig_atomic_t g_salir;
 
@@ -148,6 +149,7 @@ int main(void)
                                     &colaListos, &es, reloj);
 
         if (reloj % 100 == 0) {
+            ejecutarMasterPVM(&enEjecucion, quantum);
             vistaMostrarTablaGlobal();
             vistaEstadoES(&es);
             mostrarEstadisticasMemoria();

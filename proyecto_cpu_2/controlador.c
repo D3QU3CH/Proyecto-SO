@@ -15,7 +15,7 @@
 // TERMINAL
 
 static struct termios g_termOrig;
-static int            g_termGuardado = 0;
+static int g_termGuardado = 0;
 volatile sig_atomic_t g_salir = 0;
 
 void termGuardar(void)
@@ -26,7 +26,8 @@ void termGuardar(void)
 
 void termRestaurar(void)
 {
-    if (!g_termGuardado) return;
+    if (!g_termGuardado)
+        return;
     tcsetattr(STDIN_FILENO, TCSANOW, &g_termOrig);
     int f = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, f & ~O_NONBLOCK);
@@ -36,7 +37,8 @@ void termRaw(void)
 {
     struct termios t = g_termOrig;
     t.c_lflag &= ~(ICANON | ECHO);
-    t.c_cc[VMIN] = 0; t.c_cc[VTIME] = 0;
+    t.c_cc[VMIN] = 0;
+    t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
     int f = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, f | O_NONBLOCK);
@@ -48,14 +50,16 @@ void termBloqueo(void)
     fcntl(STDIN_FILENO, F_SETFL, f & ~O_NONBLOCK);
     struct termios t = g_termOrig;
     t.c_lflag |= (ICANON | ECHO);
-    t.c_cc[VMIN] = 1; t.c_cc[VTIME] = 0;
+    t.c_cc[VMIN] = 1;
+    t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
 
 char leerTecla(void)
 {
     char c = 0;
-    if (read(STDIN_FILENO, &c, 1) == 1) return c;
+    if (read(STDIN_FILENO, &c, 1) == 1)
+        return c;
     return 0;
 }
 
@@ -64,11 +68,15 @@ int leerLinea(char *buf, int maxlen)
     termBloqueo();
     fflush(stdout);
     int len = 0;
-    while (len < maxlen - 1) {
+    while (len < maxlen - 1)
+    {
         char c;
-        if (read(STDIN_FILENO, &c, 1) <= 0) break;
-        if (c == '\n' || c == '\r') break;
-        if ((c == 127 || c == '\b') && len > 0) {
+        if (read(STDIN_FILENO, &c, 1) <= 0)
+            break;
+        if (c == '\n' || c == '\r')
+            break;
+        if ((c == 127 || c == '\b') && len > 0)
+        {
             len--;
             write(STDOUT_FILENO, "\b \b", 3);
             continue;
@@ -82,7 +90,12 @@ int leerLinea(char *buf, int maxlen)
     return len;
 }
 
-void manejadorSenal(int sig) { (void)sig; g_salir = 1; termRestaurar(); }
+void manejadorSenal(int sig)
+{
+    (void)sig;
+    g_salir = 1;
+    termRestaurar();
+}
 
 // TECLAS DE CONTROL
 
@@ -90,37 +103,48 @@ void manejarTeclaX(int *algoritmo, int *quantum, int reloj,
                    int *cicloUltimoCambio, pthread_mutex_t *mutex)
 {
     char buf[64] = {0};
-    if (*algoritmo == ALG_FCFS) {
+    if (*algoritmo == ALG_FCFS)
+    {
         printf("\n[X] Cambiar a Round Robin\n    Ingrese Quantum (>0): ");
         fflush(stdout);
         leerLinea(buf, sizeof(buf));
         int q = atoi(buf);
-        if (q <= 0) q = 20;
+        if (q <= 0)
+            q = 20;
 
         pthread_mutex_lock(mutex);
-        *algoritmo                   = ALG_RR;
-        *quantum                     = q;
+        *algoritmo = ALG_RR;
+        *quantum = q;
         tablaSistema.algoritmoActual = ALG_RR;
-        tablaSistema.quantumActual   = q;
-        *cicloUltimoCambio           = reloj;
+        tablaSistema.quantumActual = q;
+        *cicloUltimoCambio = reloj;
         pthread_mutex_unlock(mutex);
         printf("[X] Algoritmo -> Round Robin (Q=%d)\n", q);
-    } else {
+    }
+    else
+    {
         printf("\n[X] Cambiar a FCFS? (s/n): ");
         fflush(stdout);
         leerLinea(buf, sizeof(buf));
-        if (buf[0] == 's' || buf[0] == 'S' || buf[0] == 'y' || buf[0] == 'Y') {
+        if (buf[0] == 's' || buf[0] == 'S' || buf[0] == 'y' || buf[0] == 'Y')
+        {
             pthread_mutex_lock(mutex);
-            *algoritmo                   = ALG_FCFS;
+            *algoritmo = ALG_FCFS;
             tablaSistema.algoritmoActual = ALG_FCFS;
-            *cicloUltimoCambio           = reloj;
+            *cicloUltimoCambio = reloj;
             pthread_mutex_unlock(mutex);
             printf("[X] Algoritmo -> FCFS\n");
-        } else {
+        }
+        else
+        {
             printf("[X] Cancelado. Sigue en RR (Q=%d)\n", *quantum);
         }
     }
-    { char tmp; while (read(STDIN_FILENO, &tmp, 1) == 1); }
+    {
+        char tmp;
+        while (read(STDIN_FILENO, &tmp, 1) == 1)
+            ;
+    }
 }
 
 void manejarTeclaA(Cola *colaListos, SistemaES *es,
@@ -137,18 +161,20 @@ void manejarTeclaA(Cola *colaListos, SistemaES *es,
 
     pthread_mutex_lock(mutex);
     int encontrado = 0;
-    for (int i = 0; i < TOTAL_PROCESOS; i++) {
+    for (int i = 0; i < TOTAL_PROCESOS; i++)
+    {
         Proceso *p = &tablaSistema.tablaBCPs[i];
-        if (strcmp(p->id, idBuf) == 0 && p->estado != ESTADO_TERMINADO) {
+        if (strcmp(p->id, idBuf) == 0 && p->estado != ESTADO_TERMINADO)
+        {
             if (*procesoPrivilId >= 0 && *procesoPrivilId != i)
                 tablaSistema.tablaBCPs[*procesoPrivilId].esApropiativo = 0;
             p->esApropiativo = 1;
             *procesoPrivilId = i;
-            moverAlFrenteCola(colaListos,    p);
-            moverAlFrenteCola(&es->disco,    p);
+            moverAlFrenteCola(colaListos, p);
+            moverAlFrenteCola(&es->disco, p);
             moverAlFrenteCola(&es->pantalla, p);
-            moverAlFrenteCola(&es->teclado,  p);
-            moverAlFrenteCola(&es->impresora,p);
+            moverAlFrenteCola(&es->teclado, p);
+            moverAlFrenteCola(&es->impresora, p);
             printf("[A] %s ahora es apropiativo (al frente de listos y E/S)\n", p->id);
             encontrado = 1;
             break;
@@ -157,15 +183,21 @@ void manejarTeclaA(Cola *colaListos, SistemaES *es,
     if (!encontrado)
         printf("[A] Proceso '%s' no encontrado o ya termino\n", idBuf);
     pthread_mutex_unlock(mutex);
-    { char tmp; while (read(STDIN_FILENO, &tmp, 1) == 1); }
+    {
+        char tmp;
+        while (read(STDIN_FILENO, &tmp, 1) == 1)
+            ;
+    }
 }
 
 // SCHEDULING
 
 static void ponerApropiativoAlFrente(Cola *colaListos)
 {
-    for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
-        if (n->proceso->esApropiativo) {
+    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
+    {
+        if (n->proceso->esApropiativo)
+        {
             moverAlFrenteCola(colaListos, n->proceso);
             break;
         }
@@ -175,30 +207,40 @@ static void ponerApropiativoAlFrente(Cola *colaListos)
 static void postEjecucion(Proceso *p, Cola *colaListos, SistemaES *es,
                           int *procesoPrivilId, int reloj, int ciclosEjecutados)
 {
-    if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) *procesoPrivilId = -1;
+    if (p->ciclosRestantes <= 0)
+    {
+        if (p->esApropiativo)
+            *procesoPrivilId = -1;
         procesarTerminacion(p, reloj);
-
-    } else if (p->ciclosEnEjecucion >= CICLOS_PARA_ES) {
+    }
+    else if (p->ciclosEnEjecucion >= CICLOS_PARA_ES)
+    {
         asignarES(p, es, reloj);
-
-    } else {
+    }
+    else
+    {
         p->estado = ESTADO_LISTO;
-        if (p->esApropiativo) encolarAlFrente(colaListos, p);
-        else                  encolar(colaListos, p);
+        if (p->esApropiativo)
+            encolarAlFrente(colaListos, p);
+        else
+            encolar(colaListos, p);
     }
 }
 
 void ejecutarFCFS(Cola *colaListos, SistemaES *es, int *procesoPrivilId, int reloj)
 {
-    if (estaVaciaCola(colaListos)) return;
+    if (estaVaciaCola(colaListos))
+        return;
 
     ponerApropiativoAlFrente(colaListos);
     Proceso *p = desencolar(colaListos);
-    if (!p) return;
+    if (!p)
+        return;
 
-    if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) *procesoPrivilId = -1;
+    if (p->ciclosRestantes <= 0)
+    {
+        if (p->esApropiativo)
+            *procesoPrivilId = -1;
         procesarTerminacion(p, reloj);
         tablaSistema.totalCambiosContexto++;
         return;
@@ -214,14 +256,18 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
                 int *quantum, int *iteracionesRR,
                 int histDesp[], int histCiclo[], int *histIdx, int reloj)
 {
-    if (estaVaciaCola(colaListos)) return;
+    if (estaVaciaCola(colaListos))
+        return;
 
     ponerApropiativoAlFrente(colaListos);
     Proceso *p = desencolar(colaListos);
-    if (!p) return;
+    if (!p)
+        return;
 
-    if (p->ciclosRestantes <= 0) {
-        if (p->esApropiativo) *procesoPrivilId = -1;
+    if (p->ciclosRestantes <= 0)
+    {
+        if (p->esApropiativo)
+            *procesoPrivilId = -1;
         procesarTerminacion(p, reloj);
         tablaSistema.totalCambiosContexto++;
         return;
@@ -234,22 +280,25 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
     int q = tablaSistema.quantumActual;
     int ejecuta, desp;
 
-    if (p->rafagaActual > q) {
+    if (p->rafagaActual > q)
+    {
         int sobrante = p->rafagaActual - q;
-        p->ciclosRestantes   += sobrante;
-        p->tiempoEjecucion   -= sobrante;
+        p->ciclosRestantes += sobrante;
+        p->tiempoEjecucion -= sobrante;
         p->ciclosEnEjecucion -= sobrante;
         ejecuta = q;
-        desp    = 0;
-    } else {
+        desp = 0;
+    }
+    else
+    {
         ejecuta = p->rafagaActual;
-        desp    = q - ejecuta;
+        desp = q - ejecuta;
     }
 
     p->aprovechamiento = (q > 0) ? (ejecuta * 100) / q : 0;
-    p->desperdicio     = desp;
+    p->desperdicio = desp;
 
-    histDesp[*histIdx]  = (q > 0) ? (desp * 100) / q : 0;
+    histDesp[*histIdx] = (q > 0) ? (desp * 100) / q : 0;
     histCiclo[*histIdx] = reloj;
     *histIdx = (*histIdx + 1) % 100;
 
@@ -264,19 +313,26 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
 void procesarColaES(Cola *colaES, Cola *colaListos)
 {
     int n = colaES->tamanio;
-    while (n--) {
+    while (n--)
+    {
         Proceso *p = desencolar(colaES);
-        if (!p) continue;
+        if (!p)
+            continue;
 
         p->tiempoES -= TICKS_ES;
 
-        if (p->tiempoES <= 0) {
-            p->tiempoES      = 0;
+        if (p->tiempoES <= 0)
+        {
+            p->tiempoES = 0;
             p->dispositivoES = -1;
-            p->estado        = ESTADO_LISTO;
-            if (p->esApropiativo) encolarAlFrente(colaListos, p);
-            else                  encolar(colaListos, p);
-        } else {
+            p->estado = ESTADO_LISTO;
+            if (p->esApropiativo)
+                encolarAlFrente(colaListos, p);
+            else
+                encolar(colaListos, p);
+        }
+        else
+        {
             encolar(colaES, p);
         }
     }
@@ -286,40 +342,51 @@ void procesarColaES(Cola *colaES, Cola *colaListos)
 
 void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR)
 {
-    if (iteracionesRR % 20 != 0) return;
+    if (iteracionesRR % 20 != 0)
+        return;
 
     int enListos = colaListos->tamanio;
-    int enES     = es->disco.tamanio + es->pantalla.tamanio +
-                   es->teclado.tamanio + es->impresora.tamanio;
-    int total    = enListos + enES;
-    if (total == 0) return;
+    int enES = es->disco.tamanio + es->pantalla.tamanio +
+               es->teclado.tamanio + es->impresora.tamanio;
+    int total = enListos + enES;
+    if (total == 0)
+        return;
 
     float propListos = (float)enListos / total;
-    float propES     = (float)enES     / total;
-    int   q          = tablaSistema.quantumActual;
+    float propES = (float)enES / total;
+    int q = tablaSistema.quantumActual;
 
     static int ciclosSinReporte = 0;
 
-    if (propListos > 0.75f) {
-        if (q > 20) {
+    if (propListos > 0.75f)
+    {
+        if (q > 20)
+        {
             q -= 5;
             printf("[RR] Desbalance listos>75%% -> Q reducido a %d\n", q);
             ciclosSinReporte = 0;
-        } else if (ciclosSinReporte == 0) {
+        }
+        else if (ciclosSinReporte == 0)
+        {
             printf("[RR] Q en minimo (%d). Sistema con carga alta estructural.\n", q);
             ciclosSinReporte = 5;
-        } else {
+        }
+        else
+        {
             ciclosSinReporte--;
         }
-
-    } else if (propES > 0.75f) {
-        if (q < 100) {
+    }
+    else if (propES > 0.75f)
+    {
+        if (q < 100)
+        {
             q += 5;
             printf("[RR] Desbalance ES>75%% -> Q aumentado a %d\n", q);
         }
         ciclosSinReporte = 0;
-
-    } else {
+    }
+    else
+    {
         printf("[RR] *** ALERTA: Colas balanceadas (listos=%.0f%% ES=%.0f%%) Q=%d ***\n",
                propListos * 100, propES * 100, q);
         ciclosSinReporte = 0;
@@ -336,11 +403,15 @@ void mostrarEnvejecimiento(Cola *colaListos)
 
     printf("\nTOP 5 ENVEJECIMIENTO (mas iteraciones en CPU)\n");
 
-    for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
+    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
+    {
         Proceso *p = n->proceso;
-        for (int i = 0; i < 5; i++) {
-            if (!top[i] || p->vecesEnCPU > top[i]->vecesEnCPU) {
-                for (int j = 4; j > i; j--) top[j] = top[j - 1];
+        for (int i = 0; i < 5; i++)
+        {
+            if (!top[i] || p->vecesEnCPU > top[i]->vecesEnCPU)
+            {
+                for (int j = 4; j > i; j--)
+                    top[j] = top[j - 1];
                 top[i] = p;
                 break;
             }
@@ -352,7 +423,8 @@ void mostrarEnvejecimiento(Cola *colaListos)
                i + 1, top[i]->id, top[i]->vecesEnCPU,
                top[i]->ciclosRestantes, top[i]->tiempoEspera);
 
-    if (!top[0]) printf("  (cola vacia)\n");
+    if (!top[0])
+        printf("  (cola vacia)\n");
 }
 
 void mostrarDesperdiciadores(Cola *colaListos)
@@ -361,15 +433,24 @@ void mostrarDesperdiciadores(Cola *colaListos)
 
     printf("\nTOP 5 DESPERDICIADORES DE CPU\n");
 
-    for (NodoCola *n = colaListos->frente; n; n = n->siguiente) {
+    for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
+    {
         Proceso *p = n->proceso;
-        if (p->vecesEnCPU == 0) continue;
+        if (p->vecesEnCPU == 0)
+            continue;
 
         int desp = p->desperdicio;
-        for (int i = 0; i < 5; i++) {
-            if (!top[i]) { top[i] = p; break; }
-            if (desp > top[i]->desperdicio) {
-                for (int j = 4; j > i; j--) top[j] = top[j - 1];
+        for (int i = 0; i < 5; i++)
+        {
+            if (!top[i])
+            {
+                top[i] = p;
+                break;
+            }
+            if (desp > top[i]->desperdicio)
+            {
+                for (int j = 4; j > i; j--)
+                    top[j] = top[j - 1];
                 top[i] = p;
                 break;
             }
@@ -382,7 +463,8 @@ void mostrarDesperdiciadores(Cola *colaListos)
                i + 1, top[i]->id, top[i]->rafagaActual,
                q, top[i]->desperdicio, top[i]->aprovechamiento);
 
-    if (!top[0]) printf("  (cola vacia)\n");
+    if (!top[0])
+        printf("  (cola vacia)\n");
 }
 
 // PERSISTENCIA
@@ -390,40 +472,42 @@ void mostrarDesperdiciadores(Cola *colaListos)
 void guardarBCPs(Lista *enEjecucion, const char *ruta)
 {
     FILE *f = fopen(ruta, "w");
-    if (!f) return;
+    if (!f)
+        return;
 
     time_t ahora = time(NULL);
-    fprintf(f, "\n=== CHECKPOINT %s", ctime(&ahora));
+    fprintf(f, "=== CHECKPOINT %s", ctime(&ahora));
 
-    int num = 1;
-    for (Nodo *n = enEjecucion->cabeza; n; n = n->siguiente, num++) {
-        Proceso *p = n->proceso;
-        fprintf(f, "--- BCP #%d ---\n",      num);
-        fprintf(f, " ID           : %s\n",   p->id);
-        fprintf(f, " Nombre       : %s\n",   p->nombre);
-        fprintf(f, " Llegada      : %d\n",   p->tiempoLlegada);
-        fprintf(f, " CiclosTot    : %d\n",   p->ciclosTotales);
-        fprintf(f, " CiclosRest   : %d\n",   p->ciclosRestantes);
-        fprintf(f, " RafagaActual : %d\n",   p->rafagaActual);
-        fprintf(f, " TiempoEjec   : %d\n",   p->tiempoEjecucion);
-        fprintf(f, " TiempoEspera : %d\n",   p->tiempoEspera);
-        fprintf(f, " TiempoResp   : %d\n",   p->tiempoRespuesta);
-        fprintf(f, " TiempoRetorno: %d\n",   p->tiempoRetorno);
-        fprintf(f, " Estado       : %d\n",   p->estado);
-        fprintf(f, " VecesEnCPU   : %d\n",   p->vecesEnCPU);
-        fprintf(f, " Iteraciones  : %d\n",   p->iteraciones);
-        fprintf(f, " RestQuantum  : %d\n",   p->restanteQuantum);
-        fprintf(f, " CambiosCtx   : %d\n",   p->cambiosContexto);
-        fprintf(f, " Apropiativo  : %d\n",   p->esApropiativo);
-        fprintf(f, " TipoProceso  : %d\n",   p->tipoProceso);
-        fprintf(f, " Aprovech%%    : %d\n",   p->aprovechamiento);
-        fprintf(f, " Desperdicio  : %d\n",   p->desperdicio);
-        fprintf(f, " DispositivoES: %d\n",   p->dispositivoES);
-        fprintf(f, " TiempoES     : %d\n",   p->tiempoES);
-        fprintf(f, " Bloqueado    : %d\n",   p->bloqueado);
-        fprintf(f, " Variable1    : %d\n",   p->variable1);
-        fprintf(f, " Variable2    : %d\n",   p->variable2);
-        fprintf(f, " FallosPag    : %d\n\n", p->fallosPagina);
+    // Encabezado
+    fprintf(f, "%-5s %-10s %-22s %-10s %-9s %-9s %-9s %-9s %-9s %-9s %-11s %-9s %-9s %-7s %-8s %-8s %-8s %-7s %-7s %-8s %-9s %-8s %-7s %-7s %-8s\n",
+            "#", "ID", "Nombre", "Estado", "Llegada", "CicTot", "CicRest",
+            "Rafaga", "TEjec", "TEspera", "TRespuesta", "TRetorno",
+            "VecCPU", "Iter", "ResQ", "CambCtx", "Aprov%", "Desp",
+            "DisES", "TiemES", "FallosPg", "MemKB", "Var1", "Var2", "Tipo");
+
+    fprintf(f, "%-5s %-10s %-22s %-10s %-9s %-9s %-9s %-9s %-9s %-9s %-11s %-9s %-9s %-7s %-8s %-8s %-8s %-7s %-7s %-8s %-9s %-8s %-7s %-7s %-8s\n",
+            "-----", "----------", "----------------------", "----------", "--------", "--------", "--------",
+            "--------", "--------", "--------", "----------", "--------", "--------", "------", "-------",
+            "-------", "-------", "------", "------", "-------", "--------", "-------", "------", "------", "-------");
+
+    const char *estados[] = {"LISTO", "EJEC", "ESP_ES", "TERMINADO"};
+
+    // Iterar los 250 procesos directamente de la tabla
+    for (int i = 0; i < TOTAL_PROCESOS; i++)
+    {
+        Proceso *p = &tablaSistema.tablaBCPs[i];
+        const char *est = (p->estado >= 0 && p->estado <= 3) ? estados[p->estado] : "?";
+        const char *tipo = p->tipoProceso == 0 ? "CPU" : "IO";
+
+        fprintf(f, "%-5d %-10s %-22s %-10s %-9d %-9d %-9d %-9d %-9d %-9d %-11d %-9d %-9d %-7d %-8d %-8d %-8d %-7d %-7d %-8d %-9d %-8d %-7d %-7d %-8s\n",
+                i + 1, p->id, p->nombre, est,
+                p->tiempoLlegada, p->ciclosTotales, p->ciclosRestantes,
+                p->rafagaActual, p->tiempoEjecucion, p->tiempoEspera,
+                p->tiempoRespuesta, p->tiempoRetorno,
+                p->vecesEnCPU, p->iteraciones, p->restanteQuantum,
+                p->cambiosContexto, p->aprovechamiento, p->desperdicio,
+                p->dispositivoES, p->tiempoES, p->fallosPagina,
+                p->memoriaUsadaKB, p->variable1, p->variable2, tipo);
     }
     fclose(f);
 }
@@ -431,7 +515,8 @@ void guardarBCPs(Lista *enEjecucion, const char *ruta)
 void guardarVariablesGlobales(const char *ruta)
 {
     FILE *f = fopen(ruta, "w");
-    if (!f) return;
+    if (!f)
+        return;
 
     TablaProcesos *t = &tablaSistema;
     time_t ahora = time(NULL);

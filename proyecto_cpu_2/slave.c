@@ -161,6 +161,7 @@ static void procesarRR(ProcesoSerial *arr, int n, int quantum)
 void ejecutarSlave(void)
 {
     sleep(3);
+    
 
     FILE *flog = fopen("/tmp/pvm_slave.log", "a");
     if (flog)
