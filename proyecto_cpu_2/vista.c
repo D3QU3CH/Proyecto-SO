@@ -1,138 +1,155 @@
 #include <stdio.h>
 #include "vista.h"
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TABLA GLOBAL DEL SISTEMA
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Muestra la tabla con las variables globales del sistema
 void vistaMostrarTablaGlobal(void)
 {
     TablaProcesos *t = &tablaSistema;
-    printf("\n╔══════════════════════════════════════════════╗\n");
-    printf("║     VARIABLES GLOBALES (ciclo %6d)       ║\n", t->cicloActual);
-    printf("╠══════════════════════════════════════════════╣\n");
-    printf("║  Total procesos  : %-4d                     ║\n", t->totalProcesos);
-    printf("║  Cola listos     : %-4d                     ║\n", t->procesosEnColaListos);
-    printf("║  Ejecutando      : %-4d                     ║\n", t->procesosEjecutando);
-    printf("║  En E/S          : %-4d                     ║\n", t->procesosEnES);
-    printf("║  Terminados      : %-4d                     ║\n", t->procesosTerminados);
-    printf("║  Solicitudes     : %-4d                     ║\n", t->procesosEnSolicitud);
-    printf("║  Algoritmo       : %-6s                   ║\n",
-           t->algoritmoActual == ALG_FCFS ? "FCFS" : "RR");
-    printf("║  Quantum         : %-4d                     ║\n", t->quantumActual);
-    printf("║  Cambios ctx     : %-6d                   ║\n", t->totalCambiosContexto);
-    printf("║  Fallos pagina   : %-6d                   ║\n", t->totalFallosPagina);
-    printf("║  Prom. espera    : %-6d                   ║\n", t->promedioEspera);
-    printf("║  Mem. libre KB   : %-6d                   ║\n", t->memoriaLibreKB);
-    printf("║  Desperdicio KB  : %-6d                   ║\n", t->desperdicioTotal);
-    printf("╚══════════════════════════════════════════════╝\n");
+    const char *alg  = (t->algoritmoActual == ALG_FCFS) ? "FCFS" : "RR";
+
+    printf("\n--- VARIABLES GLOBALES (ciclo %d) ---n", t->cicloActual);
+    printf("  Total procesos : %d\n",   t->totalProcesos);
+    printf("  Cola listos    : %d\n",   t->procesosEnColaListos);
+    printf("  Ejecutando     : %d\n",   t->procesosEjecutando);
+    printf("  En E/S         : %d\n",   t->procesosEnES);
+    printf("  Terminados     : %d\n",   t->procesosTerminados);
+    printf("  Solicitudes    : %d\n",   t->procesosEnSolicitud);
+    printf("  Algoritmo      : %s\n",   alg);
+    printf("  Quantum        : %d\n",   t->quantumActual);
+    printf("  Cambios ctx    : %d\n",   t->totalCambiosContexto);
+    printf("  Fallos pagina  : %d\n",   t->totalFallosPagina);
+    printf("  Prom. espera   : %d\n",   t->promedioEspera);
+    printf("  Mem. libre KB  : %d\n",   t->memoriaLibreKB);
+    printf("  Desperdicio KB : %d\n",   t->desperdicioTotal);
+    printf("----------------------------------------------------\n");
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   5 PROCESOS MÁS REZAGADOS (mayor ciclosRestantes)
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Muestra los 5 procesos con mas ciclos restantes (los mas rezagados)
 void vistaMostrarMasRezagados(Cola *c)
 {
-    printf("\n--- 5 PROCESOS MAS REZAGADOS ---\n");
     Proceso *top[5] = {NULL};
+
+    printf("\n--- 5 PROCESOS MAS REZAGADOS ---\n");
+
     for (NodoCola *n = c->frente; n; n = n->siguiente) {
         Proceso *p = n->proceso;
+
         for (int i = 0; i < 5; i++) {
+            // Si el proceso tiene mas ciclos restantes que el que esta en esta posicion
             if (!top[i] || p->ciclosRestantes > top[i]->ciclosRestantes) {
-                for (int j = 4; j > i; j--) top[j] = top[j-1];
+                // Correr los demas hacia abajo para insertar aqui
+                for (int j = 4; j > i; j--)
+                    top[j] = top[j - 1];
                 top[i] = p;
                 break;
             }
         }
     }
+
     for (int i = 0; i < 5 && top[i]; i++)
-        printf("  %d. %-8s | ciclosRest:%6d | espera:%4d | vecesEnCPU:%3d\n",
-               i+1, top[i]->id, top[i]->ciclosRestantes,
+        printf("  %d. %-8s | ciclosRest: %6d | espera: %4d | vecesEnCPU: %3d\n",
+               i + 1, top[i]->id, top[i]->ciclosRestantes,
                top[i]->tiempoEspera, top[i]->vecesEnCPU);
-    if (!top[0]) printf("  (cola vacia)\n");
+
+    if (!top[0])
+        printf("  (cola vacia)\n");
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   5 BARRAS DE APROVECHAMIENTO (actual + 4 anteriores)
-   FIX: el ciclo actual ya no se repite como entrada del historial.
-        Las 4 barras anteriores vienen del historial y la 5ta es el estado
-        calculado en este momento — sin duplicado.
-   ═══════════════════════════════════════════════════════════════════════════ */
-void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int histIdx)
+// Calcula el porcentaje de aprovechamiento promedio de los procesos en la cola
+static int calcularAprovechamientoActual(Cola *c)
 {
-    /* Calcular aprovechamiento actual de la cola */
-    int totalQ = 0, totalRafaga = 0, cnt = 0;
+    int totalQ     = 0;
+    int totalUsado = 0;
+    int q          = tablaSistema.quantumActual;
+
     for (NodoCola *n = c->frente; n; n = n->siguiente) {
         Proceso *p = n->proceso;
-        int q      = tablaSistema.quantumActual;
+
+        // El proceso usa su rafaga completa o el quantum, lo que sea menor
+        int usado = (p->rafagaActual < q) ? p->rafagaActual : q;
+
+        totalUsado += usado;
         totalQ     += q;
-        totalRafaga += (p->rafagaActual < q) ? p->rafagaActual : q;
-        cnt++;
     }
-    int aprovActual = (totalQ > 0 && cnt > 0)
-                      ? (totalRafaga * 100) / totalQ
-                      : 0;
-    int despActual  = 100 - aprovActual;
 
-    printf("\n--- APROVECHAMIENTO CPU (RR, Q=%d) ---\n",
-           tablaSistema.quantumActual);
+    if (totalQ == 0)
+        return 0;
 
-    /* Mostrar hasta 4 barras del historial (las más recientes) */
+    return (totalUsado * 100) / totalQ;
+}
+
+// Imprime una sola barra de aprovechamiento
+static void imprimirBarra(int ciclo, int aprov, int esActual)
+{
+    int llenos = aprov / 5; // cada bloque representa 5%
+
+    printf("  Ciclo %4d | Aprov: %3d%% [", ciclo, aprov);
+
+    for (int b = 0; b < 20; b++)
+        printf("%c", b < llenos ? '#' : '.');
+
+    if (esActual)
+        printf("] Desp: %3d%% <-- ACTUAL\n", 100 - aprov);
+    else
+        printf("] Desp: %3d%%\n", 100 - aprov);
+}
+
+// Muestra 4 barras historicas y 1 barra del estado actual
+void vistaBarrasAprovechamiento(Cola *c, int histDesp[], int histCiclo[], int histIdx)
+{
+    int aprovActual = calcularAprovechamientoActual(c);
+    int cicloActual = tablaSistema.cicloActual;
+
+    printf("\n--- APROVECHAMIENTO CPU (RR, Q=%d) ---\n", tablaSistema.quantumActual);
+
+    // Recorrer el historial circular desde la entrada mas reciente hacia atras
     int mostrados = 0;
-    for (int i = 1; i <= 4 && mostrados < 4; i++) {
+    for (int i = 1; i <= 100 && mostrados < 4; i++) {
         int idx = (histIdx - i + 100) % 100;
-        if (histCiclo[idx] == 0) continue;   /* entrada vacía */
-        int aprov = 100 - histDesp[idx];
-        printf("  Ciclo %4d | Aprov:%3d%% [", histCiclo[idx], aprov);
-        for (int b = 0; b < 20; b++) printf("%c", b < aprov/5 ? '#' : '.');
-        printf("] Desp:%3d%%\n", histDesp[idx]);
+
+        // Saltar si la entrada esta vacia o es del ciclo actual
+        if (histCiclo[idx] == 0 || histCiclo[idx] == cicloActual)
+            continue;
+
+        imprimirBarra(histCiclo[idx], 100 - histDesp[idx], 0);
         mostrados++;
     }
 
-    /* Barra del estado actual */
-    printf("  Ciclo %4d | Aprov:%3d%% [", tablaSistema.cicloActual, aprovActual);
-    for (int b = 0; b < 20; b++) printf("%c", b < aprovActual/5 ? '#' : '.');
-    printf("] Desp:%3d%% <-- ACTUAL\n", despActual);
+    // Barra actual al final
+    imprimirBarra(cicloActual, aprovActual, 1);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ESTADO DE E/S
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Muestra cuantos procesos hay en cada cola de E/S
 void vistaEstadoES(SistemaES *es)
 {
     printf("\n--- ESTADO E/S ---\n");
-    printf("  Disco    (x2) : %d proceso(s)\n", es->disco.tamanio);
-    printf("  Pantalla (x4) : %d proceso(s)\n", es->pantalla.tamanio);
-    printf("  Teclado  (x8) : %d proceso(s)\n", es->teclado.tamanio);
-    printf("  Impresora(x12): %d proceso(s)\n", es->impresora.tamanio);
+    printf("  Disco     (x2) : %d proceso(s)\n", es->disco.tamanio);
+    printf("  Pantalla  (x4) : %d proceso(s)\n", es->pantalla.tamanio);
+    printf("  Teclado   (x8) : %d proceso(s)\n", es->teclado.tamanio);
+    printf("  Impresora(x12) : %d proceso(s)\n", es->impresora.tamanio);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   BIENVENIDA Y CIERRE
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Pantalla inicial al arrancar el simulador
 void vistaBienvenida(void)
 {
-    printf("\n╔══════════════════════════════════════════════════════╗\n");
-    printf("║      SIMULADOR CPU-MEMORIA-DISTRIBUCION              ║\n");
-    printf("║      Proyecto III — Sistemas Operativos              ║\n");
-    printf("║      Buddy System + Paginacion NRU + PVM             ║\n");
-    printf("╠══════════════════════════════════════════════════════╣\n");
-    printf("║  %3d procesos | %3d en ciclo | %3d en solicitudes    ║\n",
+    printf("\n--- SIMULADOR CPU-MEMORIA-DISTRIBUCION ---\n");
+    printf("  Proyecto III - Sistemas Operativos\n");
+    printf("  Buddy System + Paginacion NRU\n");
+    printf("  %d procesos | %d en ciclo | %d en solicitudes\n",
            TOTAL_PROCESOS, PROCESOS_EN_CICLO, PROCESOS_EN_SOLICITUD);
-    printf("║  Algoritmo inicial : FCFS                            ║\n");
-    printf("╠══════════════════════════════════════════════════════╣\n");
-    printf("║  Teclas:                                             ║\n");
-    printf("║    [X] Cambiar algoritmo (FCFS <-> RR)               ║\n");
-    printf("║    [A] Aplicar apropiatividad a un proceso           ║\n");
-    printf("║    [Q] Salir de la simulacion                        ║\n");
-    printf("╚══════════════════════════════════════════════════════╝\n\n");
+    printf("  Algoritmo inicial: FCFS\n");
+    printf("\n  Teclas:\n");
+    printf("    [X] Cambiar algoritmo (FCFS <-> RR)\n");
+    printf("    [A] Aplicar apropiatividad a un proceso\n");
+    printf("    [Q] Salir\n");
+    printf("------------------------------------------------\n\n");
 }
 
+// Pantalla final al terminar la simulacion
 void vistaCierre(int reloj, int terminados)
 {
-    printf("\n╔══════════════════════════════════════════════════════╗\n");
-    printf("║            SIMULACION FINALIZADA                     ║\n");
-    printf("╠══════════════════════════════════════════════════════╣\n");
-    printf("║  Ciclos totales     : %-6d                        ║\n", reloj);
-    printf("║  Procesos terminados: %-6d                        ║\n", terminados);
-    printf("╚══════════════════════════════════════════════════════╝\n\n");
+    printf("\n--- SIMULACION FINALIZADA ---\n");
+    printf("  Ciclos totales     : %d\n", reloj);
+    printf("  Procesos terminados: %d\n", terminados);
+    printf("--------------------------------\n\n");
 }

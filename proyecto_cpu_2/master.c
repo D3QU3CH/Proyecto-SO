@@ -3,7 +3,7 @@
 #include <pvm3.h>
 #include "master.h"
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// HELPERS 
 static void serializarProcesos(Lista *enEjecucion, ProcesoSerial *buf, int *total)
 {
     *total = 0;
@@ -79,7 +79,7 @@ static void recibirResultadoRR(int tid, ResultadoRR *r)
     pvm_upkint(&r->totalRetornos, 1, 1);
 }
 
-// ─── MERGE TOP-5 ──────────────────────────────────────────────────────────────
+// MERGE TOP-5 
 typedef struct
 {
     char id[12];

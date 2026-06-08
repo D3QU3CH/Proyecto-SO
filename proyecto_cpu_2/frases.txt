@@ -1,0 +1,360 @@
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente
+el proceso solicita memoria adicional
+la cpu ejecuta una nueva rafaga
+la pagina fue cargada en memoria
+el planificador selecciona un proceso
+la memoria virtual utiliza paginacion
+el proceso espera una operacion de entrada salida
+el quantum fue consumido completamente
+la cola de listos contiene varios procesos
+el sistema operativo administra recursos
+la pagina requerida no esta en memoria
+ocurrio un fallo de pagina durante la lectura
+el proceso fue enviado a la cola de espera
+la interrupcion genero un cambio de contexto
+el hilo accede a una region critica
+la memoria principal almacena paginas activas
+el proceso termino su ejecucion correctamente
+la cola de entrada salida esta congestionada
+el algoritmo fifo reemplazo una pagina
+el algoritmo lru selecciono la pagina menos usada
+la segunda oportunidad evito un reemplazo
+el reloj avanzo al siguiente marco disponible
+el proceso solicita acceso al disco
+la cache contiene informacion reciente
+el planificador round robin asigna quantum
+el algoritmo fcfs respeta el orden de llegada
+el proceso incrementa su uso de memoria
+la tabla de procesos fue actualizada
+el bloque de control contiene informacion importante
+la pagina fue enviada al area swap
+el sistema detecto un nuevo fallo de pagina
+la memoria contiene palabras del archivo
+el proceso regreso a la cola de listos
+la ejecucion fue interrumpida por entrada salida
+el quantum restante fue desperdiciado
+la prioridad del proceso fue modificada
+la cola de espera contiene varios procesos
+el marco seleccionado fue reemplazado
+la memoria principal alcanzo su limite
+el proceso necesita mas ciclos de cpu
+la operacion de lectura fue completada
+el algoritmo de reemplazo fue ejecutado
+el planificador cambio automaticamente de politica
+la pagina solicitada fue recuperada de swap
+la tasa de aprovechamiento aumento significativamente
+el proceso privilegiado obtuvo acceso inmediato
+la cola de listos supera a la cola de espera
+la memoria fue redimensionada correctamente
+la mitad de los procesos redujo sus paginas
+la otra mitad duplico sus paginas
+la estadistica de desperdicio fue registrada
+el promedio de espera fue calculado
+el sistema registro una incidencia
+la cpu permanece ocupada constantemente
+el dispositivo de entrada salida esta disponible
+el proceso realiza una solicitud de lectura
+la memoria contiene la palabra requerida
+el archivo fue consultado exitosamente
+el proceso continua su ejecucion normal
+la cola de listos mantiene estabilidad
+el algoritmo distribuye el tiempo equitativamente

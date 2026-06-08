@@ -6,9 +6,8 @@
 #include <string.h>
 #include <pthread.h>
 
-/* ═══════════════════════════════════════════════════
-   CONSTANTES
-   ═══════════════════════════════════════════════════ */
+
+// CONSTANTES
 #define TOTAL_PROCESOS        250
 #define PROCESOS_EN_CICLO     150
 #define PROCESOS_EN_SOLICITUD 100
@@ -21,33 +20,32 @@
 #define ESTADO_ESPERA_ES  2
 #define ESTADO_TERMINADO  3
 
-/* Buddy: memoria total 8 MB, bloques de mínimo 4 KB */
+// Buddy: memoria total 8 MB, bloques minimo 4 KB
 #define BUDDY_MEMORIA_TOTAL_KB  8192
 #define BUDDY_MIN_KB            4
 #define BUDDY_MAX_BLOQUES       2048
 
-/* Paginación NRU */
+// Paginacion NRU
 #define PALABRAS_POR_PAGINA    20
-#define MARCOS_MIN              4
-#define MARCOS_MAX             12
+#define MARCOS_MIN  2
+#define MARCOS_MAX  6
 #define MAX_PAGINAS_PROCESO    32
 #define MAX_PAGINAS_SWAP      4096
 #define MAX_BLOQUES_BUDDY_PROC  8
 
-/* Banco de palabras */
+// Banco de palabras
 #define MAX_PALABRAS       8000
 #define MAX_LEN_PALABRA      64
 #define MAX_FRASES          200
 #define MAX_LEN_FRASE       256
 
-/* Ciclos acumulados antes de solicitar E/S */
-#define CICLOS_PARA_ES     200
+// Ciclos acumulados antes de solicitar E/S
+#define CICLOS_PARA_ES     100
 
-/* ═══════════════════════════════════════════════════
-   BCP — 25 variables obligatorias + soporte
-   ═══════════════════════════════════════════════════ */
+
+// BCP - 25 variables obligatorias + soporte
 typedef struct {
-    /* 25 obligatorias */
+    // 25 obligatorias
     char id[12];            /*  1 */
     char nombre[50];        /*  2 */
     int  tiempoLlegada;     /*  3 */
@@ -74,22 +72,22 @@ typedef struct {
     int  variable2;         /* 24 */
     int  fallosPagina;      /* 25 */
 
-    /* Soporte */
-    int  ciclosEnEjecucion;     /* acumulador para trigger E/S cada 200 */
+    // Soporte
+    int  ciclosEnEjecucion;     // acumulador para trigger E/S cada 200
     int  yaIngresado;
 
-    /* Buddy */
+    // Buddy
     int  memoriaUsadaKB;
     int  bloqueMemoriaKB;
     int  desperdicioInterno;
     int  idxsBuddy[MAX_BLOQUES_BUDDY_PROC];
     int  numBloquesBuddy;
 
-    /* Crecimiento: 15 ceros + 5 valores 1-50 */
+    // Crecimiento: 15 ceros + 5 valores 1-50
     int  crecimientoMem[20];
     int  indiceCrecimiento;
 
-    /* Paginación NRU */
+    // Paginacion NRU
     int  numMarcos;
     int  numPaginas;
     int  paginasEnRAM[MAX_PAGINAS_PROCESO];
@@ -97,9 +95,8 @@ typedef struct {
     int  bitModificado[MAX_PAGINAS_PROCESO];
 } Proceso;
 
-/* ═══════════════════════════════════════════════════
-   TABLA DEL SISTEMA — 20 variables obligatorias
-   ═══════════════════════════════════════════════════ */
+
+// Tabla del sistema - 20 variables obligatorias
 typedef struct {
     Proceso tablaBCPs[TOTAL_PROCESOS];
     int totalProcesos;           /*  1 */
@@ -126,9 +123,8 @@ typedef struct {
 
 extern TablaProcesos tablaSistema;
 
-/* ═══════════════════════════════════════════════════
-   LISTA DOBLEMENTE ENLAZADA
-   ═══════════════════════════════════════════════════ */
+
+// Lista doblemente enlazada
 typedef struct Nodo {
     Proceso     *proceso;
     struct Nodo *siguiente;
@@ -141,9 +137,8 @@ typedef struct {
     int   tamanio;
 } Lista;
 
-/* ═══════════════════════════════════════════════════
-   COLA FIFO
-   ═══════════════════════════════════════════════════ */
+
+// Cola FIFO
 typedef struct NodoCola {
     Proceso         *proceso;
     struct NodoCola *siguiente;
@@ -155,19 +150,17 @@ typedef struct {
     int       tamanio;
 } Cola;
 
-/* ═══════════════════════════════════════════════════
-   SISTEMA E/S — 4 dispositivos
-   ═══════════════════════════════════════════════════ */
+
+// Sistema E/S - 4 dispositivos
 typedef struct {
-    Cola disco;      /* x2  */
-    Cola pantalla;   /* x4  */
-    Cola teclado;    /* x8  */
-    Cola impresora;  /* x12 */
+    Cola disco;      // x2
+    Cola pantalla;   // x4
+    Cola teclado;    // x8
+    Cola impresora;  // x12
 } SistemaES;
 
-/* ═══════════════════════════════════════════════════
-   BUDDY SYSTEM
-   ═══════════════════════════════════════════════════ */
+
+// Buddy System
 typedef struct {
     int tamanioKB;
     int baseDir;
@@ -187,9 +180,8 @@ typedef struct {
 
 extern MemoriaBuddy memoriaBuddy;
 
-/* ═══════════════════════════════════════════════════
-   BANCO DE PALABRAS Y FRASES
-   ═══════════════════════════════════════════════════ */
+
+// Banco de palabras y frases
 typedef struct {
     char palabras[MAX_PALABRAS][MAX_LEN_PALABRA];
     int  totalPalabras;
@@ -198,9 +190,8 @@ typedef struct {
 
 extern BancoPalabras bancoPalabras;
 
-/* ═══════════════════════════════════════════════════
-   PAGINACIÓN NRU + SWAP
-   ═══════════════════════════════════════════════════ */
+
+// Paginacion NRU + Swap
 typedef struct {
     char palabras[PALABRAS_POR_PAGINA][MAX_LEN_PALABRA];
     int  numPalabras;
@@ -226,9 +217,8 @@ typedef struct {
 
 extern AreaSwap areaSwap;
 
-/* ═══════════════════════════════════════════════════
-   ESTADÍSTICAS GENERALES
-   ═══════════════════════════════════════════════════ */
+
+// Estadisticas generales
 typedef struct {
     int   procesosTerminados;
     int   procesosEnEjecucion;
@@ -239,23 +229,22 @@ typedef struct {
 
 extern EstadisticasMem estadMem;
 
-/* ═══════════════════════════════════════════════════
-   PROTOTIPOS — modelo.c
-   ═══════════════════════════════════════════════════ */
 
-/* Inicialización */
+// Prototipos - modelo.c
+
+// Inicializacion
 void    inicializarTablaSistema(void);
 void    poblarListas(Lista *enEjecucion, Lista *solicitudes);
 void    actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
                                     Cola *colaListos, SistemaES *es, int reloj);
 
-/* Lista */
+// Lista
 void    inicializarLista(Lista *l);
 void    insertarEnLista(Lista *l, Proceso *p);
 void    eliminarDeLista(Lista *l, Proceso *p);
 int     estaVaciaLista(Lista *l);
 
-/* Cola */
+// Cola
 void     inicializarCola(Cola *c);
 void     encolar(Cola *c, Proceso *p);
 void     encolarAlFrente(Cola *c, Proceso *p);
@@ -263,22 +252,22 @@ Proceso *desencolar(Cola *c);
 int      estaVaciaCola(Cola *c);
 void     moverAlFrenteCola(Cola *c, Proceso *p);
 
-/* E/S */
+// E/S
 void inicializarSistemaES(SistemaES *es);
 void asignarES(Proceso *p, SistemaES *es, int cicloActual);
 void ingresarProcesosNuevos(Lista *solicitudes, Cola *colaListos, int reloj);
 void actualizarEspera(Cola *colaListos);
 
-/* CPU */
+// CPU
 void procesarEntradaCPU(Proceso *p, int reloj);
 void procesarTerminacion(Proceso *p, int reloj);
 
-/* Buddy System */
+// Buddy System
 void inicializarBuddy(void);
 int  asignarMemoriaBuddy(Proceso *p, int memoriaKB);
 void liberarTodosLosBloquesBuddy(Proceso *p);
 
-/* Paginación NRU */
+// Paginacion NRU
 void inicializarPaginacion(void);
 void asignarPaginasProceso(Proceso *p);
 void liberarPaginasProceso(Proceso *p);
@@ -287,17 +276,17 @@ void resetarBitsR(int cicloActual);
 void redimensionarMemoriaPrincipal(Lista *enEjecucion, int cicloActual);
 void crecerMemoriaProceso(Proceso *p);
 
-/* Banco de palabras */
+// Banco de palabras
 void cargarPalabras(const char *ruta);
 void cargarFrases(const char *ruta);
 void procesarFraseES(Proceso *p, int cicloActual);
 
-/* Estadísticas */
+// Estadisticas
 void calcularDesperdicioExterno(void);
 void actualizarPromedioFinalizados(int cicloActual);
 void mostrarEstadisticasMemoria(void);
 
-/* Cambio automático de algoritmo */
+// Cambio automatico de algoritmo
 int  evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es);
 
-#endif /* MODELO_H */
+#endif
