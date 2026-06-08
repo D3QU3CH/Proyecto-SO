@@ -3,59 +3,27 @@
 #include <pvm3.h>
 #include "master.h"
 
-/* =========================================================
- * CORRECCIONES EN ESTE ARCHIVO:
- *
- *  1. [MEDIO] enviarMsgFin(): antes de pvm_exit(), el master
- *     ahora envia MSG_FIN a cada slave para que terminen de
- *     forma controlada y no queden bloqueados en pvm_recv().
- *
- *  2. [MEDIO] serializarProcesos(): el campo aprovechamiento
- *     se calculaba correctamente (copiando p->aprovechamiento),
- *     pero ese campo solo existe en procesos que han ejecutado
- *     en RR. Ahora se calcula en tiempo real: si rafagaActual>0
- *     y quantum>0, se recalcula; si no, se usa el almacenado.
- *     Esto evita el "Prom aprov: 0.67%" en PVM cuando la
- *     mayoria de procesos tienen aprovechamiento=0 en su BCP.
- * ========================================================= */
-
 // HELPERS
 
 static void serializarProcesos(Lista *enEjecucion, ProcesoSerial *buf, int *total)
 {
     *total = 0;
     int q = tablaSistema.quantumActual;
-    if (q <= 0) q = 20;   /* evitar division por cero */
+    if (q <= 0) q = 20;
 
-    for (Nodo *n = enEjecucion->cabeza;
-         n && *total < TOTAL_PROCESOS;
-         n = n->siguiente)
-    {
-        Proceso *p = n->proceso;
+    for (int i = 0; i < TOTAL_PROCESOS; i++) {
+        Proceso *p = &tablaSistema.tablaBCPs[i];
         ProcesoSerial *s = &buf[(*total)++];
         strncpy(s->id, p->id, 12);
         s->estado          = p->estado;
         s->ciclosRestantes = p->ciclosRestantes;
         s->tiempoEspera    = p->tiempoEspera;
         s->dispositivoES   = p->dispositivoES;
-
-        int ejecuta = (p->rafagaActual < q) ? p->rafagaActual : q;
-        int desp    = q - ejecuta;
-        s->desperdicio = (desp > 0) ? desp : 0;
-
-        /* FIX #2: recalcular aprovechamiento en tiempo real
-         * en lugar de copiar el campo del BCP (que puede ser 0
-         * para procesos que nunca ejecutaron en RR).
-         * Si rafagaActual > 0: aprovechamiento = min(rafaga,q)*100/q
-         * Si rafagaActual == 0: usar el valor almacenado en el BCP.  */
-        if (p->rafagaActual > 0) {
-            s->aprovechamiento = (ejecuta * 100) / q;
-        } else {
-            s->aprovechamiento = p->aprovechamiento;
-        }
-
-        s->rafagaActual = p->rafagaActual;
-        s->vecesEnCPU   = p->vecesEnCPU;
+        int ejecuta        = (p->rafagaActual < q) ? p->rafagaActual : q;
+        s->desperdicio     = q - ejecuta > 0 ? q - ejecuta : 0;
+        s->aprovechamiento = p->rafagaActual > 0 ? (ejecuta * 100) / q : p->aprovechamiento;
+        s->rafagaActual    = p->rafagaActual;
+        s->vecesEnCPU      = p->vecesEnCPU;
     }
 }
 
