@@ -2,6 +2,7 @@
 #include <string.h>
 #include <pvm3.h>
 #include "master.h"
+#include <unistd.h>
 
 static int g_tids[2] = {0, 0};
 static int g_slavesActivos = 0;
@@ -239,17 +240,15 @@ void ejecutarMasterPVM(Lista *enEjecucion, int quantum)
 
 void inicializarSlavesPVM(void)
 {
-    int info = pvm_spawn("slave", NULL, PvmTaskDefault, "", 2, g_tids);
-    if (info < 2)
+    int i0 = pvm_spawn("slave", NULL, PvmTaskHost, "slave1", 1, &g_tids[0]);
+    int i1 = pvm_spawn("slave", NULL, PvmTaskHost, "slave2", 1, &g_tids[1]);
+    if (i0 < 1 || i1 < 1)
     {
-        printf("[PVM] Error al crear slaves (info=%d)\n", info);
-        for (int i = 0; i < info; i++)
-            pvm_kill(g_tids[i]);
+        printf("[PVM] Error al crear slaves (%d %d)\n", i0, i1);
         return;
     }
     g_slavesActivos = 1;
-    printf("[PVM] Slaves persistentes creados: TID0=%d TID1=%d\n",
-           g_tids[0], g_tids[1]);
+    printf("[PVM] Slaves creados: TID0=%d TID1=%d\n", g_tids[0], g_tids[1]);
 }
 
 void terminarSlavesPVM(void)
@@ -261,6 +260,9 @@ void terminarSlavesPVM(void)
         pvm_initsend(PvmDataDefault);
         pvm_send(g_tids[i], MSG_FIN);
     }
+    sleep(1);
+    for (int i = 0; i < 2; i++)
+        pvm_kill(g_tids[i]);
     pvm_exit();
     g_slavesActivos = 0;
 }

@@ -94,9 +94,11 @@ void manejadorSenal(int sig)
 {
     (void)sig;
     g_salir = 1;
+    remove("/tmp/pvm_master.log");
+    system("ssh chinito@10.0.0.3 'rm -f /tmp/pvm_slave.log'");
+    system("ssh andres@10.0.0.4 'rm -f /tmp/pvm_slave.log'");
     termRestaurar();
 }
-
 // TECLAS DE CONTROL
 
 void manejarTeclaX(int *algoritmo, int *quantum, int reloj,

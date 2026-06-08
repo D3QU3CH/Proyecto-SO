@@ -185,5 +185,9 @@ int main(void)
     vistaCierre(reloj, tablaSistema.procesosTerminados);
 
     terminarSlavesPVM();
+
+    remove("/tmp/pvm_master.log");
+    system("ssh chinito@10.0.0.3 'rm -f /tmp/pvm_slave.log'");
+    system("ssh andres@10.0.0.4 'rm -f /tmp/pvm_slave.log'");
     return 0;
 }
