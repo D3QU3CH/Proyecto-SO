@@ -9,6 +9,32 @@
 #include "vista.h"
 #include "master.h"
 
+/*
+
+Comandos:
+1. Matar slaves anteriores
+pkill -x slave
+sleep 1
+ssh chinito@10.0.0.3 'pkill -x slave; rm -f /tmp/pvm_slave.log'
+ssh andres@10.0.0.4 'pkill -x slave; rm -f /tmp/pvm_slave.log'
+
+2. Compilar slave y copiar
+cd /home/dequech/Documentos/GitHub/Proyecto-SO/proyecto_cpu_2
+gcc slave.c -o slave -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64
+cp -f slave ~/pvm3/bin/LINUX64/
+scp slave chinito@10.0.0.3:~/pvm3/bin/LINUX64/slave
+scp slave andres@10.0.0.4:~/pvm3/bin/LINUX64/slave
+
+(La ruta se cambia dependiendo donde se encuentre pvm3)
+
+3. Compilar simulador
+gcc modelo.c controlador.c vista.c master.c main.c -o simulador -lpthread -lpvm3 -I/home/dequech/pvm3/include -L/home/dequech/pvm3/lib/LINUX64
+
+4. Ejecutar
+./simulador
+
+*/
+
 extern volatile sig_atomic_t g_salir;
 
 int main(void)
