@@ -1,0 +1,22 @@
+
+=== VARIABLES GLOBALES Mon Jun  8 23:09:13 2026
+ 1.  Total            : 250
+ 2.  En ciclo         : 150
+ 3.  En solicitudes   : 25
+ 4.  Cola listos      : 68
+ 5.  Ejecutando       : 0
+ 6.  En E/S           : 7
+ 7.  Terminados       : 0
+ 8.  Bloqueados       : 0
+ 9.  Algoritmo        : FCFS
+10.  Quantum          : 40
+11.  Ciclo actual     : 600
+12.  Cambios ctx      : 578
+13.  Fallos pagina    : 0
+14.  Suma espera      : 16672
+15.  Suma ciclos      : 6806973
+16.  Prom. espera     : 245
+17.  Prom. ciclos     : 27227
+18.  Ingr. dinamico   : 75
+19.  Mem. libre (KB)  : 96
+20.  Desperdicio (KB) : 2183
