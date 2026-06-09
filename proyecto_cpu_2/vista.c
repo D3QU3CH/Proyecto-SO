@@ -1,19 +1,11 @@
 #include <stdio.h>
 #include "vista.h"
 
-/* =========================================================
- * CORRECCIONES APLICADAS EN ESTE ARCHIVO:
- *  1. Bug critico visible: "\n--- VARIABLES GLOBALES (ciclo %d) ---\n"
- *     (antes terminaba en "---n" sin backslash, imprimia la 'n' en pantalla)
- *  2. Se agrego separador claro entre ciclos para mejor legibilidad
- * ========================================================= */
-
 void vistaMostrarTablaGlobal(void)
 {
     TablaProcesos *t = &tablaSistema;
     const char *alg  = (t->algoritmoActual == ALG_FCFS) ? "FCFS" : "RR";
 
-    /* FIX #1: "\n" correcto al final del formato, no "---n" */
     printf("\n--- VARIABLES GLOBALES (ciclo %d) ---\n", t->cicloActual);
     printf("  Total procesos : %d\n",   t->totalProcesos);
     printf("  Cola listos    : %d\n",   t->procesosEnColaListos);

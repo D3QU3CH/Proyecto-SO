@@ -19,7 +19,6 @@ static char frases[MAX_FRASES][MAX_LEN_FRASE];
 static int  totalFrases = 0;
 
 // BANCO DE PALABRAS
-
 void cargarPalabras(const char *ruta)
 {
     memset(&bancoPalabras, 0, sizeof(BancoPalabras));
@@ -52,8 +51,7 @@ void cargarPalabras(const char *ruta)
     }
 }
 
-// FRASES
-
+// FRASES, SIMULAN FALLOS DE PAGINA 
 void cargarFrases(const char *ruta)
 {
     totalFrases = 0;
@@ -101,7 +99,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
     int ip = (int)(p - tablaSistema.tablaBCPs);
     int fallosGenerados = 0;
 
-    // Paso A: recuperar paginas que ya esten en SWAP (hasta 3 fallos)
     for (int s = 0; s < areaSwap.numPaginas && fallosGenerados < 3; s++) {
         if (areaSwap.paginas[s].indiceProceso != ip) continue;
         if (areaSwap.paginas[s].numPalabras   == 0)  continue;
@@ -112,12 +109,10 @@ void procesarFraseES(Proceso *p, int cicloActual)
             p->fallosPagina++;
             tablaSistema.totalFallosPagina++;
             fallosGenerados++;
-            s--;   // array se compacto en manejarFalloPagina
+            s--;  
         }
     }
 
-    // Paso B: si no hubo fallos, forzar swap-out de pagina clase NRU 0
-    // y luego inmediatamente swap-in (fallo garantizado)
     if (fallosGenerados == 0) {
         int candidata = -1;
         int marcoElegido = -1;
@@ -127,7 +122,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
             if (m < 0) continue;
             if (areaSwap.numPaginas >= MAX_PAGINAS_SWAP) break;
 
-            // Preferir clase NRU mas baja: bitR=0, bitM=0
             int clase = memoriaPrincipal.marcos[m].bitR * 2 +
                         memoriaPrincipal.marcos[m].bitM;
             if (candidata == -1 || clase <
@@ -141,7 +135,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
         if (candidata >= 0 && marcoElegido >= 0 &&
             areaSwap.numPaginas < MAX_PAGINAS_SWAP) {
 
-            // Swap-out: mover pagina a SWAP
             areaSwap.paginas[areaSwap.numPaginas] =
                 memoriaPrincipal.marcos[marcoElegido];
             areaSwap.paginas[areaSwap.numPaginas].indiceProceso = ip;
@@ -158,7 +151,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
             p->bitReferencia[candidata] = 0;
             p->bitModificado[candidata] = 0;
 
-            // Swap-in inmediato: genera el fallo de pagina
             int resultado = manejarFalloPagina(p, candidata, cicloActual);
             if (resultado >= 0) {
                 p->fallosPagina++;
@@ -169,7 +161,6 @@ void procesarFraseES(Proceso *p, int cicloActual)
 }
 
 // INICIALIZACION DE PROCESOS
-
 static int tiempoLlegadaUnico(void)
 {
     int t;
@@ -273,10 +264,8 @@ void poblarListas(Lista *enEjecucion, Lista *solicitudes)
 }
 
 // ACTUALIZAR VARIABLES GLOBALES
-
-/* FIX #3: se agrega calculo de procesosBloqueados */
 void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
-                                  Cola *colaListos, SistemaES *es, int reloj)
+             Cola *colaListos, SistemaES *es, int reloj)
 {
     int sumEspera  = 0;
     int sumCiclos  = 0;
@@ -314,7 +303,6 @@ void actualizarVariablesGlobales(Lista *enEjecucion, Lista *solicitudes,
 }
 
 // LISTA DOBLEMENTE ENLAZADA
-
 void inicializarLista(Lista *l) { l->cabeza = l->cola = NULL; l->tamanio = 0; }
 
 void insertarEnLista(Lista *l, Proceso *p)
@@ -339,7 +327,6 @@ void eliminarDeLista(Lista *l, Proceso *p)
     }
 }
 
-/* FIX #4: vaciarLista() para liberar todos los nodos */
 void vaciarLista(Lista *l)
 {
     Nodo *n = l->cabeza;
@@ -355,7 +342,6 @@ void vaciarLista(Lista *l)
 int estaVaciaLista(Lista *l) { return l->cabeza == NULL; }
 
 // COLA FIFO
-
 void inicializarCola(Cola *c) { c->frente = c->final = NULL; c->tamanio = 0; }
 
 void encolar(Cola *c, Proceso *p)
@@ -402,14 +388,12 @@ void moverAlFrenteCola(Cola *c, Proceso *p)
     c->frente = curr;
 }
 
-/* FIX #4: vaciarCola() para liberar todos los nodos */
 void vaciarCola(Cola *c)
 {
     while (c->frente) desencolar(c);
 }
 
 // SISTEMA E/S
-
 void inicializarSistemaES(SistemaES *es)
 {
     inicializarCola(&es->disco);
@@ -471,7 +455,6 @@ void actualizarEspera(Cola *colaListos)
 }
 
 // BUDDY SYSTEM
-
 void inicializarBuddy(void)
 {
     memset(&memoriaBuddy, 0, sizeof(MemoriaBuddy));
@@ -551,10 +534,8 @@ static void liberarUnBloque(int idx, int ip)
         BloqueBS *bA = &memoriaBuddy.bloques[actual];
         int tamActual = bA->tamanioKB;
 
-        /* Calcular la direccion base del buddy matematico */
         int buddyBase = bA->baseDir ^ tamActual;
 
-        /* Buscar el buddy en el array de bloques */
         int socio = -1;
         for (int i = 0; i < memoriaBuddy.numBloques; i++) {
             if (i == actual) continue;
@@ -567,29 +548,22 @@ static void liberarUnBloque(int idx, int ip)
             }
         }
 
-        /* Si no hay buddy libre del mismo tamano, no se puede fusionar */
         if (socio == -1) break;
 
         BloqueBS *bS = &memoriaBuddy.bloques[socio];
 
-        /* Fusionar: el bloque con menor baseDir absorbe al otro */
         if (bA->baseDir < bS->baseDir) {
             bA->tamanioKB *= 2;
-            /* Invalidar el bloque absorbido */
             bS->tamanioKB  = 0;
             bS->libre      = 0;
             bS->socioIdx   = -1;
-            /* actual sigue siendo idx */
         } else {
             bS->tamanioKB *= 2;
-            /* Invalidar el bloque actual */
             bA->tamanioKB  = 0;
             bA->libre      = 0;
             bA->socioIdx   = -1;
-            actual = socio;   /* el bloque resultante es bS */
+            actual = socio;  
         }
-        /* Actualizar socioIdx del bloque resultante a -1
-         * (se recalculara en la proxima iteracion si hay mas fusion) */
         memoriaBuddy.bloques[actual].socioIdx = -1;
     }
 }
@@ -613,7 +587,6 @@ void liberarTodosLosBloquesBuddy(Proceso *p)
 }
 
 // PAGINACION NRU + SWAP
-
 void inicializarPaginacion(void)
 {
     memset(&memoriaPrincipal, 0, sizeof(MemoriaPrincipal));
@@ -854,7 +827,6 @@ void crecerMemoriaProceso(Proceso *p)
 }
 
 // CPU
-
 void procesarEntradaCPU(Proceso *p, int reloj)
 {
     p->cambiosContexto = rand() % 21 + 10;
@@ -892,7 +864,6 @@ void procesarEntradaCPU(Proceso *p, int reloj)
     }
 }
 
-/* FIX #5: procesarTerminacion() imprime mensaje completo */
 void procesarTerminacion(Proceso *p, int reloj)
 {
     p->estado        = ESTADO_TERMINADO;
@@ -910,7 +881,6 @@ void procesarTerminacion(Proceso *p, int reloj)
 }
 
 // ESTADISTICAS DE MEMORIA
-
 void calcularDesperdicioExterno(void)
 {
     pthread_mutex_lock(&memoriaBuddy.mutex);
@@ -955,7 +925,6 @@ void mostrarEstadisticasMemoria(void)
 }
 
 // CAMBIO AUTOMATICO DE ALGORITMO
-
 int evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es)
 {
     int enListo = tablaSistema.procesosEnColaListos;
@@ -986,7 +955,6 @@ int evaluarCambioAlgoritmo(Cola *colaListos, SistemaES *es)
         }
     }
 
-    /* Suprimir warning de parametro no usado con uso real */
     (void)(es->disco.tamanio + es->pantalla.tamanio +
            es->teclado.tamanio + es->impresora.tamanio);
     return tablaSistema.algoritmoActual;

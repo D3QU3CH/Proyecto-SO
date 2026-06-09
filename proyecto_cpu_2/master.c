@@ -83,8 +83,6 @@ static void recibirResultadoRR(int tid, ResultadoRR *r)
     pvm_upkint(&r->totalRetornos, 1, 1);
 }
 
-// MERGE TOP-5
-
 typedef struct
 {
     char id[12];
@@ -114,7 +112,6 @@ static void insertarTop5(Par top[], int *sz, const char *id, int val)
     }
 }
 
-// FIX #1: enviar MSG_FIN a los slaves antes de pvm_exit()
 static void enviarMsgFin(int *tids, int n)
 {
     for (int i = 0; i < n; i++)
@@ -125,7 +122,6 @@ static void enviarMsgFin(int *tids, int n)
 }
 
 // MASTER PRINCIPAL
-
 void ejecutarMasterPVM(Lista *enEjecucion, int quantum)
 {
     if (!g_slavesActivos)

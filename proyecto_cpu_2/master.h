@@ -16,7 +16,7 @@ typedef struct {
     int   enEspera;
     int   enES;
     float promCiclosPendientes;
-    // Top 3 desperdiciadores (id + desperdicio)
+    // Top 3 desperdiciadores
     char  topId[3][12];
     int   topDesp[3];
 } ResultadoStats;
@@ -25,15 +25,14 @@ typedef struct {
 typedef struct {
     // Top 3 perjudicados (quantum pequeño)
     char  perjId[3][12];
-    int   perjDelta[3];   // rafagaActual - quantum (>0 = se cortó)
+    int   perjDelta[3];   
     // Top 3 desperdiciadores
     char  despId[3][12];
     int   despVal[3];
     float promAprovechamiento;
-    int   totalRetornos;  // suma vecesEnCPU del subconjunto
+    int   totalRetornos;  
 } ResultadoRR;
 
-// Serialización simple: campos planos de Proceso que necesitamos
 typedef struct {
     char id[12];
     int  estado;

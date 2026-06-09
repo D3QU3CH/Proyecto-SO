@@ -8,12 +8,11 @@
 #include <unistd.h>
 
 // RECIBIR SUBCONJUNTO
-
 static int recibirSubconjunto(ProcesoSerial *buf, int tag)
 {
     int bufid = pvm_recv(-1, tag);
     if (bufid < 0)
-        return 0; /* error o conexion cerrada */
+        return 0; 
 
     int n = 0;
     pvm_upkint(&n, 1, 1);
@@ -33,7 +32,6 @@ static int recibirSubconjunto(ProcesoSerial *buf, int tag)
 }
 
 // TOP-3 LOCAL
-
 static void insertar3(char ids[][12], int vals[], int *sz, const char *id, int v)
 {
     for (int i = 0; i < *sz; i++)
@@ -61,7 +59,6 @@ static void insertar3(char ids[][12], int vals[], int *sz, const char *id, int v
 }
 
 // TAREA 1: ESTADISTICAS
-
 static void procesarStats(ProcesoSerial *arr, int n)
 {
     ResultadoStats r;
@@ -110,7 +107,6 @@ static void procesarStats(ProcesoSerial *arr, int n)
 }
 
 // TAREA 2: ANALISIS RR
-
 static void procesarRR(ProcesoSerial *arr, int n, int quantum)
 {
     ResultadoRR r;
@@ -170,7 +166,6 @@ static void procesarRR(ProcesoSerial *arr, int n, int quantum)
 }
 
 // BUCLE PRINCIPAL SLAVE
-
 void ejecutarSlave(void)
 {
     FILE *flog = fopen("/tmp/pvm_slave.log", "a");
@@ -184,11 +179,9 @@ void ejecutarSlave(void)
 
     while (1)
     {
-        /* FIX #1: usar solo msgtag, eliminar 'tag' redundante */
         int bytes, msgtag, tid;
         int bufid = pvm_recv(-1, -1);
 
-        /* FIX #3: manejar error de recepcion (master murio) */
         if (bufid < 0)
         {
             flog = fopen("/tmp/pvm_slave.log", "a");
@@ -202,7 +195,6 @@ void ejecutarSlave(void)
 
         pvm_bufinfo(bufid, &bytes, &msgtag, &tid);
 
-        /* FIX #2: terminar de forma controlada al recibir MSG_FIN */
         if (msgtag == MSG_FIN)
         {
             flog = fopen("/tmp/pvm_slave.log", "a");
@@ -260,7 +252,7 @@ void ejecutarSlave(void)
     pvm_exit();
 }
 
-// MAIN DEL SLAVE (ejecutable independiente)
+// MAIN DEL SLAVE SE EJECUTA APARTE
 int main(void)
 {
     ejecutarSlave();

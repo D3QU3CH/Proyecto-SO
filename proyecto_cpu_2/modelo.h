@@ -6,12 +6,6 @@
 #include <string.h>
 #include <pthread.h>
 
-/* =========================================================
- * CORRECCIONES EN ESTE HEADER:
- *  1. Agregados prototipos vaciarCola() y vaciarLista()
- *     para evitar memory leaks al finalizar la simulacion.
- * ========================================================= */
-
 // CONSTANTES
 #define TOTAL_PROCESOS        250
 #define PROCESOS_EN_CICLO     150
@@ -25,12 +19,11 @@
 #define ESTADO_ESPERA_ES  2
 #define ESTADO_TERMINADO  3
 
-// Buddy: memoria total 8 MB, bloques minimo 4 KB
-#define BUDDY_MEMORIA_TOTAL_KB  8192
-#define BUDDY_MIN_KB            4
-#define BUDDY_MAX_BLOQUES       2048
+#define BUDDY_MEMORIA_TOTAL_KB  8192  // 8 MB total
+#define BUDDY_MIN_KB            4     // bloque minimo = 4 KB
+#define BUDDY_MAX_BLOQUES       2048  // maximo de bloques posibles
 
-// Paginacion NRU: marcos pares entre MARCOS_MIN(8) y MARCOS_MAX(20)
+
 #define PALABRAS_POR_PAGINA    20
 #define MARCOS_MIN  8
 #define MARCOS_MAX  20
@@ -51,31 +44,31 @@
 // BCP - 25 variables obligatorias + soporte
 typedef struct {
     // 25 obligatorias
-    char id[12];            /*  1 */
-    char nombre[50];        /*  2 */
-    int  tiempoLlegada;     /*  3 */
-    int  ciclosTotales;     /*  4 */
-    int  ciclosRestantes;   /*  5 */
-    int  rafagaActual;      /*  6 */
-    int  tiempoEjecucion;   /*  7 */
-    int  tiempoEspera;      /*  8 */
-    int  tiempoRespuesta;   /*  9 */
-    int  tiempoRetorno;     /* 10 */
-    int  estado;            /* 11 */
-    int  vecesEnCPU;        /* 12 */
-    int  iteraciones;       /* 13 */
-    int  restanteQuantum;   /* 14 */
-    int  cambiosContexto;   /* 15 */
-    int  esApropiativo;     /* 16 */
-    int  tipoProceso;       /* 17  0=CPU-bound 1=IO-bound */
-    int  aprovechamiento;   /* 18 */
-    int  desperdicio;       /* 19 */
-    int  dispositivoES;     /* 20 */
-    int  tiempoES;          /* 21 */
-    int  bloqueado;         /* 22 */
-    int  variable1;         /* 23 */
-    int  variable2;         /* 24 */
-    int  fallosPagina;      /* 25 */
+    char id[12];            
+    char nombre[50];        
+    int  tiempoLlegada;   
+    int  ciclosTotales;     
+    int  ciclosRestantes;   
+    int  rafagaActual;     
+    int  tiempoEjecucion;  
+    int  tiempoEspera;      
+    int  tiempoRespuesta;   
+    int  tiempoRetorno;     
+    int  estado;           
+    int  vecesEnCPU;        
+    int  iteraciones;       
+    int  restanteQuantum;   
+    int  cambiosContexto;  
+    int  esApropiativo;   
+    int  tipoProceso;       
+    int  aprovechamiento;  
+    int  desperdicio;       
+    int  dispositivoES;    
+    int  tiempoES;          
+    int  bloqueado;         
+    int  variable1;         
+    int  variable2;         
+    int  fallosPagina;      
 
     // Soporte
     int  ciclosEnEjecucion;

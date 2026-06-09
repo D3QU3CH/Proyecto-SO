@@ -20,7 +20,8 @@ int main(void)
     signal(SIGTERM, manejadorSenal);
     atexit(termRestaurar);
 
-    inicializarBuddy();
+    
+    inicializarBuddy(); 
     inicializarTablaSistema();
 
     Lista enEjecucion, solicitudes;

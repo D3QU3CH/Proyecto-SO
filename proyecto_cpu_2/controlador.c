@@ -192,8 +192,6 @@ void manejarTeclaA(Cola *colaListos, SistemaES *es,
     }
 }
 
-// SCHEDULING
-
 static void ponerApropiativoAlFrente(Cola *colaListos)
 {
     for (NodoCola *n = colaListos->frente; n; n = n->siguiente)
@@ -310,7 +308,6 @@ void ejecutarRR(Cola *colaListos, SistemaES *es, int *procesoPrivilId,
     postEjecucion(p, colaListos, es, procesoPrivilId, reloj, ejecuta);
 }
 
-// COLA E/S
 
 void procesarColaES(Cola *colaES, Cola *colaListos)
 {
@@ -340,7 +337,6 @@ void procesarColaES(Cola *colaES, Cola *colaListos)
     }
 }
 
-// AJUSTE DE QUANTUM
 
 void ajustarQuantumAutomatico(Cola *colaListos, SistemaES *es, int iteracionesRR)
 {
